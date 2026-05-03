@@ -1,0 +1,25 @@
+{
+    "name": "Stratum.Editor",
+    "rootNamespace": "Stratum.Editor",
+    "references": [
+        "Stratum",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "Unity.CodeEditor",
+        "Unity.ResourceManager",
+        "VContainer"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

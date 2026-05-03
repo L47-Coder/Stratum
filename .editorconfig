@@ -1,0 +1,6 @@
+root = true
+
+# Unity-generated / binary YAML — don't fight their formatting
+[*.{unity,prefab,asset,mat,anim,controller,meta,preset,physicMaterial,mixer,asmdef,asmref}]
+trim_trailing_whitespace = false
+insert_final_newline = false

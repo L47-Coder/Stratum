@@ -1,0 +1,23 @@
+﻿{
+    "name": "Game.Frame",
+    "rootNamespace": "",
+    "references": [
+        "Stratum",
+        "Game.Managers",
+        "Game.Components",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "VContainer"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

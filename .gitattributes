@@ -1,0 +1,115 @@
+* text=auto eol=lf
+
+# -----------------------------------------------------------------------------
+# Unity YAML assets
+# -----------------------------------------------------------------------------
+# Merge conflicts in scenes / prefabs / assets should be resolved with
+# unityyamlmerge (ships with Unity).
+#   git config --global merge.unityyamlmerge.name "Unity SmartMerge"
+#   git config --global merge.unityyamlmerge.driver \
+#     '"<UnityInstallPath>/Editor/Data/Tools/UnityYAMLMerge" merge -p %O %B %A %A'
+# -----------------------------------------------------------------------------
+*.unity           merge=unityyamlmerge eol=lf
+*.prefab          merge=unityyamlmerge eol=lf
+*.asset           merge=unityyamlmerge eol=lf
+*.mat             merge=unityyamlmerge eol=lf
+*.anim            merge=unityyamlmerge eol=lf
+*.controller      merge=unityyamlmerge eol=lf
+*.overrideController merge=unityyamlmerge eol=lf
+*.physicMaterial  merge=unityyamlmerge eol=lf
+*.physicsMaterial2D merge=unityyamlmerge eol=lf
+*.playable        merge=unityyamlmerge eol=lf
+*.mask            merge=unityyamlmerge eol=lf
+*.brush           merge=unityyamlmerge eol=lf
+*.flare           merge=unityyamlmerge eol=lf
+*.fontsettings    merge=unityyamlmerge eol=lf
+*.guiskin         merge=unityyamlmerge eol=lf
+*.giparams        merge=unityyamlmerge eol=lf
+*.renderTexture   merge=unityyamlmerge eol=lf
+*.spriteatlas     merge=unityyamlmerge eol=lf
+*.terrainlayer    merge=unityyamlmerge eol=lf
+*.mixer           merge=unityyamlmerge eol=lf
+*.shadervariants  merge=unityyamlmerge eol=lf
+*.preset          merge=unityyamlmerge eol=lf
+*.asmdef          text eol=lf
+*.asmref          text eol=lf
+*.meta            merge=unityyamlmerge eol=lf
+
+# -----------------------------------------------------------------------------
+# Source code & text
+# -----------------------------------------------------------------------------
+*.cs              text diff=csharp eol=lf
+*.shader          text eol=lf
+*.cginc           text eol=lf
+*.hlsl            text eol=lf
+*.compute         text eol=lf
+*.uss             text eol=lf
+*.uxml            text eol=lf
+*.json            text eol=lf
+*.md              text eol=lf
+*.yml             text eol=lf
+*.yaml            text eol=lf
+*.xml             text eol=lf
+*.txt             text eol=lf
+
+# Windows-only scripts should keep CRLF
+*.bat             text eol=crlf
+*.cmd             text eol=crlf
+*.ps1             text eol=crlf
+
+# -----------------------------------------------------------------------------
+# Binary assets — tracked via Git LFS once `git lfs install` is run locally
+# -----------------------------------------------------------------------------
+# Images
+*.png   filter=lfs diff=lfs merge=lfs -text
+*.jpg   filter=lfs diff=lfs merge=lfs -text
+*.jpeg  filter=lfs diff=lfs merge=lfs -text
+*.gif   filter=lfs diff=lfs merge=lfs -text
+*.bmp   filter=lfs diff=lfs merge=lfs -text
+*.tga   filter=lfs diff=lfs merge=lfs -text
+*.tif   filter=lfs diff=lfs merge=lfs -text
+*.tiff  filter=lfs diff=lfs merge=lfs -text
+*.iff   filter=lfs diff=lfs merge=lfs -text
+*.pict  filter=lfs diff=lfs merge=lfs -text
+*.psd   filter=lfs diff=lfs merge=lfs -text
+*.exr   filter=lfs diff=lfs merge=lfs -text
+*.hdr   filter=lfs diff=lfs merge=lfs -text
+
+# 3D models
+*.fbx   filter=lfs diff=lfs merge=lfs -text
+*.obj   filter=lfs diff=lfs merge=lfs -text
+*.max   filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.dae   filter=lfs diff=lfs merge=lfs -text
+*.3ds   filter=lfs diff=lfs merge=lfs -text
+*.dxf   filter=lfs diff=lfs merge=lfs -text
+*.skp   filter=lfs diff=lfs merge=lfs -text
+
+# Audio
+*.mp3   filter=lfs diff=lfs merge=lfs -text
+*.ogg   filter=lfs diff=lfs merge=lfs -text
+*.wav   filter=lfs diff=lfs merge=lfs -text
+*.aif   filter=lfs diff=lfs merge=lfs -text
+*.aiff  filter=lfs diff=lfs merge=lfs -text
+
+# Video
+*.mov   filter=lfs diff=lfs merge=lfs -text
+*.mp4   filter=lfs diff=lfs merge=lfs -text
+*.webm  filter=lfs diff=lfs merge=lfs -text
+
+# Fonts
+*.ttf   filter=lfs diff=lfs merge=lfs -text
+*.otf   filter=lfs diff=lfs merge=lfs -text
+
+# Native / archive / misc
+*.dll   filter=lfs diff=lfs merge=lfs -text
+*.so    filter=lfs diff=lfs merge=lfs -text
+*.dylib filter=lfs diff=lfs merge=lfs -text
+*.a     filter=lfs diff=lfs merge=lfs -text
+*.lib   filter=lfs diff=lfs merge=lfs -text
+*.zip   filter=lfs diff=lfs merge=lfs -text
+*.7z    filter=lfs diff=lfs merge=lfs -text
+*.rar   filter=lfs diff=lfs merge=lfs -text
+
+# GitHub "linguist" overrides — keep the repo's language bar truthful
+*.meta  linguist-generated=true

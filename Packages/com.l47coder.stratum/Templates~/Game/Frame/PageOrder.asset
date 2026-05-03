@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 13684cc52d5b21f4c8d60dbacad7681a, type: 3}
+  m_Name: PageOrder
+  m_EditorClassIdentifier: 
+  _groups:
+  - Title: Framework
+    Tabs:
+    - Sync
+  - Title: Addressable
+    Tabs:
+    - Viewer
+  - Title: Manager
+    Tabs:
+    - Viewer
+    - Creator
+    - Order
+    - Installer
+  - Title: Component
+    Tabs:
+    - Viewer
+    - Creator
+    - Order
+    - Installer
+  - Title: Prefab
+    Tabs:
+    - Viewer

@@ -1,0 +1,10 @@
+Library/
+Temp/
+Logs/
+obj/
+Build/
+Builds/
+.cursor/
+.vs/
+.vscode/
+UserSettings/

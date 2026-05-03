@@ -1,0 +1,30 @@
+{
+  "name": "com.l47coder.stratum",
+  "displayName": "Stratum",
+  "version": "0.2.0",
+  "unity": "2022.3",
+  "description": "A Unity ScriptableObject + Addressables framework with an in-editor workbench for Managers, Components and Addressable groups.",
+  "keywords": [
+    "unity",
+    "framework",
+    "manager",
+    "component",
+    "addressable",
+    "editor",
+    "workbench",
+    "scriptableobject"
+  ],
+  "author": {
+    "name": "L47-Coder",
+    "url": "https://github.com/L47-Coder"
+  },
+  "license": "MIT",
+  "documentationUrl": "https://github.com/L47-Coder/unity-stratum",
+  "changelogUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/Packages/com.l47coder.stratum/CHANGELOG.md",
+  "licensesUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/LICENSE",
+  "dependencies": {
+    "com.unity.addressables": "1.23.1",
+    "com.cysharp.unitask": "2.5.10",
+    "jp.hadashikick.vcontainer": "1.17.0"
+  }
+}

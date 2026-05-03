@@ -1,0 +1,22 @@
+{
+  "packages": [
+    {
+      "id": "SpriteRenderer",
+      "displayName": "Sprite Renderer",
+      "description": "Wraps Unity's SpriteRenderer. Applies sprite, color, flip, and sorting settings from config data.",
+      "recommended": true
+    },
+    {
+      "id": "BoxCollider2D",
+      "displayName": "Box Collider 2D",
+      "description": "Wraps Unity's BoxCollider2D. Applies trigger, offset, size, edge radius, and composite settings from config data.",
+      "recommended": true
+    },
+    {
+      "id": "Rigidbody2D",
+      "displayName": "Rigidbody 2D",
+      "description": "Wraps Unity's Rigidbody2D. Applies body type, mass, damping, gravity, collision detection and constraints from config data.",
+      "recommended": true
+    }
+  ]
+}
