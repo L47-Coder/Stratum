@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Stratum;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace DevWorkbench
+namespace Stratum
 {
     public interface IAsyncInitManager
     {
@@ -38,8 +37,8 @@ namespace DevWorkbench
         {
             var boots = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID)
                 .OfType<IGameBoot>().ToList();
-            if (boots.Count == 0) { Debug.LogWarning("[DevWorkbench] No IGameBoot found; OnGameStart skipped."); return null; }
-            if (boots.Count > 1) throw new InvalidOperationException($"[DevWorkbench] {boots.Count} IGameBoot found; only one allowed.");
+            if (boots.Count == 0) { Debug.LogWarning("[Stratum] No IGameBoot found; OnGameStart skipped."); return null; }
+            if (boots.Count > 1) throw new InvalidOperationException($"[Stratum] {boots.Count} IGameBoot found; only one allowed.");
             return boots[0];
         }
     }

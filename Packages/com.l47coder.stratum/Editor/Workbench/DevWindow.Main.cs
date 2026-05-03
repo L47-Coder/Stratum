@@ -74,6 +74,7 @@ namespace Stratum.Editor
 
         private void OnDisable()
         {
+            FrameworkSyncSettings.OnDevWindowClosed();
             _instance = null;
             _currentPage?.OnLeave();
         }

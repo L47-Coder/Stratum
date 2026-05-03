@@ -19,5 +19,6 @@
         public const string ManagerOrder = FrameRoot + "/ManagerOrder.asset";
         public const string ComponentOrder = FrameRoot + "/ComponentOrder.asset";
         public const string PageOrder = FrameRoot + "/PageOrder.asset";
+        public const string AddressableGroupOrder = FrameRoot + "/AddressableGroupOrder.asset";
     }
 }

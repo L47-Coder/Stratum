@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Stratum;
 using VContainer;
 using VContainer.Unity;
 
-namespace DevWorkbench
+namespace Stratum
 {
     public class GameLifetimeScope : LifetimeScope
     {
@@ -32,7 +31,7 @@ namespace DevWorkbench
             {
                 var t = Type.GetType(entry.AssemblyQualifiedName);
                 if (t != null) return _managerTypeCache[entry.Name] = t;
-                UnityEngine.Debug.LogWarning($"[DevWorkbench] Manager '{entry.Name}': AQN stale, re-open Workbench to resync.");
+                UnityEngine.Debug.LogWarning($"[Stratum] Manager '{entry.Name}': AQN stale, re-open Workbench to resync.");
             }
 
             var asmName = typeof(BaseManager).Assembly.GetName().Name;
@@ -44,12 +43,12 @@ namespace DevWorkbench
 
             if (matches.Count == 0)
             {
-                UnityEngine.Debug.LogError($"[DevWorkbench] Manager '{entry.Name}' not found in any assembly.");
+                UnityEngine.Debug.LogError($"[Stratum] Manager '{entry.Name}' not found in any assembly.");
                 return _managerTypeCache[entry.Name] = null;
             }
 
             if (matches.Count > 1)
-                throw new InvalidOperationException($"[DevWorkbench] Ambiguous manager '{entry.Name}': {string.Join(", ", matches.Select(t => t.FullName))}");
+                throw new InvalidOperationException($"[Stratum] Ambiguous manager '{entry.Name}': {string.Join(", ", matches.Select(t => t.FullName))}");
 
             return _managerTypeCache[entry.Name] = matches[0];
         }

@@ -9,13 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 13684cc52d5b21f4c8d60dbacad7681a, type: 3}
-  m_Name: PageOrder
+  m_Script: {fileID: 11500000, guid: f927af4a8ec571c45a39e8f5d6b17373, type: 3}
+  m_Name: AddressableGroupOrder
   m_EditorClassIdentifier: 
-  _groups:
-  - Title: Framework
-    Tabs:
-    - Sync
-  - Title: Addressable
-    Tabs:
-    - Viewer
+  _groupGuids: []

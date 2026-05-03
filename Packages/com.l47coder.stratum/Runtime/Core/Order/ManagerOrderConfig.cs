@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Stratum;
 using UnityEngine;
 
-namespace DevWorkbench
+namespace Stratum
 {
     public class ManagerOrderConfig : ScriptableObject
     {
