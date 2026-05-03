@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -75,7 +75,7 @@ namespace Stratum.Editor
             {
                 var cell = new Rect(cursorX, innerRect.y, layout.DataColumnWidths[i], innerRect.height);
                 PaintCellFrame(cell, HeaderCellBackground, GridLineColor);
-                GUI.Label(PaddedRect(cell), _columns[i].Header, HeaderCellLabelStyle);
+                GUI.Label(PaddedRect(cell), _columns[i].Title, HeaderCellLabelStyle);
 
                 HandleColumnResize(cell, innerRect, layout, i);
 
@@ -351,7 +351,7 @@ namespace Stratum.Editor
                     EditorGUI.LabelField(PaddedRect(cell), $"Missing field: {_columns[i].RelativePropertyPath}", EditorStyles.wordWrappedMiniLabel);
                 else
                 {
-                    using (new EditorGUI.DisabledScope(!_columns[i].Editable || !CanRename || isDragFloating))
+                    using (new EditorGUI.DisabledScope(_columns[i].Readonly || !CanRename || isDragFloating))
                         DrawCellField(PaddedRect(cell), list, dataIndex, field, _columns[i].DropdownMethodName);
                 }
                 cursorX = cell.xMax;

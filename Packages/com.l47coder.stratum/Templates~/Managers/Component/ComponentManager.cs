@@ -12,10 +12,10 @@ public interface IComponentManager
 
 internal sealed partial class ComponentManagerData
 {
-    [TableColumn(Editable = false)]
+    [TableColumn(Readonly = true)]
     public string Key;
 
-    [TableColumn(Editable = false)]
+    [TableColumn(Readonly = true)]
     public string ComponentConfigAddress;
 }
 

@@ -11,19 +11,19 @@ namespace Stratum.Editor
     {
         private readonly struct ColumnDefinition
         {
-            public readonly string Header;
+            public readonly string Title;
             public readonly string RelativePropertyPath;
-            public readonly bool Editable;
+            public readonly bool Readonly;
             public readonly FieldInfo Field;
             public readonly float MinWidth;
             public readonly float InitialPreferredWidth;
             public readonly string DropdownMethodName;
 
-            public ColumnDefinition(string header, string relPath, bool editable, FieldInfo field, float minWidth, float initialPreferredWidth)
+            public ColumnDefinition(string title, string relPath, bool @readonly, FieldInfo field, float minWidth, float initialPreferredWidth)
             {
-                Header = header;
+                Title = title;
                 RelativePropertyPath = relPath;
-                Editable = editable;
+                Readonly = @readonly;
                 Field = field;
                 MinWidth = minWidth;
                 InitialPreferredWidth = initialPreferredWidth;
@@ -49,16 +49,16 @@ namespace Stratum.Editor
         private static ColumnDefinition? ToColumnDefinition(FieldInfo field)
         {
             var attr = field.GetCustomAttribute<TableColumnAttribute>(false);
-            if (attr != null && !attr.Visible) return null;
+            if (attr != null && attr.Hide) return null;
 
-            var header = string.IsNullOrWhiteSpace(attr?.Header)
+            var title = string.IsNullOrWhiteSpace(attr?.Title)
                 ? ObjectNames.NicifyVariableName(field.Name)
-                : attr.Header;
-            var initial = attr != null && attr.InitialWidth > 0f ? attr.InitialWidth : 0f;
+                : attr.Title;
+            var initial = attr != null && attr.Width > 0f ? attr.Width : 0f;
             return new ColumnDefinition(
-                header,
+                title,
                 field.Name,
-                attr?.Editable ?? true,
+                attr?.Readonly ?? false,
                 field,
                 GetDefaultMinWidth(field.FieldType),
                 initial);

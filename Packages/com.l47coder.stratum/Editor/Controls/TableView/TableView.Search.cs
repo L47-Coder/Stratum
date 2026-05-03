@@ -14,7 +14,7 @@ namespace Stratum.Editor
         private void DrawSearchBar(Rect rect)
         {
             var col = FindSearchColumn();
-            var name = col.HasValue ? col.Value.Header : KeyField;
+            var name = col.HasValue ? col.Value.Title : KeyField;
             ControlsToolbar.DrawSearchBar(rect, ref _searchField, ref _searchText,
                 $"Search by {name}...", enabled: col.HasValue, disabledHint: $"No \"{name}\" column in this table");
         }
@@ -28,7 +28,7 @@ namespace Stratum.Editor
             {
                 var col = _columns[i];
                 if (string.Equals(col.RelativePropertyPath, KeyField, StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(col.Header, KeyField, StringComparison.OrdinalIgnoreCase))
+                    string.Equals(col.Title, KeyField, StringComparison.OrdinalIgnoreCase))
                     return col;
             }
             return null;

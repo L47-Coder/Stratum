@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Stratum;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -22,49 +24,23 @@ namespace DevWorkbench
         public async UniTask StartAsync(CancellationToken token)
         {
             var managers = _container.Resolve<IReadOnlyList<BaseManager>>();
-
+            foreach (var manager in managers) await manager.InternalSetManagerDataDict();
             foreach (var manager in managers)
-                await manager.InternalSetManagerDataDict();
+                if (manager is IAsyncInitManager init) await init.InitAsync(token);
 
-            foreach (var manager in managers)
-            {
-                if (manager is IAsyncInitManager init)
-                    await init.InitAsync(token);
-            }
-
-            var gameBoot = ResolveGameBoot();
-            if (gameBoot == null) return;
-
-            _container.Inject(gameBoot);
-            await gameBoot.OnGameStart();
+            var boot = ResolveGameBoot();
+            if (boot == null) return;
+            _container.Inject(boot);
+            await boot.OnGameStart();
         }
 
         private static IGameBoot ResolveGameBoot()
         {
-            var behaviours = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
-
-            IGameBoot first = null;
-            int count = 0;
-
-            foreach (var b in behaviours)
-            {
-                if (b is not IGameBoot boot) continue;
-                first ??= boot;
-                count++;
-            }
-
-            if (count == 0)
-            {
-                Debug.LogWarning("[DevWorkbench] No IGameBoot found in scene; OnGameStart will not be called.");
-                return null;
-            }
-
-            if (count > 1)
-                throw new InvalidOperationException(
-                    $"[DevWorkbench] {count} IGameBoot implementations found in the scene. " +
-                    "Only one is allowed. Remove the extra instances before entering Play Mode.");
-
-            return first;
+            var boots = UnityEngine.Object.FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID)
+                .OfType<IGameBoot>().ToList();
+            if (boots.Count == 0) { Debug.LogWarning("[DevWorkbench] No IGameBoot found; OnGameStart skipped."); return null; }
+            if (boots.Count > 1) throw new InvalidOperationException($"[DevWorkbench] {boots.Count} IGameBoot found; only one allowed.");
+            return boots[0];
         }
     }
 }
