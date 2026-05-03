@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -50,4 +49,3 @@ namespace Stratum.Editor
         }
     }
 }
-#endif

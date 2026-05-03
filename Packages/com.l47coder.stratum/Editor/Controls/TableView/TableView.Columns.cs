@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,4 +104,3 @@ namespace Stratum.Editor
         }
     }
 }
-#endif

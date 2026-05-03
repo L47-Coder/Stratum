@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 
@@ -94,4 +93,3 @@ namespace Stratum.Editor
             Mathf.Max(0f, outer.height - CellPadding * 2f));
     }
 }
-#endif

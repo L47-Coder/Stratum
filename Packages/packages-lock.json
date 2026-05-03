@@ -21,7 +21,7 @@
       "depth": 0,
       "source": "embedded",
       "dependencies": {
-        "com.unity.addressables": "1.22.1",
+        "com.unity.addressables": "1.22.3",
         "com.cysharp.unitask": "2.5.10",
         "jp.hadashikick.vcontainer": "1.17.0"
       }

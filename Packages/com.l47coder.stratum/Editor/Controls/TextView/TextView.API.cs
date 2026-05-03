@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -54,4 +53,3 @@ namespace Stratum.Editor
         }
     }
 }
-#endif

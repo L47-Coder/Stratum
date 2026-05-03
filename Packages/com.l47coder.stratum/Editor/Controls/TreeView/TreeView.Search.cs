@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using System.Linq;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -33,4 +32,3 @@ namespace Stratum.Editor
         }
     }
 }
-#endif

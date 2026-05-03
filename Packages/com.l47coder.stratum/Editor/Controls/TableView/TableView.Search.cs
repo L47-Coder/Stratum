@@ -1,4 +1,3 @@
-﻿#if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
@@ -69,4 +68,3 @@ namespace Stratum.Editor
             GetFieldStringValue(value);
     }
 }
-#endif
