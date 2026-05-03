@@ -23,7 +23,7 @@
   "changelogUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/Packages/com.l47coder.stratum/CHANGELOG.md",
   "licensesUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/LICENSE",
   "dependencies": {
-    "com.unity.addressables": "1.23.1",
+    "com.unity.addressables": "1.22.3",
     "com.cysharp.unitask": "2.5.10",
     "jp.hadashikick.vcontainer": "1.17.0"
   }

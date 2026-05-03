@@ -6,7 +6,7 @@ distributed under its own license and is **not** bundled into this repository
 
 | Dependency | Version | License | Source |
 | ---------- | ------- | ------- | ------ |
-| [Unity Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@latest) | 1.23.1 | Unity Companion License | `com.unity.addressables` |
+| [Unity Addressables](https://docs.unity3d.com/Packages/com.unity.addressables@latest) | 1.22.3 | Unity Companion License | `com.unity.addressables` |
 | [UniTask](https://github.com/Cysharp/UniTask) | 2.5.10 | MIT License | `com.cysharp.unitask` |
 | [VContainer](https://github.com/hadashiA/VContainer) | 1.17.0 | MIT License | `jp.hadashikick.vcontainer` |
 

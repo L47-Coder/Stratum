@@ -42,7 +42,7 @@ Addressable groups.
 
 - Unity **2022.3 LTS** or newer
 - The following UPM dependencies (declared in `package.json`):
-  - `com.unity.addressables` 1.23.1
+  - `com.unity.addressables` 1.22.3
   - `com.cysharp.unitask` 2.5.10
   - `jp.hadashikick.vcontainer` 1.17.0
 
