@@ -7,17 +7,16 @@ namespace Stratum
     [Serializable]
     public sealed class EntityComponentEntry
     {
-        [TableColumn(Title = "初始化")]
+        [Field(Title = "初始化")]
         public bool InitOnStart = true;
 
-        [Dropdown(nameof(GetComponentTypeOptions))]
-        [TableColumn(Title = "组件类型")]
+        [Field(Title = "组件类型", Dropdown = nameof(GetComponentTypeOptions))]
         public string ComponentType;
 
-        [TableColumn(Title = "条目")]
+        [Field(Title = "条目")]
         public string EntryKey = "default";
 
-        [TableColumn(Hide = true)]
+        [Field(Hide = true)]
         [SerializeReference]
         public BaseComponentData Data;
 

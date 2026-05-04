@@ -27,7 +27,7 @@ namespace Stratum.Editor
                 Field = field;
                 MinWidth = minWidth;
                 InitialPreferredWidth = initialPreferredWidth;
-                DropdownMethodName = field?.GetCustomAttribute<DropdownAttribute>(false)?.MethodName;
+                DropdownMethodName = field?.GetCustomAttribute<FieldAttribute>(false)?.Dropdown;
             }
         }
 
@@ -48,7 +48,7 @@ namespace Stratum.Editor
 
         private static ColumnDefinition? ToColumnDefinition(FieldInfo field)
         {
-            var attr = field.GetCustomAttribute<TableColumnAttribute>(false);
+            var attr = field.GetCustomAttribute<FieldAttribute>(false);
             if (attr != null && attr.Hide) return null;
 
             var title = string.IsNullOrWhiteSpace(attr?.Title)

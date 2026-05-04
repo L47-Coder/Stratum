@@ -30,10 +30,10 @@ internal sealed class AssetHandle<T> : IAssetHandle<T> where T : class
 
 internal sealed partial class AssetManagerData
 {
-    [TableColumn(Readonly = true)]
+    [Field(Readonly = true)]
     public string Key;
 
-    [TableColumn(Readonly = true)]
+    [Field(Readonly = true)]
     public string AssetAddress;
 }
 

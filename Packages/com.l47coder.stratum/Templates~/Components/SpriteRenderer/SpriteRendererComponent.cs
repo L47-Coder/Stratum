@@ -14,7 +14,7 @@ public sealed partial class SpriteRendererComponentData
 
     public bool FlipY;
 
-    [Dropdown(nameof(GetSortingLayers))]
+    [Field(Dropdown = nameof(GetSortingLayers))]
     public string SortingLayerName = "Default";
 
     public int SortingOrder;

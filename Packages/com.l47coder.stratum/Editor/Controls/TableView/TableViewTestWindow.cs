@@ -191,32 +191,31 @@ namespace Stratum.Editor
         [Serializable]
         public sealed class TestRow
         {
-            [TableColumn(Title = "Key", Width = 160f)]
+            [Field(Title = "Key", Width = 160f)]
             public string Key = "new-row";
 
-            [Dropdown(nameof(GetDisplayNameOptions))]
-            [TableColumn(Title = "Name", Width = 200f)]
+            [Field(Title = "Name", Width = 200f, Dropdown = nameof(GetDisplayNameOptions))]
             public string DisplayName = "Hero";
 
-            [TableColumn(Title = "On")]
+            [Field(Title = "On")]
             public bool Enabled = true;
 
-            [TableColumn(Title = "Count")]
+            [Field(Title = "Count")]
             public int Count;
 
-            [TableColumn(Title = "Speed")]
+            [Field(Title = "Speed")]
             public float Speed = 1f;
 
-            [TableColumn(Title = "Category")]
+            [Field(Title = "Category")]
             public TestCategory Category;
 
-            [TableColumn(Title = "Tint")]
+            [Field(Title = "Tint")]
             public Color Tint = Color.white;
 
-            [TableColumn(Title = "Offset")]
+            [Field(Title = "Offset")]
             public Vector3 Offset;
 
-            [TableColumn(Title = "Tags", Width = 220f)]
+            [Field(Title = "Tags", Width = 220f)]
             public List<string> Tags = new();
 
             private static string[] GetDisplayNameOptions() => new[]

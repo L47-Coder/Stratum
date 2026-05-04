@@ -13,10 +13,10 @@ namespace Stratum
     [Serializable]
     public class ComponentOrderEntry
     {
-        [TableColumn(Title = "Component", Readonly = true)]
+        [Field(Title = "Component", Readonly = true)]
         public string Name;
 
-        [TableColumn(Hide = true)]
+        [Field(Hide = true)]
         public string AssemblyQualifiedName;
     }
 }
