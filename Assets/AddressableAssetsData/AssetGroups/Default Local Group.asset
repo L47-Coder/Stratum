@@ -22,11 +22,6 @@ MonoBehaviour:
     m_ReadOnly: 1
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2b1032fbbd0679341bc879ef06914124
-    m_Address: AddressableGroupOrder
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5a0b69d5c90319347aad5f353c661bd6
     m_Address: PageOrder
     m_ReadOnly: 0

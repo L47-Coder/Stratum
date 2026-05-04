@@ -13,6 +13,7 @@ namespace Stratum.Editor
             {
                 EnsureAddressablesInitialized();
                 AssetTransporter.Transfer(WorkbenchPaths.GameSkeletonTemplateFolder, WorkbenchPaths.GameRoot);
+                AssetCreator.Ensure<AddressableGroupOrderConfig>(WorkbenchPaths.AddressableGroupOrder);
             }
             catch (Exception ex)
             {
