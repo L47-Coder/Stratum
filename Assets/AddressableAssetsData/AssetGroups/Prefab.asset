@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: ComponentConfig
+  m_Name: Prefab
   m_EditorClassIdentifier: 
-  m_GroupName: ComponentConfig
+  m_GroupName: Prefab
   m_Data:
     m_SerializedData: []
-  m_GUID: 6c7b023567a738b4f8db22e0a8f79865
+  m_GUID: 0d12412c00c22fd409711a8e30a196eb
   m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5fe843652288d4f46a173890d3481f05, type: 2}
