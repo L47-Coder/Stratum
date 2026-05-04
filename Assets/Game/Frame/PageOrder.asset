@@ -31,3 +31,6 @@ MonoBehaviour:
     - Creator
     - Order
     - Installer
+  - Title: Prefab
+    Tabs:
+    - Viewer

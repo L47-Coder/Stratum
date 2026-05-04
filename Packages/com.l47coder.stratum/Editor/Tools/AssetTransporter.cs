@@ -48,6 +48,7 @@ namespace Stratum.Editor
                     foreach (var f in Directory.EnumerateFiles(srcAbs, "*", SearchOption.AllDirectories))
                     {
                         if (f.EndsWith(".meta", StringComparison.OrdinalIgnoreCase)) continue;
+                        if (Path.GetFileName(f).Equals(".gitkeep", StringComparison.OrdinalIgnoreCase)) continue;
                         var rel = Rel(srcAbs, f).Replace('\\', '/');
                         var dst = Path.Combine(dstAbs, rel.Replace('/', Path.DirectorySeparatorChar));
                         if (File.Exists(dst)) continue;

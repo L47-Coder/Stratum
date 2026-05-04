@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f927af4a8ec571c45a39e8f5d6b17373, type: 3}
   m_Name: AddressableGroupOrder
   m_EditorClassIdentifier: 
-  _groupGuids: []
+  _groupGuids:
+  - 18c745c031e91ad45999de1bb2b8fb7d
+  - a20f1ae9460b34a48bb941a724ea11ff
+  - 8937986441c029d43a3a724b900b93b2
