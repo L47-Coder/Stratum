@@ -4,8 +4,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -258,22 +256,7 @@ namespace Stratum.Editor
                 AssetDatabase.SaveAssets();
             }
 
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null)
-            {
-                Debug.LogWarning("[ManagerCreationService] AddressableAssetSettings not found; skipping Addressables configuration.");
-                return false;
-            }
-
-            var groupName = ManagerCreatorState.AddressableGroupName;
-            var group     = settings.groups.Find(g => g != null && g.Name == groupName)
-                ?? settings.CreateGroup(groupName, false, false, true, null);
-            var guid  = AssetDatabase.AssetPathToGUID(assetPath);
-            var entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = assetAddress;
-            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
-
-            AssetDatabase.SaveAssets();
+            AddressablesHelper.EnsureEntry(assetPath, assetAddress, ManagerCreatorState.AddressableGroupName);
             ManagerAssetIndex.Invalidate();
             Debug.Log($"[ManagerCreationService] {managerName}Manager created successfully.");
             return true;
@@ -323,29 +306,59 @@ namespace Stratum.Editor
 
     internal static class ManagerPostCompileAssetService
     {
+        private const string PendingTemplatesKey = "ManagerInstaller.PendingTemplates";
+
         [InitializeOnLoadMethod]
         private static void ProcessPendingAssetCreation()
         {
+            // ── Creator 页面挂起的单条 ──────────────────────────────────────────
             var managerName  = SessionState.GetString(ManagerCreatorState.SessionManagerNameKey,  string.Empty);
             var assetPath    = SessionState.GetString(ManagerCreatorState.SessionAssetPathKey,    string.Empty);
             var assetAddress = SessionState.GetString(ManagerCreatorState.SessionAssetAddressKey, string.Empty);
 
-            if (string.IsNullOrEmpty(managerName) || string.IsNullOrEmpty(assetPath) || string.IsNullOrEmpty(assetAddress))
-                return;
+            if (!string.IsNullOrEmpty(managerName) && !string.IsNullOrEmpty(assetPath) && !string.IsNullOrEmpty(assetAddress))
+            {
+                SessionState.EraseString(ManagerCreatorState.SessionManagerNameKey);
+                SessionState.EraseString(ManagerCreatorState.SessionAssetPathKey);
+                SessionState.EraseString(ManagerCreatorState.SessionAssetAddressKey);
 
-            SessionState.EraseString(ManagerCreatorState.SessionManagerNameKey);
-            SessionState.EraseString(ManagerCreatorState.SessionAssetPathKey);
-            SessionState.EraseString(ManagerCreatorState.SessionAssetAddressKey);
+                EditorApplication.delayCall += () =>
+                    ManagerCreationService.EnsureAssetAndAddressable(managerName, assetPath, assetAddress);
+            }
 
-            EditorApplication.delayCall += () =>
-                ManagerCreationService.EnsureAssetAndAddressable(managerName, assetPath, assetAddress);
+            // ── Installer 批量挂起 ───────────────────────────────────────────────
+            var pending = SessionState.GetString(PendingTemplatesKey, string.Empty);
+            if (string.IsNullOrEmpty(pending)) return;
+
+            SessionState.EraseString(PendingTemplatesKey);
+            foreach (var mgrName in pending.Split(','))
+            {
+                if (string.IsNullOrEmpty(mgrName)) continue;
+                var n = mgrName;
+                var p = $"{ManagerCreatorState.RootAssetPath}/{n}/{n}ManagerConfig.asset";
+                var a = ManagerAddressConvention.AddressOf(n);
+                EditorApplication.delayCall += () =>
+                    ManagerCreationService.EnsureAssetAndAddressable(n, p, a);
+            }
         }
 
+        /// <summary>Creator 页面：挂起单条 asset 创建。</summary>
         public static void ScheduleAssetCreation(ManagerCreationPlan plan)
         {
             SessionState.SetString(ManagerCreatorState.SessionManagerNameKey,  plan.ManagerName);
             SessionState.SetString(ManagerCreatorState.SessionAssetPathKey,    plan.AssetFilePath);
             SessionState.SetString(ManagerCreatorState.SessionAssetAddressKey, plan.AddressableAddressName);
+        }
+
+        /// <summary>Installer：批量挂起模板导入后的 asset 创建，编译完成后逐一执行。</summary>
+        public static void ScheduleTemplateInstall(string managerName)
+        {
+            var existing = SessionState.GetString(PendingTemplatesKey, string.Empty);
+            var names    = string.IsNullOrEmpty(existing)
+                ? new System.Collections.Generic.List<string>()
+                : new System.Collections.Generic.List<string>(existing.Split(','));
+            if (!names.Contains(managerName)) names.Add(managerName);
+            SessionState.SetString(PendingTemplatesKey, string.Join(",", names));
         }
     }
 

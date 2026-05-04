@@ -81,6 +81,7 @@ namespace Stratum.Editor
                 }
 
                 AssetTransporter.Transfer(sourcePath, destPath);
+                ComponentPostCompileAssetService.ScheduleTemplateInstall(id);
                 installed++;
                 Debug.Log($"[ComponentTemplateInstaller] Installed Component template \"{id}\".");
             }

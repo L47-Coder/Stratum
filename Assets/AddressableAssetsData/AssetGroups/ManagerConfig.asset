@@ -10,25 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Built In Data
+  m_Name: ManagerConfig
   m_EditorClassIdentifier: 
-  m_GroupName: Built In Data
+  m_GroupName: ManagerConfig
   m_Data:
     m_SerializedData: []
-  m_GUID: f3101ae1a7b1fdf4687a33c0891d1cc7
-  m_SerializeEntries:
-  - m_GUID: EditorSceneList
-    m_Address: EditorSceneList
-    m_ReadOnly: 1
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: Resources
-    m_Address: Resources
-    m_ReadOnly: 1
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  m_ReadOnly: 1
+  m_GUID: a20f1ae9460b34a48bb941a724ea11ff
+  m_SerializeEntries: []
+  m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5fe843652288d4f46a173890d3481f05, type: 2}
   m_SchemaSet:
-    m_Schemas:
-    - {fileID: 11400000, guid: bbfbc7cbbe53c824898fb7365d148cac, type: 2}
+    m_Schemas: []

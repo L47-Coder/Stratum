@@ -5,8 +5,6 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -185,22 +183,7 @@ namespace Stratum.Editor
                 AssetDatabase.SaveAssets();
             }
 
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null)
-            {
-                Debug.LogWarning("[ComponentCreationService] AddressableAssetSettings not found; skipping Addressables configuration.");
-                return false;
-            }
-
-            var groupName = ComponentCreatorState.AddressableGroupName;
-            var group = settings.groups.Find(g => g != null && g.Name == groupName)
-                ?? settings.CreateGroup(groupName, false, false, true, null);
-            var guid  = AssetDatabase.AssetPathToGUID(assetPath);
-            var entry = settings.CreateOrMoveEntry(guid, group);
-            entry.address = assetAddress;
-            settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
-
-            AssetDatabase.SaveAssets();
+            AddressablesHelper.EnsureEntry(assetPath, assetAddress, ComponentCreatorState.AddressableGroupName);
             ComponentAssetIndex.Invalidate();
             Debug.Log($"[ComponentCreationService] {componentName}Component created successfully.");
             return true;
@@ -249,29 +232,60 @@ namespace Stratum.Editor
 
     internal static class ComponentPostCompileAssetService
     {
+        // Creator 页面单条挂起（存完整 path/address，不依赖命名规则）
+        private const string PendingTemplatesKey = "ComponentInstaller.PendingTemplates";
+
         [InitializeOnLoadMethod]
         private static void OnLoad()
         {
+            // ── Creator 页面挂起的单条 ──────────────────────────────────────────
             var name    = SessionState.GetString(ComponentCreatorState.SessionComponentNameKey, string.Empty);
             var path    = SessionState.GetString(ComponentCreatorState.SessionAssetPathKey,     string.Empty);
             var address = SessionState.GetString(ComponentCreatorState.SessionAssetAddressKey,  string.Empty);
 
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(path) || string.IsNullOrEmpty(address))
-                return;
+            if (!string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(path) && !string.IsNullOrEmpty(address))
+            {
+                SessionState.EraseString(ComponentCreatorState.SessionComponentNameKey);
+                SessionState.EraseString(ComponentCreatorState.SessionAssetPathKey);
+                SessionState.EraseString(ComponentCreatorState.SessionAssetAddressKey);
 
-            SessionState.EraseString(ComponentCreatorState.SessionComponentNameKey);
-            SessionState.EraseString(ComponentCreatorState.SessionAssetPathKey);
-            SessionState.EraseString(ComponentCreatorState.SessionAssetAddressKey);
+                EditorApplication.delayCall += () =>
+                    ComponentCreationService.EnsureAssetAndAddressable(name, path, address);
+            }
 
-            EditorApplication.delayCall += () =>
-                ComponentCreationService.EnsureAssetAndAddressable(name, path, address);
+            // ── Installer 批量挂起（逗号分隔的组件名列表）──────────────────────
+            var pending = SessionState.GetString(PendingTemplatesKey, string.Empty);
+            if (string.IsNullOrEmpty(pending)) return;
+
+            SessionState.EraseString(PendingTemplatesKey);
+            foreach (var componentName in pending.Split(','))
+            {
+                if (string.IsNullOrEmpty(componentName)) continue;
+                var n       = componentName;
+                var p       = $"{ComponentCreatorState.RootAssetPath}/{n}/{n}ComponentConfig.asset";
+                var a       = ComponentAddressConvention.AddressOf(n);
+                EditorApplication.delayCall += () =>
+                    ComponentCreationService.EnsureAssetAndAddressable(n, p, a);
+            }
         }
 
+        /// <summary>Creator 页面：挂起单条 asset 创建（path/address 已由调用方算好）</summary>
         public static void Schedule(ComponentCreationPlan plan)
         {
             SessionState.SetString(ComponentCreatorState.SessionComponentNameKey, plan.ComponentName);
             SessionState.SetString(ComponentCreatorState.SessionAssetPathKey,     plan.AssetFilePath);
             SessionState.SetString(ComponentCreatorState.SessionAssetAddressKey,  plan.AddressableAddress);
+        }
+
+        /// <summary>Installer：批量挂起模板导入后的 asset 创建，编译完成后逐一执行。</summary>
+        public static void ScheduleTemplateInstall(string componentName)
+        {
+            var existing = SessionState.GetString(PendingTemplatesKey, string.Empty);
+            var names    = string.IsNullOrEmpty(existing)
+                ? new System.Collections.Generic.List<string>()
+                : new System.Collections.Generic.List<string>(existing.Split(','));
+            if (!names.Contains(componentName)) names.Add(componentName);
+            SessionState.SetString(PendingTemplatesKey, string.Join(",", names));
         }
     }
 

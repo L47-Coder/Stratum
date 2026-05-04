@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 468a46d0ae32c3544b7d98094e6448a9, type: 3}
   m_Name: AddressableAssetSettings
   m_EditorClassIdentifier: 
-  m_DefaultGroup: 2b76f08a1c0bccb44bba1d1759f038b0
+  m_DefaultGroup: 18c745c031e91ad45999de1bb2b8fb7d
   m_currentHash:
     serializedVersion: 2
-    Hash: 287ff3b413a0052d16d1437dd5b009ab
+    Hash: 00000000000000000000000000000000
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -38,14 +38,16 @@ MonoBehaviour:
     m_Id: 
   m_RemoteCatalogLoadPath:
     m_Id: 
-  m_ContentStateBuildPathProfileVariableName: <default settings path>
+  m_ContentStateBuildPathProfileVariableName: 
   m_CustomContentStateBuildPath: 
   m_ContentStateBuildPath: 
   m_BuildAddressablesWithPlayerBuild: 0
   m_overridePlayerVersion: '[UnityEditor.PlayerSettings.bundleVersion]'
   m_GroupAssets:
-  - {fileID: 11400000, guid: d4dd76227df65dd459f64b007d9f60db, type: 2}
   - {fileID: 11400000, guid: 80840fdd2062e374bb2d9d42ef332a26, type: 2}
+  - {fileID: 11400000, guid: a23e422560dbe0b4faf717beb710d09c, type: 2}
+  - {fileID: 11400000, guid: b3d2715f7c158bd4aa889515cfe37f6f, type: 2}
+  - {fileID: 11400000, guid: 217678df5fe9f834393c752cb8db5ca9, type: 2}
   - {fileID: 11400000, guid: 41b8a4bc0bbad00499c610c49366e8be, type: 2}
   m_BuildSettings:
     m_CompileScriptsInVirtualMode: 0
@@ -55,34 +57,34 @@ MonoBehaviour:
   m_ProfileSettings:
     m_Profiles:
     - m_InheritedParent: 
-      m_Id: 28f2ef72c0bbf974a8136ab6d7d833e5
+      m_Id: 5bfd586dd98ce324fb3f678790898fd4
       m_ProfileName: Default
       m_Values:
-      - m_Id: 0c53f5d6e24e64d49aa18716c93681dc
-        m_Value: ServerData/[BuildTarget]
-      - m_Id: 19fbdbc7e0b335949b24de9cf452930d
-        m_Value: http://[PrivateIpAddress]:[HostingServicePort]
-      - m_Id: 354eb82ec381d4e4da0b83e1901fd045
-        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
-      - m_Id: 453a4b92188844749923cb1aca3e8cf4
-        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
-      - m_Id: f083d04f5fd3ed54193a7cd8054bcac7
+      - m_Id: 1a3009da3c390f540bcaa7007cb76a12
         m_Value: '[UnityEditor.EditorUserBuildSettings.activeBuildTarget]'
+      - m_Id: 254f3bb4e7946964eb14f6b77bec3c75
+        m_Value: ServerData/[BuildTarget]
+      - m_Id: 2ae19c105ce97bf42a7bf4e394f58cdc
+        m_Value: '[UnityEngine.AddressableAssets.Addressables.BuildPath]/[BuildTarget]'
+      - m_Id: 6867ec5078ee60247913180079c83cd7
+        m_Value: http://[PrivateIpAddress]:[HostingServicePort]
+      - m_Id: 720ac773d0c0eeb468bff262f855d6f2
+        m_Value: '{UnityEngine.AddressableAssets.Addressables.RuntimePath}/[BuildTarget]'
     m_ProfileEntryNames:
-    - m_Id: 0c53f5d6e24e64d49aa18716c93681dc
+    - m_Id: 1a3009da3c390f540bcaa7007cb76a12
+      m_Name: BuildTarget
+      m_InlineUsage: 0
+    - m_Id: 254f3bb4e7946964eb14f6b77bec3c75
       m_Name: Remote.BuildPath
       m_InlineUsage: 0
-    - m_Id: 19fbdbc7e0b335949b24de9cf452930d
-      m_Name: Remote.LoadPath
-      m_InlineUsage: 0
-    - m_Id: 354eb82ec381d4e4da0b83e1901fd045
+    - m_Id: 2ae19c105ce97bf42a7bf4e394f58cdc
       m_Name: Local.BuildPath
       m_InlineUsage: 0
-    - m_Id: 453a4b92188844749923cb1aca3e8cf4
-      m_Name: Local.LoadPath
+    - m_Id: 6867ec5078ee60247913180079c83cd7
+      m_Name: Remote.LoadPath
       m_InlineUsage: 0
-    - m_Id: f083d04f5fd3ed54193a7cd8054bcac7
-      m_Name: BuildTarget
+    - m_Id: 720ac773d0c0eeb468bff262f855d6f2
+      m_Name: Local.LoadPath
       m_InlineUsage: 0
     m_ProfileVersion: 1
   m_LabelTable:
@@ -101,7 +103,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5632d242458243a4bb83e4f34dc4cb00, type: 2}
   - {fileID: 11400000, guid: 2903e6852477a304cbb1c7d23648ab95, type: 2}
   - {fileID: 11400000, guid: 63e27289d0340d245bc3e50ed31a3469, type: 2}
-  m_ActiveProfileId: 28f2ef72c0bbf974a8136ab6d7d833e5
+  m_ActiveProfileId: 5bfd586dd98ce324fb3f678790898fd4
   m_HostingServicesManager:
     m_HostingServiceInfos: []
     m_Settings: {fileID: 11400000}

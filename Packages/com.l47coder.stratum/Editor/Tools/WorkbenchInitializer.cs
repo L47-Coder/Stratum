@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEngine;
@@ -7,13 +8,22 @@ namespace Stratum.Editor
 {
     internal static class WorkbenchInitializer
     {
+        private const string FrameGroupName = "Frame";
+
+        private static readonly string ManagerOrderAddress =
+            $"{FrameGroupName}/{Path.GetFileNameWithoutExtension(WorkbenchPaths.ManagerOrder)}";
+
+        private static readonly string ComponentOrderAddress =
+            $"{FrameGroupName}/{Path.GetFileNameWithoutExtension(WorkbenchPaths.ComponentOrder)}";
+
         public static void Ensure()
         {
             try
             {
                 EnsureAddressablesInitialized();
                 AssetTransporter.Transfer(WorkbenchPaths.GameSkeletonTemplateFolder, WorkbenchPaths.GameRoot);
-                AssetCreator.Ensure<AddressableGroupOrderConfig>(WorkbenchPaths.AddressableGroupOrder);
+                AddressablesHelper.EnsureEntry(WorkbenchPaths.ManagerOrder,   ManagerOrderAddress,   FrameGroupName);
+                AddressablesHelper.EnsureEntry(WorkbenchPaths.ComponentOrder, ComponentOrderAddress, FrameGroupName);
             }
             catch (Exception ex)
             {

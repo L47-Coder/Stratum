@@ -81,6 +81,7 @@ namespace Stratum.Editor
                 }
 
                 AssetTransporter.Transfer(sourcePath, destPath);
+                ManagerPostCompileAssetService.ScheduleTemplateInstall(id);
                 installed++;
                 Debug.Log($"[ManagerTemplateInstaller] Installed Manager template \"{id}\".");
             }
