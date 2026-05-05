@@ -21,6 +21,7 @@ namespace Stratum.Editor
 
         private int _selectedIndex = -1;
         private Vector2 _scrollPos;
+        private List<string> _lastItems;
 
         private Action<int> _onRowAdded;
         private Action<int> _onRowRemoved;

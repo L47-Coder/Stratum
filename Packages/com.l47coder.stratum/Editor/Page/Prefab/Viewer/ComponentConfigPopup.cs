@@ -1,23 +1,30 @@
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class ComponentConfigPopup : EditorWindow
+    /// <summary>
+    /// 以 PopupWindowContent 形式弹出的组件配置面板，无标题栏，点击外部自动关闭。
+    /// </summary>
+    internal sealed class ComponentConfigPopup : PopupWindowContent
     {
-        private const float WinW    = 340f;
-        private const float MinWinH = 80f;
-        private const float Padding = 8f;
+        private const float PopupW   = 360f;
+        private const float RowH     = 22f;
+        private const float RowGap   = 2f;
+        private const float PaddingV = 4f;
+        private const float MaxPopupH = 400f;
 
         private SerializedObject   _so;
-        private SerializedProperty _compProp;
-        private Vector2            _scroll;
+        private SerializedProperty _dataProp;
+        private BaseComponentData  _data;
+        private int                _visibleCount;
+
+        private readonly FieldView _fieldView = new();
 
         // ── Factory ──────────────────────────────────────────────────────────
 
-        /// <param name="so">包裹 Entity 组件的 SerializedObject。</param>
-        /// <param name="componentIndex">Components 数组中的索引。</param>
-        public static void Open(SerializedObject so, int componentIndex)
+        public static void Open(Rect anchorRect, SerializedObject so, int componentIndex)
         {
             so.Update();
             var listProp = so.FindProperty("Components");
@@ -25,50 +32,70 @@ namespace Stratum.Editor
 
             var entryProp = listProp.GetArrayElementAtIndex(componentIndex);
             var dataProp  = entryProp.FindPropertyRelative("Data");
-            var typeName  = dataProp.managedReferenceValue?.GetType().Name ?? "Config";
+            var dataObj   = dataProp.managedReferenceValue as BaseComponentData;
 
-            var win = GetWindow<ComponentConfigPopup>(utility: true, title: typeName, focus: true);
-            win._so       = so;
-            win._compProp = dataProp;
-            win.minSize   = new Vector2(WinW, MinWinH);
+            var popup = new ComponentConfigPopup
+            {
+                _so           = so,
+                _dataProp     = dataProp,
+                _data         = dataObj,
+                _visibleCount = CountVisibleFields(dataObj),
+            };
+            PopupWindow.Show(anchorRect, popup);
         }
 
-        // ── GUI ──────────────────────────────────────────────────────────────
+        // ── PopupWindowContent ───────────────────────────────────────────────
 
-        private void OnGUI()
+        public override Vector2 GetWindowSize()
         {
-            if (_so == null || _compProp == null)
+            var bodyH = _visibleCount > 0
+                ? _visibleCount * (RowH + RowGap) - RowGap
+                : RowH;
+            return new Vector2(PopupW, Mathf.Min(bodyH + PaddingV * 2f, MaxPopupH));
+        }
+
+        public override void OnGUI(Rect rect)
+        {
+            if (_so == null || _dataProp == null || _data == null)
             {
-                EditorGUILayout.HelpBox("配置数据已失效，请重新打开。", MessageType.Warning);
+                EditorGUI.LabelField(rect, "配置数据已失效", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
 
-            _so.Update();
+            var inner = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
 
-            EditorGUILayout.Space(Padding);
-            _scroll = EditorGUILayout.BeginScrollView(_scroll);
-
-            var iter = _compProp.Copy();
-            var end  = _compProp.GetEndProperty();
-
-            if (!iter.NextVisible(true) || SerializedProperty.EqualContents(iter, end))
+            EditorGUI.BeginChangeCheck();
+            _fieldView.DrawContent(inner, _data);
+            if (EditorGUI.EndChangeCheck())
             {
-                EditorGUILayout.HelpBox("此组件配置没有可编辑字段。", MessageType.None);
-            }
-            else
-            {
-                do
-                {
-                    EditorGUILayout.PropertyField(iter, true);
-                }
-                while (iter.NextVisible(false) && !SerializedProperty.EqualContents(iter, end));
-            }
-
-            EditorGUILayout.EndScrollView();
-            EditorGUILayout.Space(Padding);
-
-            if (_so.ApplyModifiedProperties())
+                _so.Update();
+                _dataProp.managedReferenceValue = _data;
+                _so.ApplyModifiedProperties();
                 AssetDatabase.SaveAssets();
+            }
+        }
+
+        // ── 字段计数（供 GetWindowSize 计算高度）────────────────────────────
+
+        private static int CountVisibleFields(BaseComponentData data)
+        {
+            if (data == null) return 0;
+
+            const BindingFlags flags =
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+            var count = 0;
+            foreach (var f in data.GetType().GetFields(flags))
+            {
+                if (f.IsStatic) continue;
+                if (f.IsDefined(typeof(System.NonSerializedAttribute), false)) continue;
+                if (f.IsDefined(typeof(HideInInspector), false)) continue;
+                if (!f.IsPublic && !f.IsDefined(typeof(UnityEngine.SerializeField), false)) continue;
+                var attr = f.GetCustomAttribute<FieldAttribute>(false);
+                if (attr != null && attr.Hide) continue;
+                count++;
+            }
+            return count;
         }
     }
 }

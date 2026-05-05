@@ -23,6 +23,17 @@ namespace Stratum.Editor
         public void OnRowMoved(Action<int, int> callback) => _onRowMoved = callback;
         public void OnRowRenamed(Action<int> callback) => _onRowRenamed = callback;
         public void OnButtonClicked(Action<int> callback) => _onButtonClicked = callback;
+        /// <summary>
+        /// 某行某个实现了 <see cref="Stratum.IFieldExpandable"/> 的字段的展开按钮被点击时触发。
+        /// 参数：(rowIndex, fieldName)
+        /// </summary>
+        public void OnExpandField(Action<int, string> callback) => _onExpandField = callback;
+
+        /// <summary>
+        /// 同 <see cref="OnExpandField"/>，额外携带按钮的屏幕 Rect，供 PopupWindow.Show 定位。
+        /// 参数：(rowIndex, fieldName, anchorRect)
+        /// </summary>
+        public void OnExpandFieldAt(Action<int, string, Rect> callback) => _onExpandFieldAt = callback;
 
         public void Draw<T>(Rect rect, List<T> list)
         {

@@ -24,8 +24,18 @@ namespace Stratum.Editor
         public void OnDropOnRow(Action<int> callback) => _onDropOnRow = callback;
         public void OnButtonClicked(Action<int> callback) => _onButtonClicked = callback;
 
+        public bool TrySelectRow(int index)
+        {
+            if (!CanSelect || index < 0) return false;
+            if (_lastItems != null && index >= _lastItems.Count) return false;
+            _selectedIndex = index;
+            _onRowSelected?.Invoke(index);
+            return true;
+        }
+
         public void Draw(Rect rect, List<string> items)
         {
+            _lastItems = items;
             CheckRenameBlur();
             HandleKeyboard();
             if (items == null) return;

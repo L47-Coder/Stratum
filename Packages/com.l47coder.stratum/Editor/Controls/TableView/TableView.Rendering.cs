@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Stratum;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -409,6 +410,13 @@ namespace Stratum.Editor
                 return;
             }
 
+            // IFieldExpandable：渲染展开按钮，点击触发 OnExpandField 回调
+            if (typeof(IFieldExpandable).IsAssignableFrom(type))
+            {
+                DrawExpandableCell(rect, value, index, field.Name);
+                return;
+            }
+
             var isSupported =
                 type == typeof(string) || type == typeof(int) || type == typeof(float) ||
                 type == typeof(bool) || type.IsEnum ||
@@ -433,15 +441,36 @@ namespace Stratum.Editor
             {
                 if (dropdownMethodName != null)
                 {
-                    var options = InvokeDropdownMethod(field, dropdownMethodName);
-                    if (options is { Length: > 0 })
+                    var cur = value as string ?? string.Empty;
+                    var displayLabel = string.IsNullOrEmpty(cur) ? "(未选择)" : cur;
+                    if (GUI.Button(rect, displayLabel, DropdownButtonStyle))
                     {
-                        var cur = value as string ?? string.Empty;
-                        var idx = Math.Max(0, Array.IndexOf(options, cur));
-                        newValue = options[EditorGUI.Popup(rect, idx, options)];
+                        GUI.FocusControl(null);
+                        // 仅在点击时才做一次反射，之后命中缓存
+                        var options = InvokeDropdownMethod(field, dropdownMethodName);
+                        if (options is { Length: > 0 })
+                        {
+                            var capturedField = field;
+                            var capturedList  = list;
+                            var capturedIndex = index;
+                            var menu = new GenericMenu();
+                            foreach (var opt in options)
+                            {
+                                var o = opt;
+                                menu.AddItem(new GUIContent(o), o == cur, () =>
+                                {
+                                    var b = (object)capturedList[capturedIndex];
+                                    capturedField.SetValue(b, o);
+                                    capturedList[capturedIndex] = (T)b;
+                                    _pendingDirty = true;
+                                    _onRowRenamed?.Invoke(capturedIndex);
+                                });
+                            }
+                            menu.DropDown(rect);
+                        }
                     }
-                    else
-                        newValue = EditorGUI.DelayedTextField(rect, value as string ?? string.Empty);
+                    // GenericMenu 通过回调写值，不走 EndChangeCheck 流程
+                    newValue = cur;
                 }
                 else
                     newValue = EditorGUI.DelayedTextField(rect, value as string ?? string.Empty);
@@ -498,6 +527,14 @@ namespace Stratum.Editor
         private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);
         private static readonly Color ToggleOffColor = new(0.72f, 0.22f, 0.22f, 0.88f);
 
+        private static GUIStyle _dropdownButtonStyle;
+        private static GUIStyle DropdownButtonStyle =>
+            _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
+            {
+                alignment = TextAnchor.MiddleLeft,
+                clipping  = TextClipping.Clip,
+            };
+
         private static GUIStyle _toggleLabelStyle;
         private static GUIStyle ToggleLabelStyle => _toggleLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
         {
@@ -526,21 +563,47 @@ namespace Stratum.Editor
             return current;
         }
 
+        private static GUIStyle _expandButtonStyle;
+        private static GUIStyle ExpandButtonStyle =>
+            _expandButtonStyle ??= new GUIStyle(EditorStyles.miniButton)
+            {
+                alignment  = TextAnchor.MiddleLeft,
+                clipping   = TextClipping.Clip,
+                padding    = new RectOffset(4, 4, 0, 0),
+            };
+
+        private void DrawExpandableCell(Rect rect, object value, int rowIndex, string fieldName)
+        {
+            var label = value == null ? "(null)" : value.GetType().Name;
+            if (GUI.Button(rect, label, ExpandButtonStyle))
+            {
+                GUI.FocusControl(null);
+                _onExpandField?.Invoke(rowIndex, fieldName);
+                _onExpandFieldAt?.Invoke(rowIndex, fieldName, rect);
+            }
+        }
+
         private static string[] InvokeDropdownMethod(FieldInfo field, string methodName)
         {
             if (_dropdownOptionsCache.TryGetValue(field, out var cached)) return cached;
 
             var method = field.DeclaringType?.GetMethod(
                 methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            if (method == null) return null;
-            var result = method.Invoke(null, null) switch
+
+            string[] result = null;
+            if (method != null)
             {
-                string[] arr => arr,
-                List<string> list => list.ToArray(),
-                IEnumerable<string> e => e.ToArray(),
-                _ => null,
-            };
-            if (result != null) _dropdownOptionsCache[field] = result;
+                result = method.Invoke(null, null) switch
+                {
+                    string[] arr => arr,
+                    List<string> list => list.ToArray(),
+                    IEnumerable<string> e => e.ToArray(),
+                    _ => null,
+                };
+            }
+
+            // 无论成功与否都写入缓存，避免每帧重复反射
+            _dropdownOptionsCache[field] = result ?? Array.Empty<string>();
             return result;
         }
 

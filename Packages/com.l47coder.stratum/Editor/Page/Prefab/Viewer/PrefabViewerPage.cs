@@ -10,25 +10,25 @@ namespace Stratum.Editor
     internal sealed class PrefabViewerPage : IPage
     {
         public string GroupTitle => "Prefab";
-        public string TabTitle   => "Viewer";
+        public string TabTitle => "Viewer";
 
         private const float SplitterVisualW = 1f;
-        private const float LeftPanelMin    = 100f;
-        private const float LeftPanelMax    = 800f;
-        private const float LeftPanelStart  = 220f;
+        private const float LeftPanelMin = 100f;
+        private const float LeftPanelMax = 800f;
+        private const float LeftPanelStart = 220f;
         private static readonly Color SplitterColor = new(0.11f, 0.11f, 0.11f);
 
-        private readonly PrefabViewerLeftPanel  _leftPanel  = new();
+        private readonly PrefabViewerLeftPanel _leftPanel = new();
         private readonly PrefabViewerRightPanel _rightPanel = new();
         private float _splitterX = LeftPanelStart;
-        private bool  _dragging;
+        private bool _dragging;
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
 
         public void OnGUI(Rect rect)
         {
             var visualRect = new Rect(rect.x + _splitterX, rect.y, SplitterVisualW, rect.height);
-            var hitRect    = new Rect(rect.x + _splitterX - 2f, rect.y, SplitterVisualW + 4f, rect.height);
+            var hitRect = new Rect(rect.x + _splitterX - 2f, rect.y, SplitterVisualW + 4f, rect.height);
 
             EditorGUIUtility.AddCursorRect(hitRect, MouseCursor.ResizeHorizontal);
 
@@ -50,7 +50,7 @@ namespace Stratum.Editor
                     break;
             }
 
-            var leftRect  = new Rect(rect.x, rect.y, _splitterX, rect.height);
+            var leftRect = new Rect(rect.x, rect.y, _splitterX, rect.height);
             var rightRect = new Rect(visualRect.xMax, rect.y,
                                      rect.width - _splitterX - SplitterVisualW, rect.height);
 
@@ -85,51 +85,58 @@ namespace Stratum.Editor
 
     internal sealed class PrefabViewerRightPanel
     {
-        private const float Padding       = 8f;
-        private const float RowH          = 22f;
-        private const float SectionLabelH = 22f;
-        private const float PreviewSize   = 56f;
+        private const float Padding = 8f;
+        private const float RowH = 20f;
+        private const float TitleRowH = 18f;
+        private const float PreviewSize = 64f;
 
-        private const float TableBoxOverhead = (BoxDrawer.Padding + BoxDrawer.BorderWidth) * 2f;
-        private const float TableRowH        = 26f;
-        private const double SaveDelay       = 0.5;
+        private const double SaveDelay = 0.5;
 
         private static GUIStyle _keyLabelStyle;
         private static GUIStyle _hintLabelStyle;
         private static GUIStyle _addrHintStyle;
 
+        private static GUIStyle _titleStyle;
+
+        private static GUIStyle TitleStyle =>
+            _titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
+            {
+                fontSize = 12,
+                clipping = TextClipping.Clip,
+            };
+
         private static GUIStyle KeyLabelStyle =>
             _keyLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
-                { normal = { textColor = new Color(0.58f, 0.58f, 0.58f) } };
+            { normal = { textColor = new Color(0.58f, 0.58f, 0.58f) } };
 
         private static GUIStyle HintLabelStyle =>
             _hintLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
-                { normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
+            { normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
 
         private static GUIStyle AddrHintStyle =>
             _addrHintStyle ??= new GUIStyle(EditorStyles.label)
-                { normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
+            { normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
 
-        private static readonly Color HeaderBg  = new(0.13f, 0.13f, 0.13f);
-        private static readonly Color SectionBg = new(0.14f, 0.14f, 0.15f);
-
-        private string           _currentPath;
-        private string           _cachedPath;
-        private GameObject       _cachedPrefab;
-        private Texture2D        _cachedPreview;
-        private Entity           _cachedEntity;
+        private static readonly Color HeaderBg = new(0.105f, 0.105f, 0.11f);
+        private static readonly Color HeaderRule = new(0.2f, 0.2f, 0.22f);
+        private static readonly Color ThumbBorder = new(0.06f, 0.06f, 0.07f);
+        private static readonly Color ThumbBackdrop = new(0.15f, 0.15f, 0.16f);
+        private string _currentPath;
+        private string _cachedPath;
+        private GameObject _cachedPrefab;
+        private Texture2D _cachedPreview;
+        private Entity _cachedEntity;
         private SerializedObject _cachedSo;
-        private Vector2          _scrollPos;
 
-        private bool   _isAddressable;
+        private bool _isAddressable;
         private string _addrAddress;
         private string _addrGroup;
         private string _addrLabels;
 
         private readonly TableView _tableView = new();
-        private bool               _tableSetup;
+        private bool _tableSetup;
 
-        private bool   _pendingSave;
+        private bool _pendingSave;
         private double _saveScheduledAt;
 
         // ── Public API ───────────────────────────────────────────────────────
@@ -138,7 +145,7 @@ namespace Stratum.Editor
         {
             if (_currentPath == path) return;
             _currentPath = path;
-            _cachedPath  = null;
+            _cachedPath = null;
         }
 
         // ── Draw entry ───────────────────────────────────────────────────────
@@ -182,12 +189,12 @@ namespace Stratum.Editor
         {
             if (_cachedPath == _currentPath) return;
 
-            _cachedPath    = _currentPath;
-            _cachedPrefab  = AssetDatabase.LoadAssetAtPath<GameObject>(_currentPath);
+            _cachedPath = _currentPath;
+            _cachedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(_currentPath);
             _cachedPreview = null;
-            _cachedEntity  = _cachedPrefab != null ? _cachedPrefab.GetComponent<Entity>() : null;
-            _cachedSo      = _cachedEntity != null ? new SerializedObject(_cachedEntity) : null;
-            _pendingSave   = false;
+            _cachedEntity = _cachedPrefab != null ? _cachedPrefab.GetComponent<Entity>() : null;
+            _cachedSo = _cachedEntity != null ? new SerializedObject(_cachedEntity) : null;
+            _pendingSave = false;
 
             RefreshAddressableInfo();
         }
@@ -195,21 +202,21 @@ namespace Stratum.Editor
         private void RefreshAddressableInfo()
         {
             _isAddressable = false;
-            _addrAddress   = string.Empty;
-            _addrGroup     = string.Empty;
-            _addrLabels    = string.Empty;
+            _addrAddress = string.Empty;
+            _addrGroup = string.Empty;
+            _addrLabels = string.Empty;
 
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null) return;
 
-            var guid  = AssetDatabase.AssetPathToGUID(_currentPath);
+            var guid = AssetDatabase.AssetPathToGUID(_currentPath);
             var entry = settings.FindAssetEntry(guid);
             if (entry == null) return;
 
             _isAddressable = true;
-            _addrAddress   = entry.address;
-            _addrGroup     = entry.parentGroup?.Name ?? string.Empty;
-            _addrLabels    = string.Join(", ", entry.labels);
+            _addrAddress = entry.address;
+            _addrGroup = entry.parentGroup?.Name ?? string.Empty;
+            _addrLabels = string.Join(", ", entry.labels);
         }
 
         // ── Panel layout ──────────────────────────────────────────────────────
@@ -223,80 +230,81 @@ namespace Stratum.Editor
                 AssetDatabase.SaveAssets();
             }
 
-            var addrRowCount = _isAddressable
-                ? 2 + (string.IsNullOrEmpty(_addrLabels) ? 0 : 1)
-                : 1;
-            var addrHeaderH = Padding + addrRowCount * RowH + Padding + 22f + Padding;
+            var addrHeaderH = CalcAddressHeaderHeight();
 
-            var configH     = CalcConfigSectionHeight();
-            var contentH    = addrHeaderH + Padding + configH + Padding;
-            var contentRect = new Rect(0f, 0f, rect.width - 16f, Mathf.Max(contentH, rect.height));
-            _scrollPos = GUI.BeginScrollView(rect, _scrollPos, contentRect);
+            var x = rect.x;
+            var w = rect.width;
+            var y = rect.y;
 
-            var y = 0f;
-            var w = contentRect.width;
+            DrawAddressableHeader(x, y, w, addrHeaderH);
+            y += addrHeaderH;
 
-            DrawAddressableHeader(ref y, w, addrHeaderH);
-            y += Padding;
-            DrawEntityConfigPanel(ref y, w);
-
-            GUI.EndScrollView();
+            DrawEntityConfigPanel(x, y, w, rect.yMax);
         }
 
-        private float CalcConfigSectionHeight()
+        private float CalcAddressHeaderHeight()
         {
-            if (_cachedEntity == null)
-                return SectionLabelH + RowH + Padding + 22f + Padding;
-
-            var rowCount = Mathf.Max(1, _cachedEntity.Components.Count);
-            return SectionLabelH + TableBoxOverhead + ControlsToolbar.ToolbarHeight + TableRowH * (1 + rowCount) + Padding;
+            var infoRows = !_isAddressable ? 1 : (string.IsNullOrEmpty(_addrLabels) ? 2 : 3);
+            var rightH = Padding + TitleRowH + 6f + infoRows * RowH + 8f + 22f + Padding;
+            var leftH = Padding + PreviewSize + Padding;
+            return Mathf.Max(leftH, rightH);
         }
 
         // ── Addressable header ────────────────────────────────────────────────
 
-        private void DrawAddressableHeader(ref float y, float w, float h)
+        private void DrawAddressableHeader(float x, float y, float w, float h)
         {
-            EditorGUI.DrawRect(new Rect(0f, y, w, h), HeaderBg);
+            EditorGUI.DrawRect(new Rect(x, y, w, h), HeaderBg);
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(new Rect(x, y + h - 1f, w, 1f), HeaderRule);
 
             if (_cachedPreview == null)
                 _cachedPreview = AssetPreview.GetAssetPreview(_cachedPrefab);
 
-            var thumbY    = y + (h - PreviewSize) * 0.5f;
-            var thumbRect = new Rect(Padding, thumbY, PreviewSize, PreviewSize);
-            if (_cachedPreview != null)
-                GUI.DrawTexture(thumbRect, _cachedPreview, ScaleMode.ScaleToFit);
-            else
-                EditorGUI.DrawRect(thumbRect, new Color(0.22f, 0.22f, 0.22f));
+            var thumbOuter = new Rect(x + Padding, y + Padding, PreviewSize, PreviewSize);
+            if (Event.current.type == EventType.Repaint)
+            {
+                EditorGUI.DrawRect(new Rect(thumbOuter.x - 1f, thumbOuter.y - 1f, thumbOuter.width + 2f, thumbOuter.height + 2f), ThumbBorder);
+                EditorGUI.DrawRect(thumbOuter, ThumbBackdrop);
+            }
 
-            var rightX = Padding + PreviewSize + Padding;
-            var rightW = w - rightX - Padding;
-            var ry     = y + Padding;
+            var thumbInner = new Rect(thumbOuter.x + 1f, thumbOuter.y + 1f, thumbOuter.width - 2f, thumbOuter.height - 2f);
+            if (_cachedPreview != null)
+                GUI.DrawTexture(thumbInner, _cachedPreview, ScaleMode.ScaleToFit);
+            else if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(thumbInner, new Color(0.2f, 0.2f, 0.21f));
+
+            var rightX = thumbOuter.xMax + Padding + 2f;
+            var rightW = Mathf.Max(40f, x + w - rightX - Padding);
+            var ry = y + Padding;
+
+            var prefabTitle = Path.GetFileNameWithoutExtension(_cachedPath) ?? "Prefab";
+            GUI.Label(new Rect(rightX, ry, rightW, TitleRowH), prefabTitle, TitleStyle);
+            ry += TitleRowH + 6f;
 
             if (!_isAddressable)
             {
                 EditorGUI.LabelField(new Rect(rightX, ry, rightW, RowH),
-                    "此预制体尚未标记为 Addressable", AddrHintStyle);
-                ry += RowH + Padding;
-                if (GUI.Button(new Rect(rightX, ry, 140f, 22f), "标记为 Addressable", EditorStyles.miniButton))
+                    "尚未加入 Addressable 组", AddrHintStyle);
+                ry += RowH + 8f;
+                if (GUI.Button(new Rect(rightX, ry, rightW, 22f), "标记为 Addressable", EditorStyles.miniButton))
                     MarkAsAddressable();
             }
             else
             {
                 DrawKeyValue(ref ry, rightX, rightW, "Address", _addrAddress);
-                DrawKeyValue(ref ry, rightX, rightW, "Group",   _addrGroup);
+                DrawKeyValue(ref ry, rightX, rightW, "Group", _addrGroup);
                 if (!string.IsNullOrEmpty(_addrLabels))
                     DrawKeyValue(ref ry, rightX, rightW, "Labels", _addrLabels);
-                ry += Padding;
-                if (GUI.Button(new Rect(rightX, ry, 140f, 22f), "在 Addressables 中查看", EditorStyles.miniButton))
-                    EditorApplication.ExecuteMenuItem("Window/Asset Management/Addressables/Groups");
+                ry += 8f;
+                if (GUI.Button(new Rect(rightX, ry, rightW, 22f), "在 Dev Workbench 中查看", EditorStyles.miniButton))
+                    AddressableViewerPage.NavigateFromPrefab(_addrGroup);
             }
-
-            y += h;
         }
 
         private static void DrawKeyValue(ref float y, float x, float w, string key, string value)
         {
-            const float keyW = 52f;
+            const float keyW = 64f;
             EditorGUI.LabelField(new Rect(x, y, keyW, RowH), key, KeyLabelStyle);
             EditorGUI.LabelField(new Rect(x + keyW + 4f, y, w - keyW - 4f, RowH),
                 value, EditorStyles.miniLabel);
@@ -305,41 +313,31 @@ namespace Stratum.Editor
 
         // ── Entity / EntityComponentEntry 表格 ────────────────────────────────
 
-        private void DrawEntityConfigPanel(ref float y, float w)
+        private void DrawEntityConfigPanel(float x, float y, float w, float yMax)
         {
-            EditorGUI.DrawRect(new Rect(0f, y, w, SectionLabelH), SectionBg);
-            EditorGUI.LabelField(new Rect(Padding, y + 2f, w - Padding * 2, SectionLabelH - 2f),
-                "组件配置", EditorStyles.boldLabel);
-            y += SectionLabelH;
-
             if (_cachedEntity == null)
             {
-                EditorGUI.LabelField(new Rect(Padding, y + 2f, w - Padding * 2, RowH - 4f),
+                var pad = Padding;
+                EditorGUI.LabelField(new Rect(x + pad, y + pad, w - pad * 2, RowH),
                     "此预制体尚未挂载 Entity 组件", HintLabelStyle);
-                y += RowH + Padding;
-                if (GUI.Button(new Rect(Padding, y, 140f, 22f), "挂载 Entity 组件", EditorStyles.miniButton))
+                y += pad + RowH + pad;
+                if (GUI.Button(new Rect(x + pad, y, 200f, 22f), "挂载 Entity 组件", EditorStyles.miniButton))
                     AddEntity();
-                y += 22f + Padding;
                 return;
             }
 
             EnsureTableSetup();
 
-            var rowCount  = Mathf.Max(1, _cachedEntity.Components.Count);
-            var tableH    = TableBoxOverhead + ControlsToolbar.ToolbarHeight + TableRowH * (1 + rowCount);
-            var tableRect = new Rect(0f, y, w, tableH);
-
+            var tableRect = new Rect(x, y, w, yMax - y);
             _tableView.Draw(tableRect, _cachedEntity.Components);
 
             if (GUI.changed)
             {
                 SyncComponentDataTypes();
                 EditorUtility.SetDirty(_cachedEntity);
-                _pendingSave     = true;
+                _pendingSave = true;
                 _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
             }
-
-            y += tableH + Padding;
         }
 
         // ── 表格初始化 ────────────────────────────────────────────────────────
@@ -349,12 +347,14 @@ namespace Stratum.Editor
             if (_tableSetup) return;
             _tableSetup = true;
 
-            _tableView.CanAdd    = true;
-            _tableView.CanDrag   = true;
-            _tableView.CanRemove = true;
-            _tableView.CanSelect = false;
-            _tableView.CanRename = false;
-            _tableView.KeyField  = "ComponentType";
+            _tableView.CanAdd         = true;
+            _tableView.CanDrag        = true;
+            _tableView.CanRemove      = true;
+            _tableView.CanSelect      = false;
+            _tableView.CanRename      = true;
+            _tableView.ShowToolbar    = false;
+            _tableView.MarkDuplicates = false;
+            _tableView.OnExpandFieldAt((rowIndex, _, anchorRect) => OpenConfigPopup(rowIndex, anchorRect));
         }
 
         // ── ComponentType 变更时重建 Data ──────────────────────────────────────
@@ -395,11 +395,11 @@ namespace Stratum.Editor
 
         // ── 打开 Config 弹窗（供后续需求使用）─────────────────────────────────
 
-        private void OpenConfigPopup(int index)
+        private void OpenConfigPopup(int index, Rect anchorRect)
         {
             if (_cachedSo == null || _cachedEntity == null) return;
             if (index < 0 || index >= _cachedEntity.Components.Count) return;
-            ComponentConfigPopup.Open(_cachedSo, index);
+            ComponentConfigPopup.Open(anchorRect, _cachedSo, index);
         }
 
         // ── 挂载 Entity ──────────────────────────────────────────────────────
@@ -423,7 +423,7 @@ namespace Stratum.Editor
                 Debug.LogWarning("[PrefabViewer] 找不到 AddressableAssetSettings，请先在 Addressables 创建配置。");
                 return;
             }
-            var guid  = AssetDatabase.AssetPathToGUID(_cachedPath);
+            var guid = AssetDatabase.AssetPathToGUID(_cachedPath);
             var entry = settings.CreateOrMoveEntry(guid, settings.DefaultGroup);
             entry.address = Path.GetFileNameWithoutExtension(_cachedPath);
             EditorUtility.SetDirty(settings);

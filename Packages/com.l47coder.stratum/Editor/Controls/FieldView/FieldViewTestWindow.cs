@@ -11,8 +11,6 @@ namespace Stratum.Editor
         private static void Open() =>
             GetWindow<FieldViewTestWindow>("FieldView Test").Show();
 
-        // ── 示例数据 ─────────────────────────────────────────────────────────────
-
         [Serializable]
         private sealed class SampleData
         {
@@ -53,8 +51,6 @@ namespace Stratum.Editor
                 new[] { "Player", "Enemy", "NPC", "Neutral" };
         }
 
-        // ── 只读示例 ─────────────────────────────────────────────────────────────
-
         [Serializable]
         private sealed class SampleDataReadonly
         {
@@ -65,22 +61,18 @@ namespace Stratum.Editor
             public string ConfigAddress = "ComponentConfig/Rigidbody2D";
         }
 
-        // ── 状态 ─────────────────────────────────────────────────────────────────
-
-        private readonly FieldView _fieldView         = new();
+        private readonly FieldView _fieldView = new();
         private readonly FieldView _fieldViewReadonly = new() { Readonly = true };
-        private readonly SampleData         _sample         = new();
+        private readonly SampleData _sample = new();
         private readonly SampleDataReadonly _sampleReadonly = new();
 
-        private float   _splitterY     = 300f;
-        private bool    _dragging;
+        private float _splitterY = 300f;
+        private bool _dragging;
         private Vector2 _scrollPos;
 
-        private const float SplitterH      = 1f;
-        private const float SplitterHitH   = 6f;
+        private const float SplitterH = 1f;
+        private const float SplitterHitH = 6f;
         private static readonly Color SplitterColor = new(0.11f, 0.11f, 0.11f);
-
-        // ── GUI ──────────────────────────────────────────────────────────────────
 
         private void OnGUI()
         {
@@ -88,14 +80,14 @@ namespace Stratum.Editor
 
             HandleSplitter(fullRect);
 
-            var topRect    = new Rect(fullRect.x, fullRect.y, fullRect.width, _splitterY);
-            var divRect    = new Rect(fullRect.x, _splitterY, fullRect.width, SplitterH);
+            var topRect = new Rect(fullRect.x, fullRect.y, fullRect.width, _splitterY);
+            var divRect = new Rect(fullRect.x, _splitterY, fullRect.width, SplitterH);
             var bottomRect = new Rect(fullRect.x, _splitterY + SplitterH,
                                       fullRect.width, fullRect.height - _splitterY - SplitterH);
 
-            DrawSection(topRect,    "可编辑", _fieldView,         _sample);
+            DrawSection(topRect, "可编辑", _fieldView, _sample);
             EditorGUI.DrawRect(divRect, SplitterColor);
-            DrawSection(bottomRect, "只读",   _fieldViewReadonly, _sampleReadonly);
+            DrawSection(bottomRect, "只读", _fieldViewReadonly, _sampleReadonly);
 
             if (GUI.changed) Repaint();
         }
@@ -110,8 +102,6 @@ namespace Stratum.Editor
             var viewRect = new Rect(rect.x, rect.y + TitleH, rect.width, rect.height - TitleH);
             view.Draw(viewRect, data);
         }
-
-        // ── 分割条拖拽 ───────────────────────────────────────────────────────────
 
         private void HandleSplitter(Rect fullRect)
         {

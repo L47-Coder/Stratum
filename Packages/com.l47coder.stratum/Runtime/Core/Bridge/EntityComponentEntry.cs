@@ -16,7 +16,6 @@ namespace Stratum
         [Field(Title = "条目")]
         public string EntryKey = "default";
 
-        [Field(Hide = true)]
         [SerializeReference]
         public BaseComponentData Data;
 

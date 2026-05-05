@@ -97,7 +97,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f32edc864a52c4fa2bb38a4303d51b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Components: []
+  Components:
+  - InitOnStart: 1
+    ComponentType: AComponent
+    EntryKey: default
+    Data:
+      rid: 8899497816816615424
+  - InitOnStart: 1
+    ComponentType: BComponent
+    EntryKey: default
+    Data:
+      rid: 8899497816816615426
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 8899497816816615424
+      type: {class: AComponentData, ns: , asm: Game.Components}
+      data:
+        Key: 
+    - rid: 8899497816816615426
+      type: {class: BComponentData, ns: , asm: Game.Components}
+      data:
+        Key: 
+        a: 222

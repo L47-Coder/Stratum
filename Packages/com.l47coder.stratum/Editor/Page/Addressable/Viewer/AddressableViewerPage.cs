@@ -13,6 +13,24 @@ namespace Stratum.Editor
         public string GroupTitle => "Addressable";
         public string TabTitle => "Viewer";
 
+        internal static string PendingSelectGroupName;
+
+        internal static void NavigateFromPrefab(string addressableGroupName)
+        {
+            PendingSelectGroupName = string.IsNullOrEmpty(addressableGroupName) ? null : addressableGroupName;
+            DevWindow.GoTo("Addressable", "Viewer");
+        }
+
+        internal static void FinishPendingGroupSelection(AddressableViewerPage page)
+        {
+            if (page == null || string.IsNullOrEmpty(PendingSelectGroupName)) return;
+            var name = PendingSelectGroupName;
+            PendingSelectGroupName = null;
+            page._leftPanel.TrySelectGroupByName(name);
+        }
+
+        public void OnEnter() => FinishPendingGroupSelection(this);
+
         private const float SplitterVisualW = 1f;
         private const float LeftPanelMin = 100f;
         private const float LeftPanelMax = 800f;
@@ -109,6 +127,25 @@ namespace Stratum.Editor
             }
 
             _listView.Draw(rect, _groupNames);
+        }
+
+        internal void TrySelectGroupByName(string groupName)
+        {
+            if (string.IsNullOrEmpty(groupName)) return;
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null) return;
+
+            _knownGroupCount = settings.groups.Count;
+            RebuildGroupList(settings);
+
+            for (var i = 0; i < _visibleGroups.Count; i++)
+            {
+                if (string.Equals(_visibleGroups[i].Name, groupName, StringComparison.Ordinal))
+                {
+                    _listView.TrySelectRow(i);
+                    return;
+                }
+            }
         }
 
         private void RebuildGroupList(AddressableAssetSettings settings)

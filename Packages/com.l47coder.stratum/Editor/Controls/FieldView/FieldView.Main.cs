@@ -10,11 +10,11 @@ namespace Stratum.Editor
 {
     public sealed partial class FieldView
     {
-        private const float LabelWidth  = 130f;
-        private const float RowHeight   = 22f;
-        private const float RowGap      = 2f;
-        private const float PaddingH    = 4f;
-        private const float PaddingV    = 2f;
+        private const float LabelWidth = 130f;
+        private const float RowHeight = 22f;
+        private const float RowGap = 2f;
+        private const float PaddingH = 4f;
+        private const float PaddingV = 2f;
 
         private static readonly Color RowBg0 = new(0.19f, 0.19f, 0.20f, 1f);
         private static readonly Color RowBg1 = new(0.21f, 0.21f, 0.22f, 1f);
@@ -35,31 +35,26 @@ namespace Stratum.Editor
             normal = { textColor = new Color(0.75f, 0.75f, 0.75f) },
         };
 
-        // ── 每字段定义 ──────────────────────────────────────────────────────────
-
         private readonly struct FieldDef
         {
-            public readonly string       Title;
-            public readonly bool         Readonly;
-            public readonly FieldInfo    Field;
-            public readonly string       DropdownMethodName;
+            public readonly string Title;
+            public readonly bool Readonly;
+            public readonly FieldInfo Field;
+            public readonly string DropdownMethodName;
 
             public FieldDef(string title, bool @readonly, FieldInfo field, string dropdownMethodName)
             {
-                Title              = title;
-                Readonly           = @readonly;
-                Field              = field;
+                Title = title;
+                Readonly = @readonly;
+                Field = field;
                 DropdownMethodName = dropdownMethodName;
             }
         }
 
-        // ── 状态 ────────────────────────────────────────────────────────────────
-
-        private Type            _cachedType;
-        private List<FieldDef>  _fieldDefs;
-        private Vector2         _scrollPos;
-
-        // ── 反射构建字段列表 ─────────────────────────────────────────────────────
+        private Type _cachedType;
+        private List<FieldDef> _fieldDefs;
+        private Vector2 _scrollPos;
+        private object _lastItem;
 
         private static List<FieldDef> BuildFieldDefs(Type type)
         {
@@ -95,8 +90,6 @@ namespace Stratum.Editor
             !f.IsDefined(typeof(HideInInspector), false) &&
             (f.IsPublic || f.IsDefined(typeof(SerializeField), false));
 
-        // ── 行绘制 ──────────────────────────────────────────────────────────────
-
         private void DrawFieldRow(Rect rowRect, ref object boxed, FieldDef def)
         {
             var stripeIndex = _fieldDefs.IndexOf(def) % 2;
@@ -125,13 +118,11 @@ namespace Stratum.Editor
                 DrawFieldControl(controlRect, ref boxed, def);
         }
 
-        // ── 字段控件（类型分发，与 TableView 保持一致）──────────────────────────
-
         private static void DrawFieldControl(Rect rect, ref object boxed, FieldDef def)
         {
             var field = def.Field;
             var value = field.GetValue(boxed);
-            var type  = field.FieldType;
+            var type = field.FieldType;
 
             if (IsStringList(type))
             {
@@ -144,12 +135,12 @@ namespace Stratum.Editor
             }
 
             var isSupported =
-                type == typeof(string)  || type == typeof(int)   || type == typeof(float) ||
-                type == typeof(bool)    || type.IsEnum            ||
+                type == typeof(string) || type == typeof(int) || type == typeof(float) ||
+                type == typeof(bool) || type.IsEnum ||
                 typeof(UnityEngine.Object).IsAssignableFrom(type) ||
                 type == typeof(AnimationCurve) || type == typeof(Gradient) ||
-                type == typeof(Color)   ||
-                type == typeof(Vector2) || type == typeof(Vector3)    || type == typeof(Vector4)    ||
+                type == typeof(Color) ||
+                type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) ||
                 type == typeof(Vector2Int) || type == typeof(Vector3Int) || type == typeof(Quaternion) ||
                 type == typeof(LayerMask);
 
@@ -228,14 +219,14 @@ namespace Stratum.Editor
 
         // ── Toggle（带颜色反馈，与 TableView 保持一致）──────────────────────────
 
-        private static readonly Color ToggleOnColor  = new(0.22f, 0.62f, 0.35f, 0.88f);
+        private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);
         private static readonly Color ToggleOffColor = new(0.72f, 0.22f, 0.22f, 0.88f);
 
         private static GUIStyle _toggleStyle;
         private static GUIStyle ToggleStyle => _toggleStyle ??= new GUIStyle(EditorStyles.miniLabel)
         {
             alignment = TextAnchor.MiddleCenter,
-            normal    = { textColor = Color.white },
+            normal = { textColor = Color.white },
             fontStyle = FontStyle.Bold,
         };
 
@@ -271,10 +262,10 @@ namespace Stratum.Editor
 
             var result = method.Invoke(null, null) switch
             {
-                string[]           arr  => arr,
-                List<string>       list => list.ToArray(),
-                IEnumerable<string> en  => en.ToArray(),
-                _                       => null,
+                string[] arr => arr,
+                List<string> list => list.ToArray(),
+                IEnumerable<string> en => en.ToArray(),
+                _ => null,
             };
             if (result != null) _dropdownCache[field] = result;
             return result;
