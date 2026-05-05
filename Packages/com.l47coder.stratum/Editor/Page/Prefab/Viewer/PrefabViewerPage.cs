@@ -133,7 +133,8 @@ namespace Stratum.Editor
         private string _addrGroup;
         private string _addrLabels;
 
-        private readonly TableView _tableView = new();
+        private readonly TableView       _tableView    = new();
+        private readonly FieldViewPopup  _configPopup  = new();
         private bool _tableSetup;
 
         private bool _pendingSave;
@@ -393,13 +394,29 @@ namespace Stratum.Editor
             if (anyFixed) _cachedSo.ApplyModifiedProperties();
         }
 
-        // ── 打开 Config 弹窗（供后续需求使用）─────────────────────────────────
+        // ── 打开 Config 弹窗 ──────────────────────────────────────────────────
 
         private void OpenConfigPopup(int index, Rect anchorRect)
         {
             if (_cachedSo == null || _cachedEntity == null) return;
             if (index < 0 || index >= _cachedEntity.Components.Count) return;
-            ComponentConfigPopup.Open(anchorRect, _cachedSo, index);
+
+            var data = _cachedEntity.Components[index].Data;
+            if (data == null) return;
+
+            var so        = _cachedSo;
+            var listProp  = so.FindProperty("Components");
+            var dataProp  = listProp.GetArrayElementAtIndex(index).FindPropertyRelative("Data");
+
+            _configPopup.Show(anchorRect, data, onChanged: () =>
+            {
+                so.Update();
+                dataProp.managedReferenceValue = data;
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(_cachedEntity);
+                _pendingSave     = true;
+                _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
+            });
         }
 
         // ── 挂载 Entity ──────────────────────────────────────────────────────

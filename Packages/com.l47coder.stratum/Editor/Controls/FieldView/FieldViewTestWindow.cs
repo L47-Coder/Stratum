@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -61,71 +60,34 @@ namespace Stratum.Editor
             public string ConfigAddress = "ComponentConfig/Rigidbody2D";
         }
 
-        private readonly FieldView _fieldView = new();
-        private readonly FieldView _fieldViewReadonly = new() { Readonly = true };
-        private readonly SampleData _sample = new();
+        private readonly SampleData         _sample         = new();
         private readonly SampleDataReadonly _sampleReadonly = new();
 
-        private float _splitterY = 300f;
-        private bool _dragging;
-        private Vector2 _scrollPos;
+        private readonly FieldViewPopup _popup         = new();
+        private readonly FieldViewPopup _popupReadonly = new() { Readonly = true };
 
-        private const float SplitterH = 1f;
-        private const float SplitterHitH = 6f;
-        private static readonly Color SplitterColor = new(0.11f, 0.11f, 0.11f);
+        private const float BtnH    = 28f;
+        private const float BtnW    = 200f;
+        private const float Padding = 16f;
+        private const float Gap     = 12f;
 
         private void OnGUI()
         {
-            var fullRect = new Rect(0f, 0f, position.width, position.height);
+            var x = Padding;
+            var y = Padding;
 
-            HandleSplitter(fullRect);
+            EditorGUI.LabelField(new Rect(x, y, position.width - x * 2f, 18f),
+                "点击按钮弹出 FieldViewPopup 泡泡", EditorStyles.centeredGreyMiniLabel);
+            y += 22f;
 
-            var topRect = new Rect(fullRect.x, fullRect.y, fullRect.width, _splitterY);
-            var divRect = new Rect(fullRect.x, _splitterY, fullRect.width, SplitterH);
-            var bottomRect = new Rect(fullRect.x, _splitterY + SplitterH,
-                                      fullRect.width, fullRect.height - _splitterY - SplitterH);
+            var editBtnRect = new Rect(x, y, BtnW, BtnH);
+            if (GUI.Button(editBtnRect, "打开可编辑面板"))
+                _popup.Show(editBtnRect, _sample, onChanged: Repaint);
+            y += BtnH + Gap;
 
-            DrawSection(topRect, "可编辑", _fieldView, _sample);
-            EditorGUI.DrawRect(divRect, SplitterColor);
-            DrawSection(bottomRect, "只读", _fieldViewReadonly, _sampleReadonly);
-
-            if (GUI.changed) Repaint();
-        }
-
-        private static void DrawSection<T>(Rect rect, string title, FieldView view, T data)
-        {
-            const float TitleH = 20f;
-            EditorGUI.LabelField(
-                new Rect(rect.x + 8f, rect.y + 2f, rect.width - 16f, TitleH - 2f),
-                title, EditorStyles.boldLabel);
-
-            var viewRect = new Rect(rect.x, rect.y + TitleH, rect.width, rect.height - TitleH);
-            view.Draw(viewRect, data);
-        }
-
-        private void HandleSplitter(Rect fullRect)
-        {
-            var hitRect = new Rect(fullRect.x, _splitterY - SplitterHitH * 0.5f,
-                                   fullRect.width, SplitterHitH);
-            EditorGUIUtility.AddCursorRect(hitRect, MouseCursor.ResizeVertical);
-
-            var evt = Event.current;
-            switch (evt.type)
-            {
-                case EventType.MouseDown when hitRect.Contains(evt.mousePosition):
-                    _dragging = true;
-                    evt.Use();
-                    break;
-                case EventType.MouseDrag when _dragging:
-                    _splitterY = Mathf.Clamp(evt.mousePosition.y, 80f, fullRect.height - 80f);
-                    evt.Use();
-                    Repaint();
-                    break;
-                case EventType.MouseUp when _dragging:
-                    _dragging = false;
-                    evt.Use();
-                    break;
-            }
+            var roBtnRect = new Rect(x, y, BtnW, BtnH);
+            if (GUI.Button(roBtnRect, "打开只读面板"))
+                _popupReadonly.Show(roBtnRect, _sampleReadonly);
         }
     }
 }

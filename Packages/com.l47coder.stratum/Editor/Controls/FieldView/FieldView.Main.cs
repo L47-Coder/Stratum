@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    public sealed partial class FieldView
+    internal sealed partial class FieldView
     {
         private const float LabelWidth = 130f;
         private const float RowHeight = 22f;

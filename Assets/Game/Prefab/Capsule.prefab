@@ -102,21 +102,21 @@ MonoBehaviour:
     ComponentType: AComponent
     EntryKey: default
     Data:
-      rid: 8899497816816615424
+      rid: 8899497816816615437
   - InitOnStart: 1
     ComponentType: BComponent
     EntryKey: default
     Data:
-      rid: 8899497816816615426
+      rid: 8899497816816615438
   references:
     version: 2
     RefIds:
-    - rid: 8899497816816615424
+    - rid: 8899497816816615437
       type: {class: AComponentData, ns: , asm: Game.Components}
       data:
         Key: 
-    - rid: 8899497816816615426
+    - rid: 8899497816816615438
       type: {class: BComponentData, ns: , asm: Game.Components}
       data:
         Key: 
-        a: 222
+        a: 
