@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _configs:
   - Key: default
-    a: 
+    a: 222
   - Key: 
-    a: 
+    a: 222
   - Key: 
     a: 

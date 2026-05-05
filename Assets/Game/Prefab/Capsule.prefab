@@ -98,25 +98,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - InitOnStart: 1
-    ComponentType: AComponent
-    EntryKey: default
-    Data:
-      rid: 8899497816816615437
-  - InitOnStart: 1
+  - EntryKey: BComponent_10
+    InitOnStart: 0
     ComponentType: BComponent
-    EntryKey: default
+    Data:
+      rid: 8899497816816615443
+  - EntryKey: BComponent_default
+    InitOnStart: 1
+    ComponentType: BComponent
     Data:
       rid: 8899497816816615438
+  - EntryKey: BComponent_10
+    InitOnStart: 1
+    ComponentType: BComponent
+    Data:
+      rid: 8899497816816615444
   references:
     version: 2
     RefIds:
-    - rid: 8899497816816615437
-      type: {class: AComponentData, ns: , asm: Game.Components}
-      data:
-        Key: 
     - rid: 8899497816816615438
       type: {class: BComponentData, ns: , asm: Game.Components}
       data:
         Key: 
-        a: 
+        a: 222
+    - rid: 8899497816816615443
+      type: {class: BComponentData, ns: , asm: Game.Components}
+      data:
+        Key: 10
+        a: 222
+    - rid: 8899497816816615444
+      type: {class: BComponentData, ns: , asm: Game.Components}
+      data:
+        Key: 10
+        a: 111

@@ -401,23 +401,21 @@ namespace Stratum.Editor
             if (_cachedSo == null || _cachedEntity == null) return;
             if (index < 0 || index >= _cachedEntity.Components.Count) return;
 
-            var data = _cachedEntity.Components[index].Data;
-            if (data == null) return;
+            var entry = _cachedEntity.Components[index];
+            if (entry.Data == null) return;
 
-            var so        = _cachedSo;
-            var listProp  = so.FindProperty("Components");
-            var dataProp  = listProp.GetArrayElementAtIndex(index).FindPropertyRelative("Data");
+            var so = _cachedSo;
 
             _configPopup.OnChanged(() =>
             {
+                entry.RefreshEntryKey();
                 so.Update();
-                dataProp.managedReferenceValue = data;
                 so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(_cachedEntity);
                 _pendingSave     = true;
                 _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
             });
-            _configPopup.Show(anchorRect, data);
+            _configPopup.Show(anchorRect, entry.Data);
         }
 
         // ── 挂载 Entity ──────────────────────────────────────────────────────

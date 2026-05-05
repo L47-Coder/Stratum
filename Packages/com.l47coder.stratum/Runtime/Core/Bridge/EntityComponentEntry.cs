@@ -7,14 +7,29 @@ namespace Stratum
     [Serializable]
     public sealed class EntityComponentEntry
     {
-        [Field(Title = "初始化")]
+        [Field(Title = "类型键", Readonly = true)]
+        public string EntryKey = string.Empty;
+
+        [Field(Title = "初始化")] //是否在预制体生成时加入，彻底绑定预制体，会在回池时多删少增
         public bool InitOnStart = true;
 
         [Field(Title = "组件类型", Dropdown = nameof(GetComponentTypeOptions))]
         public string ComponentType;
 
-        [Field(Title = "条目")]
-        public string EntryKey = "default";
+        public void RefreshEntryKey()
+        {
+            var key = "default";
+            if (Data != null)
+            {
+                var field = Data.GetType().GetField("Key",
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Public   |
+                    System.Reflection.BindingFlags.NonPublic);
+                var val = field?.GetValue(Data) as string;
+                if (!string.IsNullOrEmpty(val)) key = val;
+            }
+            EntryKey = string.IsNullOrEmpty(ComponentType) ? key : $"{ComponentType}_{key}";
+        }
 
         [SerializeReference]
         public BaseComponentData Data;
