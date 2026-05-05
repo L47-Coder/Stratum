@@ -80,7 +80,7 @@ namespace Stratum.Editor
 
     internal sealed class AddressableGroupPanel
     {
-        private readonly ListView _listView = new()
+        private readonly ListControl _listView = new()
         {
             CanReceiveDrop = true,
             CanDrag = true,
@@ -294,7 +294,7 @@ namespace Stratum.Editor
 
     internal sealed class AddressableEntryPanel
     {
-        private readonly TableView _tableView = new()
+        private readonly TableControl _tableView = new()
         {
             CanAdd = false,
             CanRemove = false,

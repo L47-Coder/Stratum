@@ -27,7 +27,7 @@ namespace Stratum.Editor
 
     internal sealed class ComponentLeftPanel
     {
-        private readonly TreeView _treeView = new();
+        private readonly TreeControl _treeView = new();
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -41,7 +41,7 @@ namespace Stratum.Editor
 
     internal sealed class ComponentRightPanel
     {
-        private readonly TextView _csTextView = new();
+        private readonly TextControl _csTextView = new();
         private string _currentPath;
 
         private string _cachedCsPath;
@@ -51,7 +51,7 @@ namespace Stratum.Editor
         private BaseComponentConfig _cachedAsset;
         private object _cachedList;
         private MethodInfo _cachedDrawMethod;
-        private TableView _tableView;
+        private TableControl _tableView;
 
         public void SetPath(string path) => _currentPath = path;
 
@@ -107,8 +107,8 @@ namespace Stratum.Editor
                     var elemType = _cachedAsset.ConfigItemType;
                     if (_cachedList != null && elemType != null)
                     {
-                        _tableView        = new TableView();
-                        _cachedDrawMethod = typeof(TableView).GetMethod(nameof(TableView.Draw))
+                        _tableView        = new TableControl();
+                        _cachedDrawMethod = typeof(TableControl).GetMethod(nameof(TableControl.Draw))
                             .MakeGenericMethod(elemType);
                     }
                 }

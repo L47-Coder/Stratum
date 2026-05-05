@@ -8,7 +8,7 @@ namespace Stratum.Editor
         public string GroupTitle => "Manager";
         public string TabTitle   => "Order";
 
-        private readonly TableView _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
+        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
         private ManagerOrderConfig _config;
 
         public void OnFirstEnter()

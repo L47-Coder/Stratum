@@ -8,7 +8,7 @@ namespace Stratum.Editor
         public string GroupTitle => "Component";
         public string TabTitle   => "Order";
 
-        private readonly TableView _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
+        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
         private ComponentOrderConfig _config;
 
         public void OnFirstEnter()

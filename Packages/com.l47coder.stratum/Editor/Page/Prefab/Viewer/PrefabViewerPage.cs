@@ -66,7 +66,7 @@ namespace Stratum.Editor
 
     internal sealed class PrefabViewerLeftPanel
     {
-        private readonly TreeView _treeView = new();
+        private readonly TreeControl _treeView = new();
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -133,8 +133,8 @@ namespace Stratum.Editor
         private string _addrGroup;
         private string _addrLabels;
 
-        private readonly TableView       _tableView    = new();
-        private readonly FieldViewPopup  _configPopup  = new();
+        private readonly TableControl _tableView   = new();
+        private readonly FieldPopup   _configPopup = new();
         private bool _tableSetup;
 
         private bool _pendingSave;
@@ -408,7 +408,7 @@ namespace Stratum.Editor
             var listProp  = so.FindProperty("Components");
             var dataProp  = listProp.GetArrayElementAtIndex(index).FindPropertyRelative("Data");
 
-            _configPopup.Show(anchorRect, data, onChanged: () =>
+            _configPopup.OnChanged(() =>
             {
                 so.Update();
                 dataProp.managedReferenceValue = data;
@@ -417,6 +417,7 @@ namespace Stratum.Editor
                 _pendingSave     = true;
                 _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
             });
+            _configPopup.Show(anchorRect, data);
         }
 
         // ── 挂载 Entity ──────────────────────────────────────────────────────
