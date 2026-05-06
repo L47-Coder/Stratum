@@ -194,7 +194,8 @@ namespace Stratum.Editor
             [Field(Title = "Key", Width = 160f)]
             public string Key = "new-row";
 
-            [Field(Title = "Name", Width = 200f, Dropdown = nameof(GetDisplayNameOptions))]
+            [Field(Title = "Name", Width = 200f)]
+            [Dropdown(nameof(GetDisplayNameOptions))]
             public string DisplayName = "Hero";
 
             [Field(Title = "On")]

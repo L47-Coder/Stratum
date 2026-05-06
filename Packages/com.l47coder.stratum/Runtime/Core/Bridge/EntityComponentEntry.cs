@@ -13,7 +13,8 @@ namespace Stratum
         [Field(Title = "生成时加入", Width = 70)]
         public bool InitOnStart = true;
 
-        [Field(Title = "组件类型", Dropdown = nameof(GetComponentTypeOptions), Width = 160)]
+        [Field(Title = "组件类型", Width = 160)]
+        [Dropdown(nameof(GetComponentTypeOptions))]
         public string ComponentType;
 
         public void RefreshEntryKey()

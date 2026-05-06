@@ -292,8 +292,9 @@ namespace Stratum.Editor
         [Field(Title = "AssetPath", Readonly = true, Width = 450)]
         public string AssetPath;
 
-        [Field(Title = "Labels", Width = 200, Dropdown = nameof(GetAllLabels))]
-        public List<string> Labels = new();
+        [Field(Title = "Labels", Width = 200)]
+        [Dropdown(nameof(GetAllLabels), Multi = true)]
+        public string Labels;
 
         [Field(Hide = true)]
         public string Guid;
@@ -356,7 +357,7 @@ namespace Stratum.Editor
                 {
                     Address = entry.address,
                     AssetPath = entry.AssetPath,
-                    Labels = entry.labels.ToList(),
+                    Labels = string.Join(", ", entry.labels),
                     Guid = entry.guid,
                 });
             }
@@ -386,7 +387,11 @@ namespace Stratum.Editor
                 dirty = true;
             }
 
-            var newLabels = new HashSet<string>(row.Labels, StringComparer.Ordinal);
+            var newLabels = (row.Labels ?? string.Empty)
+                .Split(',')
+                .Select(l => l.Trim())
+                .Where(l => l.Length > 0)
+                .ToHashSet(StringComparer.Ordinal);
 
             foreach (var l in entry.labels.Where(l => !newLabels.Contains(l)).ToList())
             {

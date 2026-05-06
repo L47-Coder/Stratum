@@ -183,9 +183,9 @@ namespace Stratum.Editor
 
                 // String + Dropdown：用 DropdownPopup 弹泡泡，回调写入草稿；
                 // 提交时机仍为 FieldPopup.OnClose() → Commit()，不直接触发 GUI.changed。
-                if (type == typeof(string) && def.DropdownMethodName != null)
+                if (type == typeof(string) && def.Dropdown != null)
                 {
-                    var opts = InvokeDropdownMethod(field, def.DropdownMethodName);
+                    var opts = InvokeDropdownMethod(field, def.Dropdown.Method);
                     var cur  = value as string ?? string.Empty;
                     if (opts is { Length: > 0 })
                     {
@@ -193,8 +193,13 @@ namespace Stratum.Editor
                         {
                             var captDraft = _draft;
                             var captField = field;
-                            DropdownPopup.Show(rect, opts, Array.IndexOf(opts, cur),
-                                idx => captDraft[captField] = opts[idx]);
+                            var popup = new DropdownPopup
+                            {
+                                Multi     = def.Dropdown.Multi,
+                                Separator = def.Dropdown.Separator,
+                            };
+                            popup.OnConfirmed(finalValue => captDraft[captField] = finalValue);
+                            popup.Show(rect, opts, cur);
                         }
                     }
                     else
@@ -306,7 +311,8 @@ namespace Stratum.Editor
                 var attr = field.GetCustomAttribute<FieldAttribute>(false);
                 if (attr != null && attr.Hide) return null;
                 var title = string.IsNullOrWhiteSpace(attr?.Title) ? ObjectNames.NicifyVariableName(field.Name) : attr.Title;
-                return new FieldDef(title, attr?.Readonly ?? false, field, attr?.Dropdown);
+                return new FieldDef(title, attr?.Readonly ?? false, field,
+                    field.GetCustomAttribute<DropdownAttribute>(false));
             }
 
             private static bool IsSerializedField(FieldInfo f) =>
@@ -342,14 +348,14 @@ namespace Stratum.Editor
             public readonly string Title;
             public readonly bool Readonly;
             public readonly FieldInfo Field;
-            public readonly string DropdownMethodName;
+            public readonly DropdownAttribute Dropdown;
 
-            public FieldDef(string title, bool @readonly, FieldInfo field, string dropdownMethodName)
+            public FieldDef(string title, bool @readonly, FieldInfo field, DropdownAttribute dropdown)
             {
                 Title = title;
                 Readonly = @readonly;
                 Field = field;
-                DropdownMethodName = dropdownMethodName;
+                Dropdown = dropdown;
             }
         }
     }

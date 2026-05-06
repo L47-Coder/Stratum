@@ -353,7 +353,7 @@ namespace Stratum.Editor
                 else
                 {
                     using (new EditorGUI.DisabledScope(_columns[i].Readonly || !CanRename || isDragFloating))
-                        DrawCellField(PaddedRect(cell), list, dataIndex, field, _columns[i].DropdownMethodName);
+                        DrawCellField(PaddedRect(cell), list, dataIndex, field, _columns[i].Dropdown);
                 }
                 cursorX = cell.xMax;
             }
@@ -390,7 +390,7 @@ namespace Stratum.Editor
             RequestGuiVisualRefresh();
         }
 
-        private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field, string dropdownMethodName)
+        private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field, DropdownAttribute dropdown)
         {
             if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
                 GUI.FocusControl(null);
@@ -409,10 +409,7 @@ namespace Stratum.Editor
                     GUI.changed = true;
                     _onRowRenamed?.Invoke(index);
                 }
-                if (dropdownMethodName != null)
-                    DrawMultiSelectStringListCell(rect, stringList, index, field, dropdownMethodName);
-                else
-                    DrawStringListCell(rect, stringList, index);
+                DrawStringListCell(rect, stringList, index);
                 return;
             }
 
@@ -445,27 +442,33 @@ namespace Stratum.Editor
 
             if (type == typeof(string))
             {
-                if (dropdownMethodName != null)
+                if (dropdown != null)
                 {
                     var cur = value as string ?? string.Empty;
                     var displayLabel = string.IsNullOrEmpty(cur) ? "(未选择)" : cur;
                     if (GUI.Button(rect, displayLabel, DropdownButtonStyle))
                     {
                         GUI.FocusControl(null);
-                        var options = InvokeDropdownMethod(field, dropdownMethodName);
+                        var options = InvokeDropdownMethod(field, dropdown.Method);
                         if (options is { Length: > 0 })
                         {
                             var capturedField = field;
                             var capturedList  = list;
                             var capturedIndex = index;
-                            DropdownPopup.Show(rect, options, Array.IndexOf(options, cur), idx =>
+                            var popup = new DropdownPopup
+                            {
+                                Multi     = dropdown.Multi,
+                                Separator = dropdown.Separator,
+                            };
+                            popup.OnConfirmed(finalValue =>
                             {
                                 var b = (object)capturedList[capturedIndex];
-                                capturedField.SetValue(b, options[idx]);
+                                capturedField.SetValue(b, finalValue);
                                 capturedList[capturedIndex] = (T)b;
                                 _pendingDirty = true;
                                 _onRowRenamed?.Invoke(capturedIndex);
                             });
+                            popup.Show(rect, options, cur);
                         }
                     }
                     // DropdownPopup 通过回调写值，不走 EndChangeCheck 流程

@@ -25,7 +25,8 @@ namespace Stratum.Editor
             [Field(Title = "速度")]
             public float Speed = 5.5f;
 
-            [Field(Title = "类别", Dropdown = nameof(GetCategories))]
+            [Field(Title = "类别")]
+            [Dropdown(nameof(GetCategories))]
             public string Category = "Player";
 
             [Field(Title = "颜色")]

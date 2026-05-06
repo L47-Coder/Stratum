@@ -20,8 +20,7 @@ MonoBehaviour:
   - m_GUID: 23eee4b2e7cefd647ad6787bbaa871ad
     m_Address: ComponentConfig/B
     m_ReadOnly: 0
-    m_SerializedLabels:
-    - default
+    m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8f6fdcedb6d26c14cb08ad20c88b3be3
     m_Address: ComponentConfig/A

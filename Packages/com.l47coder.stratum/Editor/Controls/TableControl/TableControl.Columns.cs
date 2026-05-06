@@ -18,7 +18,7 @@ namespace Stratum.Editor
             public readonly FieldInfo Field;
             public readonly float MinWidth;
             public readonly float InitialPreferredWidth;
-            public readonly string DropdownMethodName;
+            public readonly DropdownAttribute Dropdown;
 
             public ColumnDefinition(string title, string relPath, bool @readonly, FieldInfo field, float minWidth, float initialPreferredWidth)
             {
@@ -28,7 +28,7 @@ namespace Stratum.Editor
                 Field = field;
                 MinWidth = minWidth;
                 InitialPreferredWidth = initialPreferredWidth;
-                DropdownMethodName = field?.GetCustomAttribute<FieldAttribute>(false)?.Dropdown;
+                Dropdown = field?.GetCustomAttribute<DropdownAttribute>(false);
             }
         }
 

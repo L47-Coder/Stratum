@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,31 +16,42 @@ namespace Stratum.Editor
         private const float CheckmarkW = 22f;
         private const float TextPadL   = 6f;
 
-        private static void ShowCore(Rect anchorRect, string[] items, int selectedIndex, Action<int> onSelected)
+        private Action<string> _onConfirmed;
+
+        private void ShowCore(Rect anchorRect, string[] items, string current)
         {
             if (items == null || items.Length == 0) return;
-            PopupWindow.Show(anchorRect,
-                new Content(items, selectedIndex, onSelected, Mathf.Max(anchorRect.width, MinW)));
+            var width = Mathf.Max(anchorRect.width, MinW);
+            PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, width, _onConfirmed));
         }
 
         // ─────────────────────────────────────────────────────────────────────────
 
         private sealed class Content : PopupWindowContent
         {
-            private readonly string[]    _items;
-            private readonly int         _selectedIndex;
-            private readonly Action<int> _onSelected;
-            private readonly float       _width;
+            private readonly string[]       _items;
+            private readonly bool           _multi;
+            private readonly string         _separator;
+            private readonly float          _width;
+            private readonly Action<string> _onConfirmed;
+            private readonly HashSet<string> _selected;
+            private readonly string         _initialValue;
 
             private Vector2 _scroll;
             private int     _hoverIndex = -1;
+            private bool    _changed;
+            private bool    _confirmedSingle;
+            private string  _confirmedSingleValue;
 
-            internal Content(string[] items, int selectedIndex, Action<int> onSelected, float width)
+            internal Content(string[] items, string current, bool multi, string separator, float width, Action<string> onConfirmed)
             {
-                _items         = items;
-                _selectedIndex = selectedIndex;
-                _onSelected    = onSelected;
-                _width         = width;
+                _items        = items;
+                _multi        = multi;
+                _separator    = string.IsNullOrEmpty(separator) ? ", " : separator;
+                _width        = width;
+                _onConfirmed  = onConfirmed;
+                _initialValue = current ?? string.Empty;
+                _selected     = ParseSelected(current, _separator, multi);
             }
 
             public override Vector2 GetWindowSize() =>
@@ -46,9 +59,7 @@ namespace Stratum.Editor
 
             public override void OnGUI(Rect rect)
             {
-                var inner = new Rect(rect.x, rect.y + PaddingV,
-                    rect.width, rect.height - PaddingV * 2f);
-
+                var inner      = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
                 var contentH   = _items.Length * RowH;
                 var needScroll = contentH > inner.height + 0.5f;
                 var viewW      = needScroll ? inner.width - ScrollbarW : inner.width;
@@ -75,41 +86,74 @@ namespace Stratum.Editor
                 GUI.EndScrollView();
             }
 
+            // 关闭弹窗时一次性提交：单选时用刚选中的值；多选时用当前 _selected 拼接结果。
+            // 未选中任何项的关闭（例如点击 popup 外）也会触发——传回原值，调用方据此判断是否变化。
+            public override void OnClose()
+            {
+                if (_onConfirmed == null) return;
+                if (_multi)
+                {
+                    if (!_changed) return;
+                    var ordered = _items.Where(_selected.Contains).ToArray();
+                    _onConfirmed.Invoke(string.Join(_separator, ordered));
+                    return;
+                }
+                if (_confirmedSingle && _confirmedSingleValue != _initialValue)
+                    _onConfirmed.Invoke(_confirmedSingleValue);
+            }
+
             private void DrawRow(Rect rowRect, int index)
             {
-                var isSelected = index == _selectedIndex;
+                var item       = _items[index];
+                var isSelected = _multi ? _selected.Contains(item) : item == _initialValue;
                 var isHover    = index == _hoverIndex;
                 var e          = Event.current;
 
                 if (e.type == EventType.Repaint)
                 {
-                    if (isSelected)
-                        EditorGUI.DrawRect(rowRect, SelectedBg);
-                    else if (isHover)
-                        EditorGUI.DrawRect(rowRect, HoverBg);
+                    if (isSelected) EditorGUI.DrawRect(rowRect, SelectedBg);
+                    else if (isHover) EditorGUI.DrawRect(rowRect, HoverBg);
 
-                    var textRect = new Rect(
-                        rowRect.x + TextPadL, rowRect.y,
+                    var textRect = new Rect(rowRect.x + TextPadL, rowRect.y,
                         rowRect.width - TextPadL - CheckmarkW, rowRect.height);
-                    GUI.Label(textRect, _items[index],
-                        isSelected ? SelectedRowStyle : NormalRowStyle);
+                    GUI.Label(textRect, item, isSelected ? SelectedRowStyle : NormalRowStyle);
 
                     if (isSelected)
-                        GUI.Label(
-                            new Rect(rowRect.xMax - CheckmarkW, rowRect.y, CheckmarkW, rowRect.height),
+                        GUI.Label(new Rect(rowRect.xMax - CheckmarkW, rowRect.y, CheckmarkW, rowRect.height),
                             "✓", CheckmarkStyle);
                 }
 
                 EditorGUIUtility.AddCursorRect(rowRect, MouseCursor.Link);
 
-                if (e.type == EventType.MouseDown && e.button == 0
-                    && rowRect.Contains(e.mousePosition))
+                if (e.type == EventType.MouseDown && e.button == 0 && rowRect.Contains(e.mousePosition))
                 {
                     GUI.FocusControl(null);
                     e.Use();
-                    _onSelected?.Invoke(index);
-                    editorWindow?.Close();
+                    if (_multi)
+                    {
+                        if (!_selected.Add(item)) _selected.Remove(item);
+                        _changed = true;
+                        editorWindow?.Repaint();
+                    }
+                    else
+                    {
+                        _confirmedSingle      = true;
+                        _confirmedSingleValue = item;
+                        editorWindow?.Close();
+                    }
                 }
+            }
+
+            private static HashSet<string> ParseSelected(string current, string separator, bool multi)
+            {
+                var set = new HashSet<string>(StringComparer.Ordinal);
+                if (string.IsNullOrEmpty(current) || !multi) return set;
+                foreach (var s in current.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var t = s.Trim();
+                    if (t.Length > 0) set.Add(t);
+                }
+                return set;
             }
         }
 

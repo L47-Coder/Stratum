@@ -5,7 +5,7 @@ public sealed partial class BComponentData
     [Field(Title = "KKKKK")]
     public string Key;
 
-    [Field(Dropdown = nameof(Get))]
+    [Dropdown(nameof(Get))]
     public string a;
 
     public static string[] Get()
