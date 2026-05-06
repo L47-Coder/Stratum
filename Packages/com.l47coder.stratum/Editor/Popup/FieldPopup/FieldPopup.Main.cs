@@ -181,6 +181,27 @@ namespace Stratum.Editor
                     return;
                 }
 
+                // String + Dropdown：用 DropdownPopup 弹泡泡，回调写入草稿；
+                // 提交时机仍为 FieldPopup.OnClose() → Commit()，不直接触发 GUI.changed。
+                if (type == typeof(string) && def.DropdownMethodName != null)
+                {
+                    var opts = InvokeDropdownMethod(field, def.DropdownMethodName);
+                    var cur  = value as string ?? string.Empty;
+                    if (opts is { Length: > 0 })
+                    {
+                        if (GUI.Button(rect, string.IsNullOrEmpty(cur) ? "(未选择)" : cur, DropdownButtonStyle))
+                        {
+                            var captDraft = _draft;
+                            var captField = field;
+                            DropdownPopup.Show(rect, opts, Array.IndexOf(opts, cur),
+                                idx => captDraft[captField] = opts[idx]);
+                        }
+                    }
+                    else
+                        EditorGUI.LabelField(rect, cur, ReadonlyValueStyle);
+                    return;
+                }
+
                 var supported =
                     type == typeof(string) || type == typeof(int) || type == typeof(float) ||
                     type == typeof(bool) || type.IsEnum ||
@@ -198,17 +219,7 @@ namespace Stratum.Editor
 
                 if (type == typeof(string))
                 {
-                    if (def.DropdownMethodName != null)
-                    {
-                        var opts = InvokeDropdownMethod(field, def.DropdownMethodName);
-                        if (opts is { Length: > 0 })
-                        {
-                            var cur = value as string ?? string.Empty;
-                            newValue = opts[EditorGUI.Popup(rect, Mathf.Max(0, Array.IndexOf(opts, cur)), opts)];
-                        }
-                        else newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
-                    }
-                    else newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
+                    newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
                 }
                 else if (type == typeof(int)) newValue = EditorGUI.IntField(rect, value is int iv ? iv : 0);
                 else if (type == typeof(float)) newValue = EditorGUI.FloatField(rect, value is float fv ? fv : 0f);
@@ -308,6 +319,14 @@ namespace Stratum.Editor
                 type.IsGenericType &&
                 type.GetGenericTypeDefinition() == typeof(List<>) &&
                 type.GetGenericArguments()[0] == typeof(string);
+
+            private static GUIStyle _dropdownButtonStyle;
+            private static GUIStyle DropdownButtonStyle =>
+                _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
+                {
+                    alignment = TextAnchor.MiddleLeft,
+                    clipping  = TextClipping.Clip,
+                };
 
             private static GUIStyle _labelStyle;
             private static GUIStyle LabelStyle => _labelStyle ??= new GUIStyle(EditorStyles.miniLabel)

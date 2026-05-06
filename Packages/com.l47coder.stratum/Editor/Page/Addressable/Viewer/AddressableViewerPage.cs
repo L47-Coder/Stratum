@@ -292,11 +292,15 @@ namespace Stratum.Editor
         [Field(Title = "AssetPath", Readonly = true, Width = 450)]
         public string AssetPath;
 
-        [Field(Title = "Labels")]
-        public string Labels;
+        [Field(Title = "Labels", Width = 200, Dropdown = nameof(GetAllLabels))]
+        public List<string> Labels = new();
 
         [Field(Hide = true)]
         public string Guid;
+
+        private static string[] GetAllLabels() =>
+            AddressableAssetSettingsDefaultObject.Settings?.GetLabels()?.ToArray()
+            ?? Array.Empty<string>();
     }
 
     internal sealed class AddressableEntryPanel
@@ -352,7 +356,7 @@ namespace Stratum.Editor
                 {
                     Address = entry.address,
                     AssetPath = entry.AssetPath,
-                    Labels = string.Join(", ", entry.labels),
+                    Labels = entry.labels.ToList(),
                     Guid = entry.guid,
                 });
             }
@@ -382,11 +386,7 @@ namespace Stratum.Editor
                 dirty = true;
             }
 
-            var newLabels = row.Labels
-                .Split(',')
-                .Select(l => l.Trim())
-                .Where(l => l.Length > 0)
-                .ToHashSet(StringComparer.Ordinal);
+            var newLabels = new HashSet<string>(row.Labels, StringComparer.Ordinal);
 
             foreach (var l in entry.labels.Where(l => !newLabels.Contains(l)).ToList())
             {

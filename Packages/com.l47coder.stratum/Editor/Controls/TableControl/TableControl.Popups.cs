@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,6 +26,32 @@ namespace Stratum.Editor
             PopupWindow.Show(rect, new StringListPopup(listValue, () => { _pendingDirty = true; _onRowRenamed?.Invoke(rowIndex); }));
         }
 
+        // ── 多选下拉（List<string> + Dropdown 方法）────────────────────────────────
+
+        private void DrawMultiSelectStringListCell(Rect rect, List<string> listValue, int rowIndex, FieldInfo field, string dropdownMethodName)
+        {
+            var summary = listValue.Count == 0 ? "(none)" : string.Join(", ", listValue);
+            if (!GUI.Button(rect, summary, StringListSummaryStyle)) return;
+            GUI.FocusControl(null);
+            var options = InvokeDropdownMethodFresh(field, dropdownMethodName);
+            PopupWindow.Show(rect, new StringMultiSelectPopup(options, listValue,
+                () => { _pendingDirty = true; _onRowRenamed?.Invoke(rowIndex); }));
+        }
+
+        private static string[] InvokeDropdownMethodFresh(FieldInfo field, string methodName)
+        {
+            var method = field.DeclaringType?.GetMethod(
+                methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (method == null) return Array.Empty<string>();
+            return method.Invoke(null, null) switch
+            {
+                string[] arr => arr,
+                List<string> lst => lst.ToArray(),
+                IEnumerable<string> e => e.ToArray(),
+                _ => Array.Empty<string>(),
+            };
+        }
+
         private static GUIStyle _stringListSummaryStyle;
         private static GUIStyle StringListSummaryStyle =>
             _stringListSummaryStyle ??= new GUIStyle(EditorStyles.textField)
@@ -32,6 +60,85 @@ namespace Stratum.Editor
                 clipping = TextClipping.Clip,
                 padding = new RectOffset(4, 4, 0, 0),
             };
+
+        private sealed class StringMultiSelectPopup : PopupWindowContent
+        {
+            private const float RowH = 22f;
+            private const float RowGap = 1f;
+            private const float Padding = 8f;
+            private const float ScrollbarW = 14f;
+            private const float BodyMaxH = 280f;
+            private const float WindowW = 260f;
+            private const float HeaderH = 20f;
+            private const float HeaderToBodyGap = 4f;
+
+            private readonly string[] _options;
+            private readonly List<string> _selected;
+            private readonly Action _onChanged;
+            private Vector2 _scroll;
+
+            public StringMultiSelectPopup(string[] options, List<string> selected, Action onChanged)
+            {
+                _options = options ?? Array.Empty<string>();
+                _selected = selected;
+                _onChanged = onChanged;
+            }
+
+            public override Vector2 GetWindowSize()
+            {
+                var bodyH = _options.Length == 0
+                    ? RowH
+                    : Mathf.Min(_options.Length * (RowH + RowGap), BodyMaxH);
+                return new Vector2(WindowW, Padding * 2f + HeaderH + HeaderToBodyGap + bodyH);
+            }
+
+            public override void OnGUI(Rect rect)
+            {
+                var inner = new Rect(rect.x + Padding, rect.y + Padding,
+                    rect.width - Padding * 2f, rect.height - Padding * 2f);
+
+                var headerLabel = _selected.Count == 0
+                    ? $"Labels  ({_options.Length})"
+                    : $"Labels  —  {_selected.Count} selected";
+                EditorGUI.LabelField(new Rect(inner.x, inner.y, inner.width, HeaderH),
+                    headerLabel, EditorStyles.miniBoldLabel);
+
+                var bodyRect = new Rect(inner.x, inner.y + HeaderH + HeaderToBodyGap,
+                    inner.width, inner.height - HeaderH - HeaderToBodyGap);
+
+                if (_options.Length == 0)
+                {
+                    EditorGUI.LabelField(bodyRect, "No labels defined",
+                        EditorStyles.centeredGreyMiniLabel);
+                    return;
+                }
+
+                var contentH = _options.Length * (RowH + RowGap);
+                var needScroll = contentH > bodyRect.height + 0.5f;
+                var viewW = needScroll ? bodyRect.width - ScrollbarW : bodyRect.width;
+
+                _scroll = GUI.BeginScrollView(bodyRect, _scroll,
+                    new Rect(0f, 0f, viewW, Mathf.Max(contentH, bodyRect.height)));
+
+                for (var i = 0; i < _options.Length; i++)
+                {
+                    var opt = _options[i];
+                    var rowRect = new Rect(0f, i * (RowH + RowGap), viewW, RowH);
+                    var isSel = _selected.Contains(opt);
+                    EditorGUI.BeginChangeCheck();
+                    var next = EditorGUI.ToggleLeft(rowRect, opt, isSel);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        if (next && !isSel) _selected.Add(opt);
+                        else if (!next) _selected.Remove(opt);
+                        _onChanged?.Invoke();
+                        editorWindow?.Repaint();
+                    }
+                }
+
+                GUI.EndScrollView();
+            }
+        }
 
         private sealed class StringListPopup : PopupWindowContent
         {

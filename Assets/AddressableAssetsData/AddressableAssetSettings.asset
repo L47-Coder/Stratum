@@ -91,6 +91,8 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - New Label
+    - New Label1
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: f2cae52c6cc6fe549b772ef8bbecd85d, type: 2}

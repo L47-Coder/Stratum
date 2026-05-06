@@ -409,7 +409,10 @@ namespace Stratum.Editor
                     GUI.changed = true;
                     _onRowRenamed?.Invoke(index);
                 }
-                DrawStringListCell(rect, stringList, index);
+                if (dropdownMethodName != null)
+                    DrawMultiSelectStringListCell(rect, stringList, index, field, dropdownMethodName);
+                else
+                    DrawStringListCell(rect, stringList, index);
                 return;
             }
 
@@ -449,30 +452,23 @@ namespace Stratum.Editor
                     if (GUI.Button(rect, displayLabel, DropdownButtonStyle))
                     {
                         GUI.FocusControl(null);
-                        // 仅在点击时才做一次反射，之后命中缓存
                         var options = InvokeDropdownMethod(field, dropdownMethodName);
                         if (options is { Length: > 0 })
                         {
                             var capturedField = field;
                             var capturedList  = list;
                             var capturedIndex = index;
-                            var menu = new GenericMenu();
-                            foreach (var opt in options)
+                            DropdownPopup.Show(rect, options, Array.IndexOf(options, cur), idx =>
                             {
-                                var o = opt;
-                                menu.AddItem(new GUIContent(o), o == cur, () =>
-                                {
-                                    var b = (object)capturedList[capturedIndex];
-                                    capturedField.SetValue(b, o);
-                                    capturedList[capturedIndex] = (T)b;
-                                    _pendingDirty = true;
-                                    _onRowRenamed?.Invoke(capturedIndex);
-                                });
-                            }
-                            menu.DropDown(rect);
+                                var b = (object)capturedList[capturedIndex];
+                                capturedField.SetValue(b, options[idx]);
+                                capturedList[capturedIndex] = (T)b;
+                                _pendingDirty = true;
+                                _onRowRenamed?.Invoke(capturedIndex);
+                            });
                         }
                     }
-                    // GenericMenu 通过回调写值，不走 EndChangeCheck 流程
+                    // DropdownPopup 通过回调写值，不走 EndChangeCheck 流程
                     newValue = cur;
                 }
                 else
