@@ -90,8 +90,6 @@ namespace Stratum.Editor
         private const float TitleRowH = 18f;
         private const float PreviewSize = 64f;
 
-        private const double SaveDelay = 0.5;
-
         private static GUIStyle _keyLabelStyle;
         private static GUIStyle _hintLabelStyle;
         private static GUIStyle _addrHintStyle;
@@ -136,9 +134,6 @@ namespace Stratum.Editor
         private readonly TableControl _tableView   = new();
         private readonly FieldPopup   _configPopup = new();
         private bool _tableSetup;
-
-        private bool _pendingSave;
-        private double _saveScheduledAt;
 
         // ── Public API ───────────────────────────────────────────────────────
 
@@ -195,7 +190,6 @@ namespace Stratum.Editor
             _cachedPreview = null;
             _cachedEntity = _cachedPrefab != null ? _cachedPrefab.GetComponent<Entity>() : null;
             _cachedSo = _cachedEntity != null ? new SerializedObject(_cachedEntity) : null;
-            _pendingSave = false;
 
             RefreshAddressableInfo();
         }
@@ -224,13 +218,6 @@ namespace Stratum.Editor
 
         private void DrawPanel(Rect rect)
         {
-            if (_pendingSave && Event.current.type == EventType.Repaint &&
-                EditorApplication.timeSinceStartup >= _saveScheduledAt)
-            {
-                _pendingSave = false;
-                AssetDatabase.SaveAssets();
-            }
-
             var addrHeaderH = CalcAddressHeaderHeight();
 
             var x = rect.x;
@@ -336,8 +323,7 @@ namespace Stratum.Editor
             {
                 SyncComponentDataTypes();
                 EditorUtility.SetDirty(_cachedEntity);
-                _pendingSave = true;
-                _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
+                if (_cachedPrefab != null) PrefabUtility.SavePrefabAsset(_cachedPrefab);
             }
         }
 
@@ -404,16 +390,12 @@ namespace Stratum.Editor
             var entry = _cachedEntity.Components[index];
             if (entry.Data == null) return;
 
-            var so = _cachedSo;
-
-            _configPopup.OnChanged(() =>
+            _configPopup.OnClosed(() =>
             {
                 entry.RefreshEntryKey();
-                so.Update();
-                so.ApplyModifiedProperties();
                 EditorUtility.SetDirty(_cachedEntity);
-                _pendingSave     = true;
-                _saveScheduledAt = EditorApplication.timeSinceStartup + SaveDelay;
+                if (_cachedPrefab != null) PrefabUtility.SavePrefabAsset(_cachedPrefab);
+                DevWindow.Refresh();
             });
             _configPopup.Show(anchorRect, entry.Data);
         }

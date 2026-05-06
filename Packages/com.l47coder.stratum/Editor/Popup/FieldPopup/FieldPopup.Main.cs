@@ -41,9 +41,14 @@ namespace Stratum.Editor
             public override void OnGUI(Rect rect)
             {
                 var inner = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
-                EditorGUI.BeginChangeCheck();
                 _renderer.DrawRows(inner);
-                if (EditorGUI.EndChangeCheck())
+            }
+
+            // Popup 关闭时一次性把草稿合并回原对象。提交时机完全确定，
+            // 不依赖 IMGUI 的失焦/重绘时机。
+            public override void OnClose()
+            {
+                if (_renderer.Commit())
                     _onChanged?.Invoke();
             }
         }
@@ -67,14 +72,49 @@ namespace Stratum.Editor
             private Vector2 _scrollPos;
             private object _lastItem;
 
+            // 草稿层：值类型/string/UnityObject/Enum 等"应当延迟提交"的字段在编辑期
+            // 只写入 _draft，关闭 Popup 时再合并回 _lastItem。绕开 IMGUI 全局
+            // RecycledTextEditor 的失焦/重绘时机不可控问题。
+            private Dictionary<FieldInfo, object> _draft;
+
             internal int Prepare<T>(T item)
             {
-                if (item == null) { _lastItem = null; return 0; }
+                if (item == null) { _lastItem = null; _draft = null; return 0; }
                 _lastItem = item;
                 var t = item.GetType();
                 if (_cachedType != t) { _cachedType = t; _fieldDefs = null; }
                 _fieldDefs ??= BuildFieldDefs(t);
+
+                _draft = new Dictionary<FieldInfo, object>(_fieldDefs.Count);
+                foreach (var def in _fieldDefs)
+                    if (IsDraftManaged(def.Field.FieldType))
+                        _draft[def.Field] = def.Field.GetValue(item);
+
                 return _fieldDefs.Count;
+            }
+
+            // 把草稿一次性合并回 _lastItem。返回是否实际有任何字段发生变化。
+            internal bool Commit()
+            {
+                if (_lastItem == null || _draft == null) return false;
+                var any = false;
+                foreach (var kv in _draft)
+                {
+                    var orig = kv.Key.GetValue(_lastItem);
+                    if (Equals(orig, kv.Value)) continue;
+                    kv.Key.SetValue(_lastItem, kv.Value);
+                    any = true;
+                }
+                return any;
+            }
+
+            // 引用类型 + 用户自管编辑（AnimationCurve/Gradient/StringList）保持 in-place，
+            // 它们没有"延迟提交"问题，也不希望走草稿（草稿要做深拷贝才安全）。
+            private static bool IsDraftManaged(Type t)
+            {
+                if (IsStringList(t)) return false;
+                if (t == typeof(AnimationCurve) || t == typeof(Gradient)) return false;
+                return true;
             }
 
             internal float ContentHeight() =>
@@ -125,11 +165,13 @@ namespace Stratum.Editor
                     DrawFieldControl(controlRect, ref boxed, def);
             }
 
-            private static void DrawFieldControl(Rect rect, ref object boxed, FieldDef def)
+            private void DrawFieldControl(Rect rect, ref object boxed, FieldDef def)
             {
                 var field = def.Field;
-                var value = field.GetValue(boxed);
                 var type = field.FieldType;
+                var managed = IsDraftManaged(type);
+                // 草稿管理字段从 _draft 读取当前编辑值；其余引用类型从原对象读。
+                var value = managed ? _draft[field] : field.GetValue(boxed);
 
                 if (IsStringList(type))
                 {
@@ -164,12 +206,12 @@ namespace Stratum.Editor
                             var cur = value as string ?? string.Empty;
                             newValue = opts[EditorGUI.Popup(rect, Mathf.Max(0, Array.IndexOf(opts, cur)), opts)];
                         }
-                        else newValue = EditorGUI.DelayedTextField(rect, value as string ?? string.Empty);
+                        else newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
                     }
-                    else newValue = EditorGUI.DelayedTextField(rect, value as string ?? string.Empty);
+                    else newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
                 }
-                else if (type == typeof(int)) newValue = EditorGUI.DelayedIntField(rect, value is int iv ? iv : 0);
-                else if (type == typeof(float)) newValue = EditorGUI.DelayedFloatField(rect, value is float fv ? fv : 0f);
+                else if (type == typeof(int)) newValue = EditorGUI.IntField(rect, value is int iv ? iv : 0);
+                else if (type == typeof(float)) newValue = EditorGUI.FloatField(rect, value is float fv ? fv : 0f);
                 else if (type == typeof(bool)) newValue = DrawToggle(rect, value is bool bv && bv);
                 else if (type.IsEnum) newValue = EditorGUI.EnumPopup(rect, (Enum)value);
                 else if (type == typeof(AnimationCurve)) newValue = EditorGUI.CurveField(rect, value as AnimationCurve ?? new AnimationCurve());
@@ -193,7 +235,10 @@ namespace Stratum.Editor
                 }
                 else newValue = EditorGUI.ObjectField(rect, value as UnityEngine.Object, type, true);
 
-                if (EditorGUI.EndChangeCheck()) { field.SetValue(boxed, newValue); GUI.changed = true; }
+                if (!EditorGUI.EndChangeCheck()) return;
+                if (managed) _draft[field] = newValue;
+                else field.SetValue(boxed, newValue);
+                GUI.changed = true;
             }
 
             private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);

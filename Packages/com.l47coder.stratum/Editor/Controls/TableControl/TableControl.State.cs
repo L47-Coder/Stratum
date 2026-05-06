@@ -135,7 +135,8 @@ namespace Stratum.Editor
 
         private static void RequestGuiVisualRefresh()
         {
-            GUI.changed = true;
+            // 仅请求重绘（hover 高亮/拖拽视觉等），不污染 GUI.changed —— 后者只用于
+            // 表达“控件值真的变了”，否则外层（如 PrefabViewer）会把 hover 误判为数据变化。
             (EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow)?.Repaint();
         }
 

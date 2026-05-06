@@ -392,6 +392,9 @@ namespace Stratum.Editor
 
         private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field, string dropdownMethodName)
         {
+            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
+                GUI.FocusControl(null);
+
             var boxed = (object)list[index];
             var value = field.GetValue(boxed);
             var type = field.FieldType;
@@ -563,24 +566,57 @@ namespace Stratum.Editor
             return current;
         }
 
-        private static GUIStyle _expandButtonStyle;
-        private static GUIStyle ExpandButtonStyle =>
-            _expandButtonStyle ??= new GUIStyle(EditorStyles.miniButton)
+        private static GUIStyle _expandableLabelStyle;
+        private static GUIStyle ExpandableLabelStyle =>
+            _expandableLabelStyle ??= new GUIStyle(EditorStyles.label)
             {
-                alignment  = TextAnchor.MiddleLeft,
-                clipping   = TextClipping.Clip,
-                padding    = new RectOffset(4, 4, 0, 0),
+                alignment = TextAnchor.MiddleLeft,
+                padding = new RectOffset(4, 4, 0, 0),
             };
 
         private void DrawExpandableCell(Rect rect, object value, int rowIndex, string fieldName)
         {
-            var label = value == null ? "(null)" : value.GetType().Name;
-            if (GUI.Button(rect, label, ExpandButtonStyle))
+            var typeName = value == null ? "(null)" : value.GetType().Name;
+            var e = Event.current;
+            var isHover = rect.Contains(e.mousePosition);
+
+            // 鼠标变成手型，强化“可点击链接”的心理预期
+            EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
+
+            if (e.type == EventType.Repaint)
+            {
+                // 悬停时的微弱背景
+                if (isHover)
+                {
+                    EditorGUI.DrawRect(rect, EditorGUIUtility.isProSkin
+                        ? new Color(1f, 1f, 1f, 0.05f)
+                        : new Color(0f, 0f, 0f, 0.05f));
+                }
+
+                // 链接文本颜色
+                var linkColor = EditorGUIUtility.isProSkin
+                    ? new Color(0.35f, 0.65f, 1f, 1f)
+                    : new Color(0.1f, 0.4f, 0.8f, 1f);
+
+                var oldColor = GUI.contentColor;
+                GUI.contentColor = linkColor;
+
+                // 绘制文本
+                GUI.Label(rect, typeName, ExpandableLabelStyle);
+
+                GUI.contentColor = oldColor;
+            }
+
+            if (e.type == EventType.MouseDown && e.button == 0 && isHover)
             {
                 GUI.FocusControl(null);
+                e.Use();
                 _onExpandField?.Invoke(rowIndex, fieldName);
                 _onExpandFieldAt?.Invoke(rowIndex, fieldName, rect);
             }
+
+            if (isHover && e.type == EventType.MouseMove)
+                RequestGuiVisualRefresh();
         }
 
         private static string[] InvokeDropdownMethod(FieldInfo field, string methodName)

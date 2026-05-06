@@ -83,7 +83,7 @@ namespace Stratum.Editor
             var editBtnRect = new Rect(x, y, BtnW, BtnH);
             if (GUI.Button(editBtnRect, "打开可编辑面板"))
             {
-                _popup.OnChanged(Repaint);
+                _popup.OnClosed(Repaint);
                 _popup.Show(editBtnRect, _sample);
             }
             y += BtnH + Gap;

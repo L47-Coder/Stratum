@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: BComponentConfig
   m_EditorClassIdentifier: 
   _configs:
-  - Key: default
+  - Key: 20
     a: 222
-  - Key: 
+  - Key: 10
     a: 222
-  - Key: 
-    a: 
+  - Key: 30
+    a: 222

@@ -7,13 +7,13 @@ namespace Stratum
     [Serializable]
     public sealed class EntityComponentEntry
     {
-        [Field(Title = "类型键", Readonly = true)]
+        [Field(Title = "类型键", Readonly = true, Width = 200)]
         public string EntryKey = string.Empty;
 
-        [Field(Title = "初始化")] //是否在预制体生成时加入，彻底绑定预制体，会在回池时多删少增
+        [Field(Title = "生成时加入", Width = 80)]
         public bool InitOnStart = true;
 
-        [Field(Title = "组件类型", Dropdown = nameof(GetComponentTypeOptions))]
+        [Field(Title = "组件类型", Dropdown = nameof(GetComponentTypeOptions), Width = 200)]
         public string ComponentType;
 
         public void RefreshEntryKey()
