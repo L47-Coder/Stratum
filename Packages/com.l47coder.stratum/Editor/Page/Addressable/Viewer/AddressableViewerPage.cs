@@ -286,10 +286,17 @@ namespace Stratum.Editor
 
     internal sealed class AddressableEntryRow
     {
-        [Field(Title = "Address")] public string Address;
-        [Field(Title = "AssetPath", Readonly = true)] public string AssetPath;
-        [Field(Title = "Labels")] public string Labels;
-        [Field(Hide = true)] public string Guid;
+        [Field(Title = "Address", Width = 300)]
+        public string Address;
+
+        [Field(Title = "AssetPath", Readonly = true, Width = 450)]
+        public string AssetPath;
+
+        [Field(Title = "Labels")]
+        public string Labels;
+
+        [Field(Hide = true)]
+        public string Guid;
     }
 
     internal sealed class AddressableEntryPanel

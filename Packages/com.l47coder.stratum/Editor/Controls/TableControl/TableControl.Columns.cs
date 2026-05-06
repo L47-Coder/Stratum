@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Stratum;
 using UnityEditor;
 using UnityEngine;
 
@@ -82,6 +83,7 @@ namespace Stratum.Editor
             if (type == typeof(Vector2) || type == typeof(Vector2Int)) return 140f;
             if (type == typeof(Vector3) || type == typeof(Vector3Int) || type == typeof(Quaternion)) return 210f;
             if (type == typeof(Vector4)) return 280f;
+            if (typeof(IFieldExpandable).IsAssignableFrom(type)) return FieldExpandableMinWidth;
             if (typeof(UnityEngine.Object).IsAssignableFrom(type)) return 140f;
             return DefaultFallbackMinWidth;
         }

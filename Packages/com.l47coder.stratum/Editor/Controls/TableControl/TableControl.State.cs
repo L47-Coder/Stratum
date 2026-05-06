@@ -13,6 +13,7 @@ namespace Stratum.Editor
         private const float CellPadding = 4f;
         private const float GridThickness = 1f;
         private const float DefaultFallbackMinWidth = 80f;
+        private const float FieldExpandableMinWidth = 180f;
 
         private const float RowMoveSmoothTime = 0.1f;
         private const float GapMoveSmoothTime = 0.09f;
@@ -61,9 +62,8 @@ namespace Stratum.Editor
         private Action<int> _onRowRemoved;
         private Action<int, int> _onRowMoved;
         private Action<int> _onButtonClicked;
-        // (rowIndex, fieldName) — 某行某个 IFieldExpandable 字段的展开按钮被点击
-        private Action<int, string> _onExpandField;
-        // (rowIndex, fieldName, anchorRect) — 同上，附带按钮屏幕 Rect，供 PopupWindow.Show 定位
+        // (rowIndex, fieldName, anchorRect) — 某行某个 IFieldExpandable 字段的展开按钮被点击，
+        // anchorRect 供 PopupWindow.Show 定位
         private Action<int, string, Rect> _onExpandFieldAt;
 
         private struct TableLayout

@@ -317,9 +317,9 @@ namespace Stratum.Editor
             EnsureTableSetup();
 
             var tableRect = new Rect(x, y, w, yMax - y);
+            EditorGUI.BeginChangeCheck();
             _tableView.Draw(tableRect, _cachedEntity.Components);
-
-            if (GUI.changed)
+            if (EditorGUI.EndChangeCheck())
             {
                 SyncComponentDataTypes();
                 EditorUtility.SetDirty(_cachedEntity);

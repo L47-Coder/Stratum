@@ -413,7 +413,7 @@ namespace Stratum.Editor
                 return;
             }
 
-            // IFieldExpandable：渲染展开按钮，点击触发 OnExpandField 回调
+            // IFieldExpandable：渲染展开按钮，点击触发 OnExpandFieldAt 回调
             if (typeof(IFieldExpandable).IsAssignableFrom(type))
             {
                 DrawExpandableCell(rect, value, index, field.Name);
@@ -611,7 +611,6 @@ namespace Stratum.Editor
             {
                 GUI.FocusControl(null);
                 e.Use();
-                _onExpandField?.Invoke(rowIndex, fieldName);
                 _onExpandFieldAt?.Invoke(rowIndex, fieldName, rect);
             }
 
