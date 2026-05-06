@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 
@@ -34,8 +33,6 @@ namespace Stratum.Editor
         private static GUIStyle _headerCellLabelStyleCache;
         private static GUIStyle _bodyIndexLabelStyleCache;
 
-        private static readonly Dictionary<FieldInfo, string[]> _dropdownOptionsCache = new();
-
         private static bool _rowIndexUpdateHooked;
 
         private bool _rowIndexInteractDown;
@@ -62,7 +59,7 @@ namespace Stratum.Editor
         private Action<int> _onRowRemoved;
         private Action<int, int> _onRowMoved;
         private Action<int> _onButtonClicked;
-        // (rowIndex, fieldName, anchorRect) — 某行某个 IFieldExpandable 字段的展开按钮被点击，
+        // (rowIndex, fieldName, anchorRect) — 某行带 [Expandable] 字段的展开按钮被点击，
         // anchorRect 供 PopupWindow.Show 定位
         private Action<int, string, Rect> _onExpandFieldAt;
 

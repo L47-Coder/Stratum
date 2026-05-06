@@ -14,7 +14,7 @@ namespace Stratum
         internal Dictionary<string, BaseComponentData> ExportComponentDataDict() => GetComponentDataDict();
     }
 
-    public abstract class BaseComponentData : IFieldExpandable
+    public abstract class BaseComponentData
     {
         protected abstract BaseComponent CreateComponent();
         internal BaseComponent InternalCreateComponent() => CreateComponent();

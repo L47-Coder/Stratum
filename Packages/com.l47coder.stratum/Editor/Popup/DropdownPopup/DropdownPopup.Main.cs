@@ -8,13 +8,13 @@ namespace Stratum.Editor
 {
     public sealed partial class DropdownPopup
     {
-        private const float RowH       = 22f;
-        private const float PaddingV   = 4f;
+        private const float RowH = 22f;
+        private const float PaddingV = 4f;
         private const float ScrollbarW = 14f;
-        private const float MaxH       = 280f;
-        private const float MinW       = 120f;
+        private const float MaxH = 280f;
+        private const float MinW = 120f;
         private const float CheckmarkW = 22f;
-        private const float TextPadL   = 6f;
+        private const float TextPadL = 6f;
 
         private Action<string> _onConfirmed;
 
@@ -25,33 +25,31 @@ namespace Stratum.Editor
             PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, width, _onConfirmed));
         }
 
-        // ─────────────────────────────────────────────────────────────────────────
-
         private sealed class Content : PopupWindowContent
         {
-            private readonly string[]       _items;
-            private readonly bool           _multi;
-            private readonly string         _separator;
-            private readonly float          _width;
+            private readonly string[] _items;
+            private readonly bool _multi;
+            private readonly string _separator;
+            private readonly float _width;
             private readonly Action<string> _onConfirmed;
             private readonly HashSet<string> _selected;
-            private readonly string         _initialValue;
+            private readonly string _initialValue;
 
             private Vector2 _scroll;
-            private int     _hoverIndex = -1;
-            private bool    _changed;
-            private bool    _confirmedSingle;
-            private string  _confirmedSingleValue;
+            private int _hoverIndex = -1;
+            private bool _changed;
+            private bool _confirmedSingle;
+            private string _confirmedSingleValue;
 
             internal Content(string[] items, string current, bool multi, string separator, float width, Action<string> onConfirmed)
             {
-                _items        = items;
-                _multi        = multi;
-                _separator    = string.IsNullOrEmpty(separator) ? ", " : separator;
-                _width        = width;
-                _onConfirmed  = onConfirmed;
+                _items = items;
+                _multi = multi;
+                _separator = string.IsNullOrEmpty(separator) ? ", " : separator;
+                _width = width;
+                _onConfirmed = onConfirmed;
                 _initialValue = current ?? string.Empty;
-                _selected     = ParseSelected(current, _separator, multi);
+                _selected = ParseSelected(current, _separator, multi);
             }
 
             public override Vector2 GetWindowSize() =>
@@ -59,16 +57,16 @@ namespace Stratum.Editor
 
             public override void OnGUI(Rect rect)
             {
-                var inner      = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
-                var contentH   = _items.Length * RowH;
+                var inner = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
+                var contentH = _items.Length * RowH;
                 var needScroll = contentH > inner.height + 0.5f;
-                var viewW      = needScroll ? inner.width - ScrollbarW : inner.width;
+                var viewW = needScroll ? inner.width - ScrollbarW : inner.width;
 
                 _scroll = GUI.BeginScrollView(inner, _scroll,
                     new Rect(0f, 0f, viewW, Mathf.Max(contentH, inner.height)));
 
                 var newHover = -1;
-                var e        = Event.current;
+                var e = Event.current;
 
                 for (var i = 0; i < _items.Length; i++)
                 {
@@ -86,8 +84,6 @@ namespace Stratum.Editor
                 GUI.EndScrollView();
             }
 
-            // 关闭弹窗时一次性提交：单选时用刚选中的值；多选时用当前 _selected 拼接结果。
-            // 未选中任何项的关闭（例如点击 popup 外）也会触发——传回原值，调用方据此判断是否变化。
             public override void OnClose()
             {
                 if (_onConfirmed == null) return;
@@ -104,10 +100,10 @@ namespace Stratum.Editor
 
             private void DrawRow(Rect rowRect, int index)
             {
-                var item       = _items[index];
+                var item = _items[index];
                 var isSelected = _multi ? _selected.Contains(item) : item == _initialValue;
-                var isHover    = index == _hoverIndex;
-                var e          = Event.current;
+                var isHover = index == _hoverIndex;
+                var e = Event.current;
 
                 if (e.type == EventType.Repaint)
                 {
@@ -137,7 +133,7 @@ namespace Stratum.Editor
                     }
                     else
                     {
-                        _confirmedSingle      = true;
+                        _confirmedSingle = true;
                         _confirmedSingleValue = item;
                         editorWindow?.Close();
                     }
@@ -157,8 +153,6 @@ namespace Stratum.Editor
             }
         }
 
-        // ─────────────────────────────────────────────────── 颜色 & 样式 ────────
-
         private static Color SelectedBg =>
             EditorGUIUtility.isProSkin
                 ? new Color(0.26f, 0.46f, 0.70f, 1f)
@@ -174,8 +168,8 @@ namespace Stratum.Editor
             _normalRowStyle ??= new GUIStyle(EditorStyles.label)
             {
                 alignment = TextAnchor.MiddleLeft,
-                clipping  = TextClipping.Clip,
-                padding   = new RectOffset(0, 0, 0, 0),
+                clipping = TextClipping.Clip,
+                padding = new RectOffset(0, 0, 0, 0),
             };
 
         private static GUIStyle _selectedRowStyle;
@@ -183,10 +177,10 @@ namespace Stratum.Editor
             _selectedRowStyle ??= new GUIStyle(EditorStyles.label)
             {
                 alignment = TextAnchor.MiddleLeft,
-                clipping  = TextClipping.Clip,
+                clipping = TextClipping.Clip,
                 fontStyle = FontStyle.Bold,
-                padding   = new RectOffset(0, 0, 0, 0),
-                normal    = { textColor = Color.white },
+                padding = new RectOffset(0, 0, 0, 0),
+                normal = { textColor = Color.white },
             };
 
         private static GUIStyle _checkmarkStyle;
@@ -195,7 +189,7 @@ namespace Stratum.Editor
             {
                 alignment = TextAnchor.MiddleCenter,
                 fontStyle = FontStyle.Bold,
-                normal    = { textColor = Color.white },
+                normal = { textColor = Color.white },
             };
     }
 }

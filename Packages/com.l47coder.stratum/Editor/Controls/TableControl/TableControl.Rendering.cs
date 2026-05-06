@@ -413,8 +413,8 @@ namespace Stratum.Editor
                 return;
             }
 
-            // IFieldExpandable：渲染展开按钮，点击触发 OnExpandFieldAt 回调
-            if (typeof(IFieldExpandable).IsAssignableFrom(type))
+            // [Expandable]：渲染展开按钮，点击触发 OnExpandFieldAt 回调
+            if (field.GetCustomAttribute<ExpandableAttribute>(false) != null)
             {
                 DrawExpandableCell(rect, value, index, field.Name);
                 return;
@@ -449,8 +449,8 @@ namespace Stratum.Editor
                     if (GUI.Button(rect, displayLabel, DropdownButtonStyle))
                     {
                         GUI.FocusControl(null);
-                        var options = InvokeDropdownMethod(field, dropdown.Method);
-                        if (options is { Length: > 0 })
+                        var items = DropdownAttributeResolver.ResolveItems(field, dropdown.Method);
+                        if (items.Length > 0)
                         {
                             var capturedField = field;
                             var capturedList  = list;
@@ -468,7 +468,7 @@ namespace Stratum.Editor
                                 _pendingDirty = true;
                                 _onRowRenamed?.Invoke(capturedIndex);
                             });
-                            popup.Show(rect, options, cur);
+                            popup.Show(rect, items, cur);
                         }
                     }
                     // DropdownPopup 通过回调写值，不走 EndChangeCheck 流程
@@ -615,30 +615,6 @@ namespace Stratum.Editor
 
             if (isHover && e.type == EventType.MouseMove)
                 RequestGuiVisualRefresh();
-        }
-
-        private static string[] InvokeDropdownMethod(FieldInfo field, string methodName)
-        {
-            if (_dropdownOptionsCache.TryGetValue(field, out var cached)) return cached;
-
-            var method = field.DeclaringType?.GetMethod(
-                methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-
-            string[] result = null;
-            if (method != null)
-            {
-                result = method.Invoke(null, null) switch
-                {
-                    string[] arr => arr,
-                    List<string> list => list.ToArray(),
-                    IEnumerable<string> e => e.ToArray(),
-                    _ => null,
-                };
-            }
-
-            // 无论成功与否都写入缓存，避免每帧重复反射
-            _dropdownOptionsCache[field] = result ?? Array.Empty<string>();
-            return result;
         }
 
         private static void DrawDragFloatingRowShadow(Rect rowRect)

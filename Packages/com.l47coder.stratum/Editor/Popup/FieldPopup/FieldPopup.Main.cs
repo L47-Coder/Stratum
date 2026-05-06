@@ -44,8 +44,6 @@ namespace Stratum.Editor
                 _renderer.DrawRows(inner);
             }
 
-            // Popup 关闭时一次性把草稿合并回原对象。提交时机完全确定，
-            // 不依赖 IMGUI 的失焦/重绘时机。
             public override void OnClose()
             {
                 if (_renderer.Commit())
@@ -72,9 +70,6 @@ namespace Stratum.Editor
             private Vector2 _scrollPos;
             private object _lastItem;
 
-            // 草稿层：值类型/string/UnityObject/Enum 等"应当延迟提交"的字段在编辑期
-            // 只写入 _draft，关闭 Popup 时再合并回 _lastItem。绕开 IMGUI 全局
-            // RecycledTextEditor 的失焦/重绘时机不可控问题。
             private Dictionary<FieldInfo, object> _draft;
 
             internal int Prepare<T>(T item)
@@ -93,7 +88,6 @@ namespace Stratum.Editor
                 return _fieldDefs.Count;
             }
 
-            // 把草稿一次性合并回 _lastItem。返回是否实际有任何字段发生变化。
             internal bool Commit()
             {
                 if (_lastItem == null || _draft == null) return false;
@@ -108,8 +102,6 @@ namespace Stratum.Editor
                 return any;
             }
 
-            // 引用类型 + 用户自管编辑（AnimationCurve/Gradient/StringList）保持 in-place，
-            // 它们没有"延迟提交"问题，也不希望走草稿（草稿要做深拷贝才安全）。
             private static bool IsDraftManaged(Type t)
             {
                 if (IsStringList(t)) return false;
@@ -170,7 +162,7 @@ namespace Stratum.Editor
                 var field = def.Field;
                 var type = field.FieldType;
                 var managed = IsDraftManaged(type);
-                // 草稿管理字段从 _draft 读取当前编辑值；其余引用类型从原对象读。
+
                 var value = managed ? _draft[field] : field.GetValue(boxed);
 
                 if (IsStringList(type))
@@ -181,29 +173,25 @@ namespace Stratum.Editor
                     return;
                 }
 
-                // String + Dropdown：用 DropdownPopup 弹泡泡，回调写入草稿；
-                // 提交时机仍为 FieldPopup.OnClose() → Commit()，不直接触发 GUI.changed。
                 if (type == typeof(string) && def.Dropdown != null)
                 {
-                    var opts = InvokeDropdownMethod(field, def.Dropdown.Method);
-                    var cur  = value as string ?? string.Empty;
-                    if (opts is { Length: > 0 })
+                    var cur = value as string ?? string.Empty;
+                    if (GUI.Button(rect, string.IsNullOrEmpty(cur) ? "(未选择)" : cur, DropdownButtonStyle))
                     {
-                        if (GUI.Button(rect, string.IsNullOrEmpty(cur) ? "(未选择)" : cur, DropdownButtonStyle))
+                        var items = DropdownAttributeResolver.ResolveItems(field, def.Dropdown.Method);
+                        if (items.Length > 0)
                         {
                             var captDraft = _draft;
                             var captField = field;
                             var popup = new DropdownPopup
                             {
-                                Multi     = def.Dropdown.Multi,
+                                Multi = def.Dropdown.Multi,
                                 Separator = def.Dropdown.Separator,
                             };
                             popup.OnConfirmed(finalValue => captDraft[captField] = finalValue);
-                            popup.Show(rect, opts, cur);
+                            popup.Show(rect, items, cur);
                         }
                     }
-                    else
-                        EditorGUI.LabelField(rect, cur, ReadonlyValueStyle);
                     return;
                 }
 
@@ -276,24 +264,6 @@ namespace Stratum.Editor
                 return cur;
             }
 
-            private static readonly Dictionary<FieldInfo, string[]> _dropdownCache = new();
-
-            private static string[] InvokeDropdownMethod(FieldInfo field, string methodName)
-            {
-                if (_dropdownCache.TryGetValue(field, out var cached)) return cached;
-                var method = field.DeclaringType?.GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-                if (method == null) { _dropdownCache[field] = Array.Empty<string>(); return null; }
-                var result = method.Invoke(null, null) switch
-                {
-                    string[] arr => arr,
-                    List<string> l => l.ToArray(),
-                    IEnumerable<string> e => e.ToArray(),
-                    _ => null,
-                };
-                _dropdownCache[field] = result ?? Array.Empty<string>();
-                return result;
-            }
-
             private static List<FieldDef> BuildFieldDefs(Type type)
             {
                 const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
@@ -331,7 +301,7 @@ namespace Stratum.Editor
                 _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
                 {
                     alignment = TextAnchor.MiddleLeft,
-                    clipping  = TextClipping.Clip,
+                    clipping = TextClipping.Clip,
                 };
 
             private static GUIStyle _labelStyle;
