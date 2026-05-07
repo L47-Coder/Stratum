@@ -63,7 +63,7 @@ namespace Stratum.Editor
 
         private void HookTreeCallbacks()
         {
-            _tree.OnButtonClicked(i =>
+            _tree.OnButtonClick(i =>
             {
                 if (i == 0)
                 {
@@ -73,11 +73,11 @@ namespace Stratum.Editor
                 else
                     Log($"工具栏 #{i}");
             });
-            _tree.OnNodeSelected(p => Log($"选中: {p}"));
-            _tree.OnNodeAdded(p => Log($"新建文件夹: {p}"));
-            _tree.OnNodeRenamed((o, n) => Log($"重命名: {o} → {n}"));
-            _tree.OnNodeRemoved(p => Log($"已删除: {p}"));
-            _tree.OnNodeMoved((src, dst) => Log($"移动: {src} → {dst}"));
+            _tree.OnNodeSelect(p => Log($"选中: {p}"));
+            _tree.OnNodeAdd(p => Log($"新建文件夹: {p}"));
+            _tree.OnNodeEdit((o, n) => Log($"重命名: {o} → {n}"));
+            _tree.OnNodeRemove(p => Log($"已删除: {p}"));
+            _tree.OnNodeMove((src, dst) => Log($"移动: {src} → {dst}"));
         }
 
         private void Log(string line)
@@ -110,9 +110,9 @@ namespace Stratum.Editor
                 {
                     _tree.CanAdd = EditorGUILayout.ToggleLeft("新建", _tree.CanAdd, GUILayout.Width(52f));
                     _tree.CanRemove = EditorGUILayout.ToggleLeft("删除", _tree.CanRemove, GUILayout.Width(52f));
-                    _tree.CanRename = EditorGUILayout.ToggleLeft("改名", _tree.CanRename, GUILayout.Width(52f));
+                    _tree.CanEdit = EditorGUILayout.ToggleLeft("改名", _tree.CanEdit, GUILayout.Width(52f));
                     _tree.CanSelect = EditorGUILayout.ToggleLeft("选中", _tree.CanSelect, GUILayout.Width(52f));
-                    _tree.CanDrag = EditorGUILayout.ToggleLeft("拖拽移动", _tree.CanDrag, GUILayout.Width(72f));
+                    _tree.CanReorder = EditorGUILayout.ToggleLeft("拖拽移动", _tree.CanReorder, GUILayout.Width(72f));
                     _tree.ShowToolbar = EditorGUILayout.ToggleLeft("工具栏", _tree.ShowToolbar, GUILayout.Width(60f));
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("刷新 DB", GUILayout.Width(80f)))

@@ -38,10 +38,10 @@ namespace Stratum.Editor
                 else if (Event.current.keyCode == KeyCode.Escape) { CommitRename(false); Event.current.Use(); }
                 return;
             }
-            if (string.IsNullOrEmpty(_selectedPathBacking) || !CanSelect) return;
+            if (string.IsNullOrEmpty(_selectedPathBacking)) return;
             var node = FindNodeByPath(_selectedPathBacking);
             if (node == null) return;
-            if (Event.current.keyCode == KeyCode.F2 && CanRename && CanOperateNode(node)) { BeginRename(node); Event.current.Use(); }
+            if (Event.current.keyCode == KeyCode.F2 && CanEdit && CanOperateNode(node)) { BeginRename(node); Event.current.Use(); }
             else if (Event.current.keyCode == KeyCode.Delete && CanRemove && CanOperateNode(node)) { ExecuteDelete(node); Event.current.Use(); }
         }
 
@@ -56,7 +56,7 @@ namespace Stratum.Editor
                 {
                     CommitRename(true);
                     _selectedPathBacking = node.FullPath;
-                    _onNodeSelected?.Invoke(_selectedPathBacking);
+                    _onNodeSelect?.Invoke(_selectedPathBacking);
                 }
                 _pendingContextNode = node;
                 GUI.changed = true;
@@ -71,7 +71,7 @@ namespace Stratum.Editor
                 if (_renamingPath != null && !string.Equals(_renamingPath, node.FullPath, StringComparison.OrdinalIgnoreCase))
                     CommitRename(true);
 
-                if (CanSelect) { _selectedPathBacking = node.FullPath; _onNodeSelected?.Invoke(_selectedPathBacking); }
+                if (CanSelect) { _selectedPathBacking = node.FullPath; _onNodeSelect?.Invoke(_selectedPathBacking); }
                 GUI.changed = true;
 
                 if (node.Kind != NodeKind.Root)
@@ -86,17 +86,20 @@ namespace Stratum.Editor
                     }
                 }
 
-                if (CanDrag && CanOperateNode(node)) _dragSourcePath = node.FullPath;
+                if (CanReorder && CanOperateNode(node)) _dragSourcePath = node.FullPath;
                 e.Use();
             }
 
             if (e.type == EventType.MouseDrag && e.button == 0 &&
                 string.Equals(_dragSourcePath, node.FullPath, StringComparison.OrdinalIgnoreCase))
             {
+                var dragPath = _dragSourcePath;
+                if (CanDragOut)
+                    _onNodeDragOut?.Invoke(dragPath);
                 DragAndDrop.PrepareStartDrag();
-                DragAndDrop.paths = new[] { _dragSourcePath };
+                DragAndDrop.paths = new[] { dragPath };
                 DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
-                DragAndDrop.StartDrag(Path.GetFileName(_dragSourcePath));
+                DragAndDrop.StartDrag(Path.GetFileName(dragPath));
                 _dragSourcePath = null;
                 e.Use();
             }
@@ -109,6 +112,7 @@ namespace Stratum.Editor
             var e = Event.current;
             if (e.type == EventType.DragExited) { ClearDropState(true); return; }
             if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
+            if (!CanReceiveDrop) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
             if (!string.IsNullOrEmpty(_searchNormalized)) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
             if (DragAndDrop.paths == null || DragAndDrop.paths.Length == 0) return;
 
@@ -132,7 +136,11 @@ namespace Stratum.Editor
             {
                 DragAndDrop.AcceptDrag();
                 var target = _dropFolderPath ?? _dropLineParentPath;
-                if (!string.IsNullOrEmpty(target)) ExecuteMove(sourcePath, target);
+                if (!string.IsNullOrEmpty(target))
+                {
+                    _onNodeReceiveDrop?.Invoke(sourcePath, target);
+                    ExecuteMove(sourcePath, target);
+                }
                 ClearDropState(true);
                 e.Use();
             }
@@ -236,16 +244,27 @@ namespace Stratum.Editor
             switch (node.Kind)
             {
                 case NodeKind.Branch:
-                    if (CanRename) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(node));
+                    if (CanEdit) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(node));
                     if (CanRemove && !HasAnyLeafDescendant(node)) menu.AddItem(new GUIContent(_deleteLabel), false, () => ExecuteDelete(node));
                     break;
                 case NodeKind.FolderLeaf:
                 case NodeKind.FileLeaf:
-                    if (CanRename) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(node));
+                    if (CanEdit) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(node));
                     if (CanRemove) menu.AddItem(new GUIContent(_deleteLabel), false, () => ExecuteDelete(node));
                     break;
             }
             if (menu.GetItemCount() > 0) menu.ShowAsContext();
+        }
+        private bool SelectNodeCore(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            var normalized = NormalizePath(path);
+            _selectedPathBacking = normalized;
+            var node = FindNodeByPath(normalized);
+            var parent = node?.Parent;
+            while (parent != null) { parent.IsExpanded = true; parent = parent.Parent; }
+            _onNodeSelect?.Invoke(_selectedPathBacking);
+            return true;
         }
     }
 }

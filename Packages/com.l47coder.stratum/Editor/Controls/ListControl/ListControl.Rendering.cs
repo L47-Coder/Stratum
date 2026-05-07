@@ -25,7 +25,7 @@ namespace Stratum.Editor
                     var content = btns[i] ?? new GUIContent($"{i + 1}", "Empty button");
                     var br = new Rect(x0 + i * (btnSize + spacing), r.y + (r.height - btnSize) * 0.5f, btnSize, btnSize);
                     var style = content.image != null ? EditorStyles.iconButton : ControlsToolbar.ButtonStyle;
-                    if (GUI.Button(br, content, style)) { GUI.FocusControl(null); _onButtonClicked?.Invoke(i); }
+                    if (GUI.Button(br, content, style)) { GUI.FocusControl(null); _onButtonClick?.Invoke(i); }
                 }
                 xMax = x0 - ControlsToolbar.ToolbarSectionGap;
             }
@@ -55,7 +55,8 @@ namespace Stratum.Editor
             var innerW = Mathf.Max(bodyRect.width - (needScroll ? ControlsToolbar.VerticalScrollbarWidth : 0f), 1f);
             var viewRect = new Rect(0f, 0f, innerW, Mathf.Max(totalH, bodyRect.height));
 
-            if (CanDrag) { TryStartReorderDrag(bodyRect, filtered); HandleReorderDrag(bodyRect, items, filtered); }
+            if (CanReorder || CanDragOut) TryStartReorderDrag(bodyRect, filtered);
+            if (CanReorder) HandleReorderDrag(bodyRect, items, filtered);
             if (CanReceiveDrop) HandleGlobalDrop(bodyRect, filtered);
 
             _scrollPos = GUI.BeginScrollView(bodyRect, _scrollPos, viewRect);
@@ -63,7 +64,7 @@ namespace Stratum.Editor
             for (var vi = 0; vi < filtered.Count; vi++)
                 DrawRow(new Rect(0f, vi * RowHeight, innerW, RowHeight), items[filtered[vi]], filtered[vi], vi);
 
-            if (CanDrag && _reorderInsertIndex >= 0 && Event.current.type == EventType.Repaint)
+            if (CanReorder && _reorderInsertIndex >= 0 && Event.current.type == EventType.Repaint)
                 DrawReorderIndicator(innerW, filtered);
 
             if (_renamingIndex >= 0 && Event.current.type == EventType.MouseDown && Event.current.button == 0)
@@ -96,7 +97,7 @@ namespace Stratum.Editor
 
         private void DrawRow(Rect rowRect, string label, int dataIndex, int vi)
         {
-            var isSelected = CanSelect && dataIndex == _selectedIndex;
+            var isSelected = dataIndex == _selectedIndex;
             var isDrop = CanReceiveDrop && dataIndex == _dropHighlightIndex;
             var isRenaming = _renamingIndex == dataIndex;
 
@@ -115,8 +116,8 @@ namespace Stratum.Editor
             if (Event.current.type == EventType.ContextClick && rowRect.Contains(Event.current.mousePosition))
             {
                 if (_renamingIndex >= 0) CommitRename(true);
-                if (CanSelect) { _selectedIndex = dataIndex; _onRowSelected?.Invoke(dataIndex); }
-                if (CanAdd || CanRename || CanRemove)
+                if (CanSelect) { _selectedIndex = dataIndex; _onRowSelect?.Invoke(dataIndex); }
+                if (CanAdd || CanEdit || CanRemove)
                 { _hasPendingContextMenu = true; _pendingContextIndex = dataIndex; _pendingContextLabel = label; }
                 GUI.changed = true; Event.current.Use();
                 return;
@@ -126,7 +127,7 @@ namespace Stratum.Editor
             {
                 if (_renamingIndex >= 0 && _renamingIndex != dataIndex) CommitRename(true);
                 if (!CanSelect) return;
-                _selectedIndex = dataIndex; _onRowSelected?.Invoke(dataIndex);
+                _selectedIndex = dataIndex; _onRowSelect?.Invoke(dataIndex);
                 GUI.changed = true; Event.current.Use();
             }
         }
@@ -163,7 +164,7 @@ namespace Stratum.Editor
             GUI.FocusControl(null);
             items.Add("New");
             _selectedIndex = -1;
-            _onRowAdded?.Invoke(items.Count - 1);
+            _onRowAdd?.Invoke(items.Count - 1);
             GUI.changed = true;
         }
 
@@ -178,11 +179,11 @@ namespace Stratum.Editor
 
         private void ShowContextMenu(List<string> items, int dataIndex, string label)
         {
-            if (!CanAdd && !CanRename && !CanRemove) return;
+            if (!CanAdd && !CanEdit && !CanRemove) return;
             GUI.FocusControl(null);
             var menu = new GenericMenu();
             if (CanAdd) menu.AddItem(new GUIContent(_createLabel), false, () => TryAppendNewRow(items));
-            if (CanRename) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(items, dataIndex, label));
+            if (CanEdit) menu.AddItem(new GUIContent(_renameLabel), false, () => BeginRename(items, dataIndex, label));
             if (CanRemove) menu.AddItem(new GUIContent(_deleteLabel), false, () => { if (items != null) TryRemoveRowAt(items, dataIndex); });
             menu.ShowAsContext();
         }
@@ -207,7 +208,7 @@ namespace Stratum.Editor
             if (e.type == EventType.DragUpdated)
             { DragAndDrop.visualMode = DragAndDropVisualMode.Move; _dropHighlightIndex = dataIndex; GUI.changed = true; e.Use(); }
             else
-            { DragAndDrop.AcceptDrag(); _dropHighlightIndex = -1; _onDropOnRow?.Invoke(dataIndex); GUI.changed = true; e.Use(); }
+            { DragAndDrop.AcceptDrag(); _dropHighlightIndex = -1; _onRowReceiveDrop?.Invoke(dataIndex); GUI.changed = true; e.Use(); }
         }
 
         private void TryStartReorderDrag(Rect bodyRect, List<int> filtered)
@@ -221,6 +222,7 @@ namespace Stratum.Editor
                     if (e.button != 0 || !bodyRect.Contains(e.mousePosition)) break;
                     var vi = Mathf.FloorToInt((e.mousePosition.y - bodyRect.y + _scrollPos.y) / RowHeight);
                     if (vi < 0 || vi >= filtered.Count) break;
+                    _listReorderPromotedOut = false;
                     _pressDataIndex = filtered[vi]; _pressPos = e.mousePosition;
                     GUIUtility.hotControl = _reorderControlId;
                     break;
@@ -228,13 +230,26 @@ namespace Stratum.Editor
                 case EventType.MouseDrag:
                     if (GUIUtility.hotControl != _reorderControlId || _pressDataIndex < 0) break;
                     if (Vector2.Distance(e.mousePosition, _pressPos) < ReorderDragThreshold) break;
-                    _reorderFromIndex = _pressDataIndex; _pressDataIndex = -1;
-                    DragAndDrop.PrepareStartDrag();
-                    DragAndDrop.SetGenericData(ReorderDragKey, _reorderToken);
-                    DragAndDrop.SetGenericData(ReorderFromKey, _reorderFromIndex);
-                    DragAndDrop.objectReferences = System.Array.Empty<UnityEngine.Object>();
-                    DragAndDrop.paths = System.Array.Empty<string>();
-                    DragAndDrop.StartDrag("ListViewReorder");
+                    var dragIdx = _pressDataIndex;
+                    _pressDataIndex = -1;
+                    if (CanReorder)
+                    {
+                        _reorderFromIndex = dragIdx;
+                        DragAndDrop.PrepareStartDrag();
+                        DragAndDrop.SetGenericData(ReorderDragKey, _reorderToken);
+                        DragAndDrop.SetGenericData(ReorderFromKey, _reorderFromIndex);
+                        DragAndDrop.objectReferences = System.Array.Empty<UnityEngine.Object>();
+                        DragAndDrop.paths = System.Array.Empty<string>();
+                        DragAndDrop.StartDrag("ListViewReorder");
+                    }
+                    else if (CanDragOut)
+                    {
+                        DragAndDrop.PrepareStartDrag();
+                        DragAndDrop.objectReferences = System.Array.Empty<UnityEngine.Object>();
+                        DragAndDrop.paths = System.Array.Empty<string>();
+                        _onRowDragOut?.Invoke(dragIdx);
+                        DragAndDrop.StartDrag("Row");
+                    }
                     GUIUtility.hotControl = 0; e.Use();
                     break;
 
@@ -248,7 +263,7 @@ namespace Stratum.Editor
         private void HandleReorderDrag(Rect bodyRect, List<string> items, List<int> filtered)
         {
             var e = Event.current;
-            if (e.type == EventType.DragExited) { _reorderInsertIndex = -1; return; }
+            if (e.type == EventType.DragExited) { _reorderInsertIndex = -1; _listReorderPromotedOut = false; return; }
             if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
             if (!ReferenceEquals(DragAndDrop.GetGenericData(ReorderDragKey), _reorderToken)) return;
 
@@ -262,15 +277,32 @@ namespace Stratum.Editor
 
             if (e.type == EventType.DragUpdated)
             {
+                if (!inside && CanDragOut && CanReorder && !_listReorderPromotedOut)
+                {
+                    var promoFromKey = DragAndDrop.GetGenericData(ReorderFromKey);
+                    var fromPromo = promoFromKey is int fp ? fp : -1;
+                    if (fromPromo >= 0)
+                    {
+                        _listReorderPromotedOut = true;
+                        _onRowDragOut?.Invoke(fromPromo);
+                        DragAndDrop.PrepareStartDrag();
+                        DragAndDrop.objectReferences = System.Array.Empty<UnityEngine.Object>();
+                        DragAndDrop.paths = System.Array.Empty<string>();
+                        DragAndDrop.StartDrag("Row");
+                        _reorderInsertIndex = -1;
+                        GUI.changed = true; e.Use(); return;
+                    }
+                }
                 DragAndDrop.visualMode = inside ? DragAndDropVisualMode.Move : DragAndDropVisualMode.Rejected;
                 _reorderInsertIndex = inside ? insertIdx : -1;
                 GUI.changed = true; e.Use(); return;
             }
 
             DragAndDrop.AcceptDrag();
-            var fromObj = DragAndDrop.GetGenericData(ReorderFromKey);
-            var from = fromObj is int fi ? fi : _reorderFromIndex;
+            var performFromKey = DragAndDrop.GetGenericData(ReorderFromKey);
+            var from = performFromKey is int fi ? fi : _reorderFromIndex;
             _reorderInsertIndex = _reorderFromIndex = -1;
+            _listReorderPromotedOut = false;
 
             if (inside && from >= 0 && from < items.Count && insertIdx != from && insertIdx != from + 1)
                 ApplyInternalReorder(items, from, insertIdx);
@@ -292,7 +324,7 @@ namespace Stratum.Editor
 
             items.Insert(ins, item);
             _selectedIndex = si < 0 ? -1 : Mathf.Clamp(newSi, 0, items.Count - 1);
-            _onRowMoved?.Invoke(from, ins);
+            _onRowMove?.Invoke(from, ins);
         }
 
         private void DrawReorderIndicator(float innerW, List<int> filtered)

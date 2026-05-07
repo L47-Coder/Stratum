@@ -8,14 +8,14 @@ namespace Stratum.Editor
         public string GroupTitle => "Component";
         public string TabTitle   => "Order";
 
-        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
+        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanEdit = false };
         private ComponentOrderConfig _config;
 
         public void OnFirstEnter()
         {
             _tableView.KeyField = "Component";
             _config = AssetDatabase.LoadAssetAtPath<ComponentOrderConfig>(WorkbenchPaths.ComponentOrder);
-            _tableView.OnRowMoved((_, _) => EditorUtility.SetDirty(_config));
+            _tableView.OnRowMove((_, _) => EditorUtility.SetDirty(_config));
         }
 
         public void OnEnter()

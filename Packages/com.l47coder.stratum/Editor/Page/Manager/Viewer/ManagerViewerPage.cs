@@ -33,7 +33,7 @@ namespace Stratum.Editor
         {
             _treeView.ExcludePatterns  = new() { "**/Generated", "**/Editor", "**/*.InternalsVisibleTo.cs", "**/*.asmdef" };
             _treeView.HiddenExtensions = new() { ".cs", ".asset" };
-            _treeView.OnNodeSelected(onSelected);
+            _treeView.OnNodeSelect(onSelected);
         }
 
         public void OnGUI(Rect rect) => _treeView.Draw(rect, WorkbenchPaths.ManagerRoot);

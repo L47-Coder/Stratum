@@ -25,7 +25,7 @@ namespace Stratum.Editor
                     var c = buttons[i] ?? new GUIContent($"{i + 1}", "Empty button");
                     var br = new Rect(x0 + i * (btnSize + spacing), r.y + (r.height - btnSize) * 0.5f, btnSize, btnSize);
                     if (GUI.Button(br, c, c.image != null ? EditorStyles.iconButton : ControlsToolbar.ButtonStyle))
-                    { GUI.FocusControl(null); _onButtonClicked?.Invoke(i); }
+                    { GUI.FocusControl(null); _onButtonClick?.Invoke(i); }
                 }
             }
 
@@ -97,7 +97,7 @@ namespace Stratum.Editor
         private void DrawRow(Rect rowRect, FlatNode flat, int rowIndex)
         {
             var node = flat.Node;
-            var isSelected = CanSelect && string.Equals(node.FullPath, _selectedPathBacking, StringComparison.OrdinalIgnoreCase);
+            var isSelected = string.Equals(node.FullPath, _selectedPathBacking, StringComparison.OrdinalIgnoreCase);
             var isDropFolder = string.Equals(node.FullPath, _dropFolderPath, StringComparison.OrdinalIgnoreCase);
             var isRenaming = _renamingPath != null && string.Equals(node.FullPath, _renamingPath, StringComparison.OrdinalIgnoreCase);
 

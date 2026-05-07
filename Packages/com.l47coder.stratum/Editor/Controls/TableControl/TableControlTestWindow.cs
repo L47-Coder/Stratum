@@ -35,12 +35,12 @@ namespace Stratum.Editor
 
         private void HookTableCallbacks()
         {
-            _table.OnRowSelected(i => Log(RowLine("选中", i)));
-            _table.OnRowRenamed(i => Log(RowLine("改名完成", i)));
-            _table.OnRowAdded(i => Log(RowLine("新建", i)));
-            _table.OnRowRemoved(i => Log(RowLine("删除", i)));
-            _table.OnRowMoved((from, to) => Log($"移动: {from} → {to}"));
-            _table.OnButtonClicked(i =>
+            _table.OnRowSelect(i => Log(RowLine("选中", i)));
+            _table.OnRowEdit(i => Log(RowLine("行已编辑", i)));
+            _table.OnRowAdd(i => Log(RowLine("新建", i)));
+            _table.OnRowRemove(i => Log(RowLine("删除", i)));
+            _table.OnRowMove((from, to) => Log($"移动: {from} → {to}"));
+            _table.OnButtonClick(i =>
             {
                 if (i == 0)
                 {
@@ -91,8 +91,8 @@ namespace Stratum.Editor
                     _table.CanAdd = EditorGUILayout.ToggleLeft("新建", _table.CanAdd, GUILayout.Width(52f));
                     _table.CanRemove = EditorGUILayout.ToggleLeft("删除", _table.CanRemove, GUILayout.Width(52f));
                     _table.CanSelect = EditorGUILayout.ToggleLeft("选中", _table.CanSelect, GUILayout.Width(52f));
-                    _table.CanRename = EditorGUILayout.ToggleLeft("单元格编辑", _table.CanRename, GUILayout.Width(88f));
-                    _table.CanDrag = EditorGUILayout.ToggleLeft("拖拽排序", _table.CanDrag, GUILayout.Width(72f));
+                    _table.CanEdit = EditorGUILayout.ToggleLeft("单元格编辑", _table.CanEdit, GUILayout.Width(88f));
+                    _table.CanReorder = EditorGUILayout.ToggleLeft("行内交换", _table.CanReorder, GUILayout.Width(72f));
                     _table.ShowToolbar = EditorGUILayout.ToggleLeft("工具栏", _table.ShowToolbar, GUILayout.Width(60f));
                     GUILayout.FlexibleSpace();
                     if (GUILayout.Button("重置数据", GUILayout.Width(88f)))

@@ -34,3 +34,4 @@ MonoBehaviour:
   - Title: Prefab
     Tabs:
     - Viewer
+    - Creator

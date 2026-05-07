@@ -54,16 +54,16 @@ namespace Stratum.Editor
 
         private void HookListCallbacks()
         {
-            _list.OnRowSelected(i => Log(LabelAt(i, "选中")));
-            _list.OnRowRenamed(i => Log(LabelAt(i, "改名完成")));
-            _list.OnRowMoved((from, to) => Log($"移动（数据索引）: {from} → {to}"));
-            _list.OnRowRemoved(i => Log(i >= 0 ? $"删除: 原索引 {i}" : "删除: 无效索引"));
-            _list.OnRowAdded(i => Log(LabelAt(i, "新建")));
-            _list.OnDropOnRow(i =>
+            _list.OnRowSelect(i => Log(LabelAt(i, "选中")));
+            _list.OnRowEdit(i => Log(LabelAt(i, "改名完成")));
+            _list.OnRowMove((from, to) => Log($"移动（数据索引）: {from} → {to}"));
+            _list.OnRowRemove(i => Log(i >= 0 ? $"删除: 原索引 {i}" : "删除: 无效索引"));
+            _list.OnRowAdd(i => Log(LabelAt(i, "新建")));
+            _list.OnRowReceiveDrop(i =>
                 Log(i >= 0 && i < _items.Count
                     ? $"外部拖放到行 #{i}: \"{_items[i]}\""
                     : "外部拖放: 未命中行（dataIndex = -1）"));
-            _list.OnButtonClicked(i =>
+            _list.OnButtonClick(i =>
             {
                 if (i == 0)
                 {
@@ -114,8 +114,8 @@ namespace Stratum.Editor
                     _list.CanAdd = EditorGUILayout.ToggleLeft("新建", _list.CanAdd, GUILayout.Width(52f));
                     _list.CanRemove = EditorGUILayout.ToggleLeft("删除", _list.CanRemove, GUILayout.Width(52f));
                     _list.CanSelect = EditorGUILayout.ToggleLeft("选中", _list.CanSelect, GUILayout.Width(52f));
-                    _list.CanRename = EditorGUILayout.ToggleLeft("改名", _list.CanRename, GUILayout.Width(52f));
-                    _list.CanDrag = EditorGUILayout.ToggleLeft("拖拽排序", _list.CanDrag, GUILayout.Width(72f));
+                    _list.CanEdit = EditorGUILayout.ToggleLeft("改名", _list.CanEdit, GUILayout.Width(52f));
+                    _list.CanReorder = EditorGUILayout.ToggleLeft("拖拽排序", _list.CanReorder, GUILayout.Width(72f));
                     _list.CanReceiveDrop = EditorGUILayout.ToggleLeft("外部拖入", _list.CanReceiveDrop,
                         GUILayout.Width(72f));
                     _list.ShowToolbar = EditorGUILayout.ToggleLeft("工具栏", _list.ShowToolbar, GUILayout.Width(60f));

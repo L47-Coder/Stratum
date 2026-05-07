@@ -25,6 +25,8 @@ namespace Stratum.Editor
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
 
+        public void OnEnter() => _leftPanel.OnEnter();
+
         public void OnGUI(Rect rect)
         {
             var visualRect = new Rect(rect.x + _splitterX, rect.y, SplitterVisualW, rect.height);
@@ -67,24 +69,15 @@ namespace Stratum.Editor
     internal sealed class PrefabViewerLeftPanel
     {
         private readonly TreeControl _treeView = new();
-        private string _lastSelectedPath;
 
         public void OnFirstEnter(Action<string> onSelected)
         {
             _treeView.HiddenExtensions = new() { ".prefab" };
             _treeView.CanAdd = true;
-            _treeView.OnNodeSelected(path =>
-            {
-                _lastSelectedPath = path;
-                onSelected(path);
-            });
-            _treeView.OnNodeRenamed((oldPath, newPath) =>
-            {
-                if (!string.Equals(_lastSelectedPath, oldPath, StringComparison.OrdinalIgnoreCase)) return;
-                _lastSelectedPath = newPath;
-                onSelected(newPath);
-            });
+            _treeView.OnNodeSelect(onSelected);
         }
+
+        public void OnEnter() => _treeView.RebuildTree();
 
         public void OnGUI(Rect rect) =>
             _treeView.Draw(rect, WorkbenchPaths.PrefabRoot);
@@ -98,23 +91,10 @@ namespace Stratum.Editor
     {
         private const float Padding = 8f;
         private const float RowH = 20f;
-        private const float TitleRowH = 18f;
-        private const float PreviewSize = 64f;
 
         private static GUIStyle _keyLabelStyle;
         private static GUIStyle _hintLabelStyle;
-        private static GUIStyle _addrHintStyle;
-        private static GUIStyle _addrHintCenterStyle;
         private static GUIStyle _hintLabelCenterStyle;
-
-        private static GUIStyle _titleStyle;
-
-        private static GUIStyle TitleStyle =>
-            _titleStyle ??= new GUIStyle(EditorStyles.boldLabel)
-            {
-                fontSize = 12,
-                clipping = TextClipping.Clip,
-            };
 
         private static GUIStyle KeyLabelStyle =>
             _keyLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
@@ -124,28 +104,15 @@ namespace Stratum.Editor
             _hintLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
             { normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
 
-        private static GUIStyle AddrHintStyle =>
-            _addrHintStyle ??= new GUIStyle(EditorStyles.label)
-            { normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
-
-        private static GUIStyle AddrHintCenterStyle =>
-            _addrHintCenterStyle ??= new GUIStyle(EditorStyles.label)
-            { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
-
         private static GUIStyle HintLabelCenterStyle =>
             _hintLabelCenterStyle ??= new GUIStyle(EditorStyles.miniLabel)
             { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
 
-        private static readonly Color HeaderBg = new(0.105f, 0.105f, 0.11f);
-        private static readonly Color HeaderRule = new(0.2f, 0.2f, 0.22f);
-        private static readonly Color ThumbBorder = new(0.06f, 0.06f, 0.07f);
-        private static readonly Color ThumbBackdrop = new(0.15f, 0.15f, 0.16f);
         private static readonly Color AddrLinkRowBg = new(0.115f, 0.115f, 0.12f);
         private static readonly Color AddrLinkRowBgHover = new(0.145f, 0.15f, 0.168f);
         private string _currentPath;
         private string _cachedPath;
         private GameObject _cachedPrefab;
-        private Texture2D _cachedPreview;
         private Entity _cachedEntity;
         private SerializedObject _cachedSo;
 
@@ -210,7 +177,6 @@ namespace Stratum.Editor
 
             _cachedPath = _currentPath;
             _cachedPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(_currentPath);
-            _cachedPreview = null;
             _cachedEntity = _cachedPrefab != null ? _cachedPrefab.GetComponent<Entity>() : null;
             _cachedSo = _cachedEntity != null ? new SerializedObject(_cachedEntity) : null;
 
@@ -255,66 +221,22 @@ namespace Stratum.Editor
 
         private float CalcAddressHeaderHeight()
         {
-            var infoRows = !_isAddressable ? 2 : (string.IsNullOrEmpty(_addrLabels) ? 2 : 3);
-            // Title + gap + separator + gap + rows（未标记时为 2×RowH 提示块；已标记为 Address+Group 块或 +Labels）
-            var rightH = Padding + TitleRowH + 3f + 1f + 4f + infoRows * RowH + Padding;
-            var leftH = Padding + PreviewSize + Padding;
-            return Mathf.Max(leftH, rightH);
+            return RowH;
         }
 
         // ── Addressable header ────────────────────────────────────────────────
 
         private void DrawAddressableHeader(float x, float y, float w, float h)
         {
-            EditorGUI.DrawRect(new Rect(x, y, w, h), HeaderBg);
-            if (Event.current.type == EventType.Repaint)
-                EditorGUI.DrawRect(new Rect(x, y + h - 1f, w, 1f), HeaderRule);
-
-            if (_cachedPreview == null)
-                _cachedPreview = AssetPreview.GetAssetPreview(_cachedPrefab);
-
-            // 缩略图垂直居中
-            var thumbOuter = new Rect(x + Padding, y + (h - PreviewSize) * 0.5f, PreviewSize, PreviewSize);
-            if (Event.current.type == EventType.Repaint)
-            {
-                EditorGUI.DrawRect(new Rect(thumbOuter.x - 1f, thumbOuter.y - 1f, thumbOuter.width + 2f, thumbOuter.height + 2f), ThumbBorder);
-                EditorGUI.DrawRect(thumbOuter, ThumbBackdrop);
-            }
-
-            var thumbInner = new Rect(thumbOuter.x + 1f, thumbOuter.y + 1f, thumbOuter.width - 2f, thumbOuter.height - 2f);
-            if (_cachedPreview != null)
-                GUI.DrawTexture(thumbInner, _cachedPreview, ScaleMode.ScaleToFit);
-            else if (Event.current.type == EventType.Repaint)
-                EditorGUI.DrawRect(thumbInner, new Color(0.2f, 0.2f, 0.21f));
-
-            var rightX = thumbOuter.xMax + Padding + 4f;
-            var rightW = Mathf.Max(40f, x + w - rightX - Padding);
-            var ry = y + Padding;
-
-            // 预制体名称
-            var prefabTitle = Path.GetFileNameWithoutExtension(_cachedPath) ?? "Prefab";
-            GUI.Label(new Rect(rightX, ry, rightW, TitleRowH), prefabTitle, TitleStyle);
-            ry += TitleRowH + 3f;
-
-            // 标题下方细分隔线
-            if (Event.current.type == EventType.Repaint)
-                EditorGUI.DrawRect(new Rect(rightX, ry, rightW, 1f), HeaderRule);
-            ry += 4f;
-
             if (!_isAddressable)
-                DrawMarkAddressableHintBlock(ref ry, rightX, rightW);
+                DrawMarkAddressableHintBlock(ref y, x, w);
             else
-            {
-                DrawAddressGroupWorkbenchLinkBlock(ref ry, rightX, rightW);
-                if (!string.IsNullOrEmpty(_addrLabels))
-                    DrawKeyValue(ref ry, rightX, rightW, "Labels", _addrLabels);
-            }
+                DrawAddressWorkbenchLinkRow(ref y, x, w);
         }
 
         private void DrawMarkAddressableHintBlock(ref float y, float x, float w)
         {
-            var blockH = RowH * 2f;
-            var blockRect = new Rect(x, y, w, blockH);
+            var blockRect = new Rect(x, y, w, RowH);
             var hover = blockRect.Contains(Event.current.mousePosition);
 
             if (Event.current.type == EventType.Repaint)
@@ -328,18 +250,13 @@ namespace Stratum.Editor
                 Event.current.Use();
             }
 
-            const float paddingY = 4f;
-            const float lineH = 16f;
-
-            EditorGUI.LabelField(new Rect(x, y + paddingY, w, lineH), "尚未加入 Addressable 组", AddrHintCenterStyle);
-            EditorGUI.LabelField(new Rect(x, y + paddingY + lineH, w, lineH), "点击以标记为 Addressable", HintLabelCenterStyle);
-            y += blockH;
+            EditorGUI.LabelField(new Rect(x, y, w, RowH), "尚未加入 Addressable 组，点击标记", HintLabelCenterStyle);
+            y += RowH;
         }
 
-        private void DrawAddressGroupWorkbenchLinkBlock(ref float y, float x, float w)
+        private void DrawAddressWorkbenchLinkRow(ref float y, float x, float w)
         {
-            var blockH = RowH * 2f;
-            var blockRect = new Rect(x, y, w, blockH);
+            var blockRect = new Rect(x, y, w, RowH);
             var hover = blockRect.Contains(Event.current.mousePosition);
 
             if (Event.current.type == EventType.Repaint)
@@ -349,40 +266,16 @@ namespace Stratum.Editor
 
             if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
             {
-                AddressableViewerPage.NavigateFromPrefab(_addrGroup);
+                AddressableViewerPage.NavigateFromPrefab(_addrGroup, _cachedPath);
                 Event.current.Use();
             }
 
-            const float paddingX = 10f;
-            const float paddingY = 4f;
-            const float lineH = 16f;
             const float keyW = 56f;
+            var contentX = x + Padding;
+            var contentW = w - Padding * 2f;
 
-            var innerX = x + paddingX;
-            var innerW = w - paddingX * 2f;
-            var yLine = y + paddingY;
-
-            EditorGUI.LabelField(new Rect(innerX, yLine, keyW, lineH), "Address", KeyLabelStyle);
-            EditorGUI.LabelField(new Rect(innerX + keyW, yLine, innerW - keyW, lineH), _addrAddress, EditorStyles.miniLabel);
-            
-            yLine += lineH;
-            
-            EditorGUI.LabelField(new Rect(innerX, yLine, keyW, lineH), "Group", KeyLabelStyle);
-            EditorGUI.LabelField(new Rect(innerX + keyW, yLine, innerW - keyW, lineH), _addrGroup, EditorStyles.miniLabel);
-
-            y += blockH;
-        }
-
-        private static void DrawKeyValue(ref float y, float x, float w, string key, string value)
-        {
-            const float paddingX = 10f;
-            const float keyW = 56f;
-            var innerX = x + paddingX;
-            var innerW = w - paddingX * 2f;
-
-            EditorGUI.LabelField(new Rect(innerX, y, keyW, RowH), key, KeyLabelStyle);
-            EditorGUI.LabelField(new Rect(innerX + keyW, y, innerW - keyW, RowH),
-                value, EditorStyles.miniLabel);
+            EditorGUI.LabelField(new Rect(contentX, y, keyW, RowH), "Address", KeyLabelStyle);
+            EditorGUI.LabelField(new Rect(contentX + keyW, y, contentW - keyW, RowH), _addrAddress, EditorStyles.miniLabel);
             y += RowH;
         }
 
@@ -393,11 +286,21 @@ namespace Stratum.Editor
             if (_cachedEntity == null)
             {
                 var pad = Padding;
-                EditorGUI.LabelField(new Rect(x + pad, y + pad, w - pad * 2, RowH),
-                    "此预制体尚未挂载 Entity 组件", HintLabelStyle);
-                y += pad + RowH + pad;
-                if (GUI.Button(new Rect(x + pad, y, 200f, 22f), "挂载 Entity 组件", EditorStyles.miniButton))
+                var blockRect = new Rect(x + pad, y + pad, w - pad * 2f, RowH);
+                var hover = blockRect.Contains(Event.current.mousePosition);
+
+                if (Event.current.type == EventType.Repaint)
+                    EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
+
+                EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
+
+                if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
+                {
                     AddEntity();
+                    Event.current.Use();
+                }
+
+                EditorGUI.LabelField(blockRect, "此预制体尚未挂载 Entity 组件，点击挂载", HintLabelCenterStyle);
                 return;
             }
 
@@ -422,13 +325,13 @@ namespace Stratum.Editor
             _tableSetup = true;
 
             _tableView.CanAdd         = true;
-            _tableView.CanDrag        = true;
+            _tableView.CanReorder     = true;
             _tableView.CanRemove      = true;
             _tableView.CanSelect      = false;
-            _tableView.CanRename      = true;
+            _tableView.CanEdit        = true;
             _tableView.ShowToolbar    = false;
             _tableView.MarkDuplicates = false;
-            _tableView.OnExpandFieldAt((rowIndex, _, anchorRect) => OpenConfigPopup(rowIndex, anchorRect));
+            _tableView.OnRowExpandField((rowIndex, _, anchorRect) => OpenConfigPopup(rowIndex, anchorRect));
         }
 
         // ── ComponentType 变更时重建 Data ──────────────────────────────────────

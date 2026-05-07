@@ -14,10 +14,12 @@ namespace Stratum.Editor
         public string TabTitle => "Viewer";
 
         internal static string PendingSelectGroupName;
+        internal static string PendingSelectAssetPath;
 
-        internal static void NavigateFromPrefab(string addressableGroupName)
+        internal static void NavigateFromPrefab(string addressableGroupName, string assetPath)
         {
             PendingSelectGroupName = string.IsNullOrEmpty(addressableGroupName) ? null : addressableGroupName;
+            PendingSelectAssetPath = string.IsNullOrEmpty(assetPath) ? null : assetPath;
             DevWindow.GoTo("Addressable", "Viewer");
         }
 
@@ -25,8 +27,12 @@ namespace Stratum.Editor
         {
             if (page == null || string.IsNullOrEmpty(PendingSelectGroupName)) return;
             var name = PendingSelectGroupName;
+            var assetPath = PendingSelectAssetPath;
             PendingSelectGroupName = null;
+            PendingSelectAssetPath = null;
             page._leftPanel.TrySelectGroupByName(name);
+            if (!string.IsNullOrEmpty(assetPath))
+                page._rightPanel.TrySelectByAssetPath(assetPath);
         }
 
         public void OnEnter() => FinishPendingGroupSelection(this);
@@ -83,7 +89,7 @@ namespace Stratum.Editor
         private readonly ListControl _listView = new()
         {
             CanReceiveDrop = true,
-            CanDrag = true,
+            CanReorder = true,
         };
 
         private List<AddressableAssetGroup> _visibleGroups = new();
@@ -98,14 +104,14 @@ namespace Stratum.Editor
             _onGroupSelected = onGroupSelected;
             _onDropComplete = onDropComplete;
 
-            _listView.OnRowSelected(idx =>
+            _listView.OnRowSelect(idx =>
                 _onGroupSelected?.Invoke(idx >= 0 && idx < _visibleGroups.Count ? _visibleGroups[idx] : null));
 
-            _listView.OnDropOnRow(HandleDropOnGroup);
-            _listView.OnRowRenamed(HandleRenameGroup);
-            _listView.OnRowRemoved(HandleDeleteGroup);
-            _listView.OnRowMoved(HandleReorderGroup);
-            _listView.OnRowAdded(HandleAddGroup);
+            _listView.OnRowReceiveDrop(HandleDropOnGroup);
+            _listView.OnRowEdit(HandleRenameGroup);
+            _listView.OnRowRemove(HandleDeleteGroup);
+            _listView.OnRowMove(HandleReorderGroup);
+            _listView.OnRowAdd(HandleAddGroup);
         }
 
         public void OnGUI(Rect rect)
@@ -142,7 +148,7 @@ namespace Stratum.Editor
             {
                 if (string.Equals(_visibleGroups[i].Name, groupName, StringComparison.Ordinal))
                 {
-                    _listView.TrySelectRow(i);
+                    _listView.SelectRow(i);
                     return;
                 }
             }
@@ -308,22 +314,60 @@ namespace Stratum.Editor
     {
         private readonly TableControl _tableView = new()
         {
-            CanAdd = false,
-            CanRemove = false,
-            CanDrag = false,
-            KeyField = "Address",
+            CanAdd     = false,
+            CanRemove  = false,
+            CanReorder = true,
+            CanDragOut = true,
+            KeyField   = "Address",
         };
 
         private AddressableAssetGroup _currentGroup;
         private AddressableAssetGroup _cachedGroup;
         private int _cachedEntryCount = -1;
-        private readonly List<AddressableEntryRow> _rows = new();
+        private readonly List<AddressableEntryRow> _rows    = new();
         private readonly List<AddressableAssetEntry> _entries = new();
-        private string _pressedGuid;
+
+        public AddressableEntryPanel()
+        {
+            // 行拖出控件时：设置跨控件拖拽载荷
+            _tableView.OnRowDragOut(idx =>
+            {
+                if (idx >= 0 && idx < _rows.Count)
+                    DragAndDrop.SetGenericData("AddressableEntryGuid", _rows[idx].Guid);
+            });
+
+            // 行在组内重排时：同步 _entries，保证 SyncAllEntries 的索引对应关系正确
+            _tableView.OnRowMove((from, to) =>
+            {
+                if (from < 0 || from >= _entries.Count) return;
+                var entry = _entries[from];
+                _entries.RemoveAt(from);
+                _entries.Insert(Mathf.Clamp(to, 0, _entries.Count), entry);
+            });
+        }
 
         public void SetGroup(AddressableAssetGroup group) => _currentGroup = group;
 
         public void Invalidate() => _cachedEntryCount = -1;
+
+        public void TrySelectByAssetPath(string assetPath)
+        {
+            if (_currentGroup != null && (_cachedGroup != _currentGroup || _cachedEntryCount != _currentGroup.entries.Count))
+            {
+                _cachedGroup = _currentGroup;
+                _cachedEntryCount = _currentGroup.entries.Count;
+                RebuildRows(_currentGroup);
+            }
+
+            for (var i = 0; i < _rows.Count; i++)
+            {
+                if (string.Equals(_rows[i].AssetPath, assetPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    _tableView.SelectRow(i);
+                    return;
+                }
+            }
+        }
 
         public void OnGUI(Rect rect)
         {
@@ -341,7 +385,6 @@ namespace Stratum.Editor
                 RebuildRows(group);
             }
 
-            HandleEntryDragStart(rect);
             _tableView.Draw(rect, _rows);
             SyncAllEntries();
         }
@@ -355,10 +398,10 @@ namespace Stratum.Editor
                 _entries.Add(entry);
                 _rows.Add(new AddressableEntryRow
                 {
-                    Address = entry.address,
+                    Address  = entry.address,
                     AssetPath = entry.AssetPath,
-                    Labels = string.Join(", ", entry.labels),
-                    Guid = entry.guid,
+                    Labels   = string.Join(", ", entry.labels),
+                    Guid     = entry.guid,
                 });
             }
         }
@@ -407,36 +450,6 @@ namespace Stratum.Editor
 
             if (dirty) EditorUtility.SetDirty(entry.parentGroup);
             return dirty;
-        }
-
-        private void HandleEntryDragStart(Rect rect)
-        {
-            var e = Event.current;
-
-            if (e.type == EventType.MouseDown && e.button == 0 && rect.Contains(e.mousePosition))
-            {
-                var boxOffset = BoxDrawer.Padding + BoxDrawer.BorderWidth;
-                var toolbarH = ControlsToolbar.ToolbarHeight;
-                var rowH = EditorGUIUtility.singleLineHeight + 8f;
-                var localY = e.mousePosition.y - rect.y - boxOffset - toolbarH - rowH;
-                var rowIdx = Mathf.FloorToInt(localY / rowH);
-
-                _pressedGuid = (rowIdx >= 0 && rowIdx < _rows.Count) ? _rows[rowIdx].Guid : null;
-            }
-
-            if (e.type == EventType.MouseDrag && e.button == 0 && !string.IsNullOrEmpty(_pressedGuid))
-            {
-                DragAndDrop.PrepareStartDrag();
-                DragAndDrop.SetGenericData("AddressableEntryGuid", _pressedGuid);
-                DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
-                var row = _rows.FirstOrDefault(r => r.Guid == _pressedGuid);
-                DragAndDrop.StartDrag(row?.Address ?? _pressedGuid);
-                _pressedGuid = null;
-                e.Use();
-            }
-
-            if (e.type == EventType.MouseUp)
-                _pressedGuid = null;
         }
     }
 }

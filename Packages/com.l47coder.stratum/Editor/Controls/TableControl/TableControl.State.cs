@@ -53,15 +53,20 @@ namespace Stratum.Editor
         private int _selectedIndex = -1;
         private Vector2 _scrollPos;
 
-        private Action<int> _onRowRenamed;
-        private Action<int> _onRowSelected;
-        private Action<int> _onRowAdded;
-        private Action<int> _onRowRemoved;
-        private Action<int, int> _onRowMoved;
-        private Action<int> _onButtonClicked;
+        private Action<int> _onRowEdit;
+        private Action<int> _onRowSelect;
+        private Action<int> _onRowAdd;
+        private Action<int> _onRowRemove;
+        private Action<int, int> _onRowMove;
+        private Action<int> _onButtonClick;
+        private Action<int> _onRowDragOut;
+        private Action<int> _onRowReceiveDrop;
         // (rowIndex, fieldName, anchorRect) — 某行带 [Expandable] 字段的展开按钮被点击，
         // anchorRect 供 PopupWindow.Show 定位
-        private Action<int, string, Rect> _onExpandFieldAt;
+        private Action<int, string, Rect> _onRowExpandField;
+
+        private Vector2 _lastGroupSize;
+        private int _dropHighlightDataIndex = -1;
 
         private struct TableLayout
         {
@@ -130,6 +135,19 @@ namespace Stratum.Editor
                 ? new Color(0.26f, 0.46f, 0.70f, 1f)
                 : new Color(0.50f, 0.68f, 0.96f, 1f);
 
+        private static Color DropTargetCellBackground =>
+            EditorGUIUtility.isProSkin
+                ? new Color(0.20f, 0.40f, 0.62f, 0.55f)
+                : new Color(0.24f, 0.49f, 0.91f, 0.30f);
+
+        private bool SelectRowCore(int index)
+        {
+            if (index < 0) return false;
+            _selectedIndex = index;
+            _onRowSelect?.Invoke(index);
+            return true;
+        }
+
         private static void RequestGuiVisualRefresh()
         {
             // 仅请求重绘（hover 高亮/拖拽视觉等），不污染 GUI.changed —— 后者只用于
@@ -152,6 +170,7 @@ namespace Stratum.Editor
             BoxDrawer.DrawBox(boxRect);
             var contentRect = BoxDrawer.CalcContentRect(boxRect);
             GUI.BeginGroup(contentRect);
+            _lastGroupSize = new Vector2(contentRect.width, contentRect.height);
 
             var toolbarHeight = ShowToolbar ? ControlsToolbar.ToolbarHeight : 0f;
             if (ShowToolbar) DrawToolbar(new Rect(0f, 0f, contentRect.width, toolbarHeight));

@@ -27,12 +27,14 @@ namespace Stratum.Editor
         private List<FlatNode> _flatList = new();
         private TreeNode _pendingContextNode;
 
-        private Action<string> _onNodeSelected;
-        private Action<string> _onNodeAdded;
-        private Action<string> _onNodeRemoved;
-        private Action<string, string> _onNodeRenamed;
-        private Action<string, string> _onNodeMoved;
-        private Action<int> _onButtonClicked;
+        private Action<string> _onNodeSelect;
+        private Action<string> _onNodeAdd;
+        private Action<string> _onNodeRemove;
+        private Action<string, string> _onNodeEdit;
+        private Action<string, string> _onNodeMove;
+        private Action<string> _onNodeDragOut;
+        private Action<string, string> _onNodeReceiveDrop;
+        private Action<int> _onButtonClick;
 
         private static string _projectRoot;
         private static string ProjectRoot =>

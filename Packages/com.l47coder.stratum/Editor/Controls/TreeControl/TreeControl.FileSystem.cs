@@ -136,12 +136,12 @@ namespace Stratum.Editor
             if (string.IsNullOrEmpty(guid)) { Debug.LogWarning("[TreeControl] Failed to create folder."); return; }
             var newPath = $"{parent.FullPath}/{name}";
             RefreshTree(newPath);
-            _onNodeAdded?.Invoke(newPath);
+            _onNodeAdd?.Invoke(newPath);
         }
 
         private void ExecuteRename(TreeNode node, string newName)
         {
-            if (!CanOperateNode(node) || string.IsNullOrWhiteSpace(newName)) return;
+            if (!CanEdit || !CanOperateNode(node) || string.IsNullOrWhiteSpace(newName)) return;
             newName = RestoreKnownExtension(node.Name, newName.Trim());
             if (string.Equals(node.Name, newName, StringComparison.Ordinal)) return;
             var oldPath = node.FullPath;
@@ -150,7 +150,7 @@ namespace Stratum.Editor
             if (!string.IsNullOrEmpty(error)) { Debug.LogWarning($"[TreeControl] Rename failed: {error}"); return; }
             if (string.Equals(_selectedPathBacking, oldPath, StringComparison.OrdinalIgnoreCase)) _selectedPathBacking = destPath;
             RefreshTree(destPath);
-            _onNodeRenamed?.Invoke(oldPath, destPath);
+            _onNodeEdit?.Invoke(oldPath, destPath);
         }
 
         private void ExecuteDelete(TreeNode node)
@@ -161,7 +161,7 @@ namespace Stratum.Editor
             if (!AssetDatabase.DeleteAsset(path)) { Debug.LogWarning($"[TreeControl] Delete failed: {path}"); return; }
             if (string.Equals(_selectedPathBacking, path, StringComparison.OrdinalIgnoreCase)) _selectedPathBacking = null;
             RefreshTree(_cachedRootPath);
-            _onNodeRemoved?.Invoke(path);
+            _onNodeRemove?.Invoke(path);
         }
 
         private void ExecuteMove(string sourcePath, string targetDirPath)
@@ -175,7 +175,7 @@ namespace Stratum.Editor
             if (!string.IsNullOrEmpty(error)) { Debug.LogWarning($"[TreeControl] Move failed: {error}"); return; }
             if (string.Equals(_selectedPathBacking, src, StringComparison.OrdinalIgnoreCase)) _selectedPathBacking = dest;
             RefreshTree(dest);
-            _onNodeMoved?.Invoke(src, dest);
+            _onNodeMove?.Invoke(src, dest);
         }
 
         private void RefreshTree(string focusPath = null)

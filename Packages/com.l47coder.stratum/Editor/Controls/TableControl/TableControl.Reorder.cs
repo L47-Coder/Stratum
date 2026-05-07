@@ -23,7 +23,7 @@ namespace Stratum.Editor
             }
 
             if (GUIUtility.hotControl != owner._rowIndexInteractControlId ||
-                owner._rowIndexInteractSearchingAtPress || !owner.CanDrag)
+                owner._rowIndexInteractSearchingAtPress || !(owner.CanReorder || owner.CanDragOut))
             {
                 owner._rowIndexInteractDown = false;
                 owner.ReleaseRowIndexPendingOwner();
@@ -54,11 +54,18 @@ namespace Stratum.Editor
             GUIUtility.hotControl = 0;
             ClearRowIndexInteractAfterReorderOrCancel();
 
-            if (!CanSelect || wasSearching) return;
+            if (wasSearching) return;
             if (idx < 0 || idx >= list.Count) return;
 
-            if (_selectedIndex == idx) _selectedIndex = -1;
-            else { _selectedIndex = idx; _onRowSelected?.Invoke(idx); }
+            if (_selectedIndex == idx)
+                _selectedIndex = -1;
+            else if (!CanSelect)
+                return;
+            else
+            {
+                _selectedIndex = idx;
+                _onRowSelect?.Invoke(idx);
+            }
             RequestGuiVisualRefresh();
         }
 
@@ -67,7 +74,7 @@ namespace Stratum.Editor
             if (_reorder != null) return;
             if (!_rowIndexInteractDown || GUIUtility.hotControl != controlId) return;
             if (dataIndex != _rowIndexInteractDataIndex) return;
-            if (_rowIndexInteractSearchingAtPress || !CanDrag) return;
+            if (_rowIndexInteractSearchingAtPress || !(CanReorder || CanDragOut)) return;
 
             var e = Event.current;
             if (e.type == EventType.MouseDrag &&
@@ -116,6 +123,25 @@ namespace Stratum.Editor
         {
             if (_draggingOwner != this || _reorder == null) return;
             var e = Event.current;
+
+            // 鼠标离开控件区域 → 切换为 DragAndDrop 跨控件拖拽
+            if (CanDragOut && e.type == EventType.MouseDrag)
+            {
+                var groupBounds = new Rect(0f, 0f, _lastGroupSize.x, _lastGroupSize.y);
+                if (!groupBounds.Contains(e.mousePosition))
+                {
+                    var sourceIdx = _reorder.SourceIndex;
+                    DragAndDrop.PrepareStartDrag();
+                    DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
+                    _onRowDragOut?.Invoke(sourceIdx);
+                    DragAndDrop.StartDrag("Row");
+                    GUIUtility.hotControl = 0;
+                    EndReorderSession();
+                    e.Use();
+                    return;
+                }
+            }
+
             if (GUIUtility.hotControl != _reorder.ControlId)
             {
                 if (e.rawType == EventType.MouseUp || e.rawType == EventType.Ignore) EndReorderSession();
@@ -125,7 +151,8 @@ namespace Stratum.Editor
             if (e.rawType == EventType.MouseUp && e.button == 0)
             {
                 GUIUtility.hotControl = 0;
-                ApplyReorder(list, _reorder.SourceIndex, _reorder.InsertSlot);
+                if (CanReorder)
+                    ApplyReorder(list, _reorder.SourceIndex, _reorder.InsertSlot);
                 EndReorderSession();
                 e.Use();
                 return;
@@ -147,7 +174,7 @@ namespace Stratum.Editor
             var item = list[from];
             list.RemoveAt(from);
             list.Insert(dest, item);
-            _onRowMoved?.Invoke(from, dest);
+            _onRowMove?.Invoke(from, dest);
             GUI.changed = true;
         }
 
@@ -198,11 +225,17 @@ namespace Stratum.Editor
             if (_reorder == null || rowCount == 0) return;
             var dragRowTop = Mathf.Clamp(Event.current.mousePosition.y - _reorder.PickupOffsetY,
                 bodyRect.yMin, Mathf.Max(bodyRect.yMin, bodyRect.yMax - _reorder.SourceRowHeight));
-            var probeY = dragRowTop + _reorder.SourceRowHeight * 0.5f;
-            var count = 0;
-            var rowTop = bodyRect.yMin;
-            for (var i = 0; i < rowHeights.Count; i++) { if (probeY > rowTop) count++; rowTop += rowHeights[i]; }
-            _reorder.InsertSlot = Mathf.Clamp(count - 1, 0, Math.Max(0, rowCount - 1));
+            if (CanReorder)
+            {
+                var probeY = dragRowTop + _reorder.SourceRowHeight * 0.5f;
+                var count = 0;
+                var rowTop = bodyRect.yMin;
+                for (var i = 0; i < rowHeights.Count; i++) { if (probeY > rowTop) count++; rowTop += rowHeights[i]; }
+                _reorder.InsertSlot = Mathf.Clamp(count - 1, 0, Math.Max(0, rowCount - 1));
+            }
+            else
+                _reorder.InsertSlot = _reorder.SourceIndex;
+
             _reorder.DragRowYTarget = dragRowTop;
         }
 

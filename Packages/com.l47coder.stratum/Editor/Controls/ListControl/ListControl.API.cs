@@ -9,22 +9,26 @@ namespace Stratum.Editor
         public bool CanAdd { get; set; } = true;
         public bool CanRemove { get; set; } = true;
         public bool CanSelect { get; set; } = true;
-        public bool CanDrag { get; set; } = true;
-        public bool CanRename { get; set; } = true;
-        public bool ShowToolbar { get; set; } = true;
+        public bool CanEdit { get; set; } = true;
+
+        public bool CanReorder { get; set; } = true;
+        public bool CanDragOut { get; set; }
         public bool CanReceiveDrop { get; set; }
+
+        public bool ShowToolbar { get; set; } = true;
         public List<string> ExcludePatterns { get; set; } = new();
         public List<GUIContent> ToolbarButtons { get; set; } = new();
 
-        public void OnRowAdded(Action<int> callback) => _onRowAdded = callback;
-        public void OnRowRemoved(Action<int> callback) => _onRowRemoved = callback;
-        public void OnRowSelected(Action<int> callback) => _onRowSelected = callback;
-        public void OnRowMoved(Action<int, int> callback) => _onRowMoved = callback;
-        public void OnRowRenamed(Action<int> callback) => _onRowRenamed = callback;
-        public void OnDropOnRow(Action<int> callback) => _onDropOnRow = callback;
-        public void OnButtonClicked(Action<int> callback) => _onButtonClicked = callback;
+        public void OnRowAdd(Action<int> callback) => _onRowAdd = callback;
+        public void OnRowRemove(Action<int> callback) => _onRowRemove = callback;
+        public void OnRowSelect(Action<int> callback) => _onRowSelect = callback;
+        public void OnRowEdit(Action<int> callback) => _onRowEdit = callback;
+        public void OnRowMove(Action<int, int> callback) => _onRowMove = callback;
+        public void OnRowDragOut(Action<int> callback) => _onRowDragOut = callback;
+        public void OnRowReceiveDrop(Action<int> callback) => _onRowReceiveDrop = callback;
+        public void OnButtonClick(Action<int> callback) => _onButtonClick = callback;
 
-        public bool TrySelectRow(int index) => TrySelectRowCore(index);
+        public bool SelectRow(int index) => SelectRowCore(index);
 
         public void Draw(Rect rect, List<string> items) => DrawCore(rect, items);
     }

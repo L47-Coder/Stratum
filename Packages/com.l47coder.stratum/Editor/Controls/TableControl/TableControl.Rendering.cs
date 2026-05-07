@@ -39,7 +39,7 @@ namespace Stratum.Editor
                     if (GUI.Button(r, content, style))
                     {
                         GUI.FocusControl(null);
-                        _onButtonClicked?.Invoke(i);
+                        _onButtonClick?.Invoke(i);
                     }
                 }
             }
@@ -62,7 +62,7 @@ namespace Stratum.Editor
                 var indexRect = new Rect(cursorX, innerRect.y, layout.IndexWidth, innerRect.height);
                 PaintCellFrame(indexRect, HeaderCellBackground, GridLineColor);
                 GUI.Label(PaddedRect(indexRect), list.Count.ToString(), HeaderCellLabelStyle);
-                if (CanSelect && Event.current.type == EventType.MouseDown && Event.current.button == 0 &&
+                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 &&
                     indexRect.Contains(Event.current.mousePosition))
                 {
                     _selectedIndex = -1;
@@ -95,7 +95,7 @@ namespace Stratum.Editor
                         try { list.Add(Activator.CreateInstance<T>()); }
                         catch { list.Add(default); }
                         var newIndex = list.Count - 1;
-                        _onRowAdded?.Invoke(newIndex);
+                        _onRowAdd?.Invoke(newIndex);
                         _selectedIndex = -1;
                         GUI.changed = true;
                     }
@@ -203,6 +203,9 @@ namespace Stratum.Editor
             var totalH = displayCount * rowHeight;
             var viewRect = new Rect(0f, 0f, rowsContentWidth, totalH);
 
+            if (CanReceiveDrop)
+                HandleTableReceiveDrop(bodyRect, filteredIndices, rowHeight);
+
             _scrollPos = GUI.BeginScrollView(bodyRect, _scrollPos, viewRect);
 
             var inner = new Rect(0f, 0f, rowsContentWidth, viewRect.height);
@@ -210,7 +213,7 @@ namespace Stratum.Editor
             OnRowIndexInteractIgnore();
             FlushRowIndexInteractClickSelect(list);
 
-            var isDraggingThis = CanDrag && !isSearching &&
+            var isDraggingThis = (CanReorder || CanDragOut) && !isSearching &&
                                  _draggingOwner == this && _reorder != null &&
                                  _reorder.ArraySize == rowCount;
 
@@ -244,7 +247,8 @@ namespace Stratum.Editor
                     continue;
                 }
                 var isInvalid = invalidIndices != null && invalidIndices.Contains(visual.RowIndex);
-                DrawRow(rowRect, list, visual.RowIndex, visual.StripeIndex, isSearching, ref removeIndex, layout, isInvalid: isInvalid);
+                var isDrop = CanReceiveDrop && _dropHighlightDataIndex >= 0 && visual.RowIndex == _dropHighlightDataIndex;
+                DrawRow(rowRect, list, visual.RowIndex, visual.StripeIndex, isSearching, ref removeIndex, layout, isInvalid: isInvalid, isDrop: isDrop);
             }
 
             if (isDraggingThis && _reorder != null)
@@ -259,7 +263,7 @@ namespace Stratum.Editor
                 DrawRow(floatRect, list, _reorder.SourceIndex, floaterStripe, isSearching, ref removeIndex, layout, isDragFloating: true, isInvalid: floatInvalid);
             }
 
-            if (CanDrag && !isSearching)
+            if ((CanReorder || CanDragOut) && !isSearching)
                 HandleActiveReorderLifecycle(list);
 
             GUI.EndScrollView();
@@ -268,7 +272,7 @@ namespace Stratum.Editor
             {
                 if (_draggingOwner == this && _reorder?.SourceIndex == removeIndex)
                     EndReorderSession();
-                _onRowRemoved?.Invoke(removeIndex);
+                _onRowRemove?.Invoke(removeIndex);
                 list.RemoveAt(removeIndex);
                 if (_selectedIndex == removeIndex) _selectedIndex = -1;
                 else if (_selectedIndex > removeIndex) _selectedIndex--;
@@ -292,13 +296,16 @@ namespace Stratum.Editor
             ref int removeIndex,
             TableLayout layout,
             bool isDragFloating = false,
-            bool isInvalid = false)
+            bool isInvalid = false,
+            bool isDrop = false)
         {
-            var isSelected = CanSelect && !isDragFloating && _selectedIndex == dataIndex;
+            var isSelected = !isDragFloating && _selectedIndex == dataIndex;
             var fill = isInvalid
                 ? (EditorGUIUtility.isProSkin
                     ? new Color(0.55f, 0.26f, 0.26f, 1f)
                     : new Color(1.00f, 0.82f, 0.82f, 1f))
+                : isDrop
+                    ? DropTargetCellBackground
                 : isSelected
                     ? SelectedCellBackground
                     : BodyCellBackground(stripeIndex % 2 == 1);
@@ -315,7 +322,7 @@ namespace Stratum.Editor
             if (!isDragFloating)
             {
                 var e = Event.current;
-                if (CanDrag && !isSearching)
+                if ((CanReorder || CanDragOut) && !isSearching)
                 {
                     if (e.type == EventType.MouseDown && e.button == 0 && indexRect.Contains(e.mousePosition))
                     {
@@ -352,7 +359,7 @@ namespace Stratum.Editor
                     EditorGUI.LabelField(PaddedRect(cell), $"Missing field: {_columns[i].RelativePropertyPath}", EditorStyles.wordWrappedMiniLabel);
                 else
                 {
-                    using (new EditorGUI.DisabledScope(_columns[i].Readonly || !CanRename || isDragFloating))
+                    using (new EditorGUI.DisabledScope(_columns[i].Readonly || !CanEdit || isDragFloating))
                         DrawCellField(PaddedRect(cell), list, dataIndex, field, _columns[i].Dropdown);
                 }
                 cursorX = cell.xMax;
@@ -375,16 +382,19 @@ namespace Stratum.Editor
 
         private void HandleRowSelectInput(Rect indexRect, int dataIndex, bool isDragFloating)
         {
-            if (!CanSelect || isDragFloating || _draggingOwner == this || _rowIndexInteractDown) return;
+            if (isDragFloating || _draggingOwner == this || _rowIndexInteractDown) return;
             if (Event.current.type != EventType.MouseDown || Event.current.button != 0) return;
             if (!indexRect.Contains(Event.current.mousePosition)) return;
             if (_selectedIndex == dataIndex)
                 _selectedIndex = -1;
+            else if (!CanSelect)
+                return;
             else
             {
                 _selectedIndex = dataIndex;
-                _onRowSelected?.Invoke(dataIndex);
+                _onRowSelect?.Invoke(dataIndex);
             }
+
             GUI.FocusControl(null);
             Event.current.Use();
             RequestGuiVisualRefresh();
@@ -407,13 +417,13 @@ namespace Stratum.Editor
                     field.SetValue(boxed, stringList);
                     list[index] = (T)boxed;
                     GUI.changed = true;
-                    _onRowRenamed?.Invoke(index);
+                    _onRowEdit?.Invoke(index);
                 }
                 DrawStringListCell(rect, stringList, index);
                 return;
             }
 
-            // [Expandable]：渲染展开按钮，点击触发 OnExpandFieldAt 回调
+            // [Expandable]：渲染展开按钮，点击触发 OnRowExpandField 回调
             if (field.GetCustomAttribute<ExpandableAttribute>(false) != null)
             {
                 DrawExpandableCell(rect, value, index, field.Name);
@@ -466,7 +476,7 @@ namespace Stratum.Editor
                                 capturedField.SetValue(b, finalValue);
                                 capturedList[capturedIndex] = (T)b;
                                 _pendingDirty = true;
-                                _onRowRenamed?.Invoke(capturedIndex);
+                                _onRowEdit?.Invoke(capturedIndex);
                             });
                             popup.Show(rect, items, cur);
                         }
@@ -522,7 +532,7 @@ namespace Stratum.Editor
                 field.SetValue(boxed, newValue);
                 list[index] = (T)boxed;
                 GUI.changed = true;
-                _onRowRenamed?.Invoke(index);
+                _onRowEdit?.Invoke(index);
             }
         }
 
@@ -610,7 +620,7 @@ namespace Stratum.Editor
             {
                 GUI.FocusControl(null);
                 e.Use();
-                _onExpandFieldAt?.Invoke(rowIndex, fieldName, rect);
+                _onRowExpandField?.Invoke(rowIndex, fieldName, rect);
             }
 
             if (isHover && e.type == EventType.MouseMove)
@@ -630,6 +640,45 @@ namespace Stratum.Editor
             var pulse = 0.55f + 0.45f * Mathf.Sin((float)EditorApplication.timeSinceStartup * 6f);
             EditorGUI.DrawRect(gap, new Color(0.25f, 0.55f, 0.95f, 0.11f + 0.08f * pulse));
             DrawRectOutline(gap, new Color(0.32f, 0.62f, 1f, 0.28f + 0.12f * pulse), 1f);
+        }
+
+        private void HandleTableReceiveDrop(Rect bodyRect, List<int> filteredIndices, float rowHeight)
+        {
+            if (!CanReceiveDrop)
+            {
+                if (Event.current.type == EventType.DragExited) _dropHighlightDataIndex = -1;
+                return;
+            }
+
+            var e = Event.current;
+            if (e.type == EventType.DragExited) { _dropHighlightDataIndex = -1; return; }
+            if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
+
+            if (!bodyRect.Contains(e.mousePosition))
+            {
+                _dropHighlightDataIndex = -1;
+                if (e.type == EventType.DragUpdated) DragAndDrop.visualMode = DragAndDropVisualMode.Rejected;
+                return;
+            }
+
+            var vi = Mathf.FloorToInt((e.mousePosition.y - bodyRect.y + _scrollPos.y) / rowHeight);
+            var dataIndex = vi >= 0 && vi < filteredIndices.Count ? filteredIndices[vi] : -1;
+
+            if (e.type == EventType.DragUpdated)
+            {
+                DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+                _dropHighlightDataIndex = dataIndex;
+                GUI.changed = true;
+                e.Use();
+            }
+            else
+            {
+                DragAndDrop.AcceptDrag();
+                _dropHighlightDataIndex = -1;
+                _onRowReceiveDrop?.Invoke(dataIndex);
+                GUI.changed = true;
+                e.Use();
+            }
         }
 
         private HashSet<int> BuildDuplicateIndices<T>(List<T> list)

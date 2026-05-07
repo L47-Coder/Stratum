@@ -8,14 +8,14 @@ namespace Stratum.Editor
         public string GroupTitle => "Manager";
         public string TabTitle   => "Order";
 
-        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanRename = false };
+        private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanEdit = false };
         private ManagerOrderConfig _config;
 
         public void OnFirstEnter()
         {
             _tableView.KeyField = "Manager";
             _config = AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(WorkbenchPaths.ManagerOrder);
-            _tableView.OnRowMoved((_, _) => EditorUtility.SetDirty(_config));
+            _tableView.OnRowMove((_, _) => EditorUtility.SetDirty(_config));
         }
 
         public void OnEnter()

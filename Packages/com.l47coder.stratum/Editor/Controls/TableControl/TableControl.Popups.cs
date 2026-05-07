@@ -21,7 +21,7 @@ namespace Stratum.Editor
             var summary = listValue.Count == 0 ? "(empty)" : $"[{listValue.Count}] {string.Join(", ", listValue)}";
             if (!GUI.Button(rect, summary, StringListSummaryStyle)) return;
             GUI.FocusControl(null);
-            PopupWindow.Show(rect, new StringListPopup(listValue, () => { _pendingDirty = true; _onRowRenamed?.Invoke(rowIndex); }));
+            PopupWindow.Show(rect, new StringListPopup(listValue, () => { _pendingDirty = true; _onRowEdit?.Invoke(rowIndex); }));
         }
 
         private static GUIStyle _stringListSummaryStyle;

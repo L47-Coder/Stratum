@@ -23,13 +23,14 @@ namespace Stratum.Editor
         private Vector2 _scrollPos;
         private List<string> _lastItems;
 
-        private Action<int> _onRowAdded;
-        private Action<int> _onRowRemoved;
-        private Action<int> _onRowSelected;
-        private Action<int> _onRowRenamed;
-        private Action<int, int> _onRowMoved;
-        private Action<int> _onDropOnRow;
-        private Action<int> _onButtonClicked;
+        private Action<int> _onRowAdd;
+        private Action<int> _onRowRemove;
+        private Action<int> _onRowSelect;
+        private Action<int> _onRowEdit;
+        private Action<int, int> _onRowMove;
+        private Action<int> _onRowDragOut;
+        private Action<int> _onRowReceiveDrop;
+        private Action<int> _onButtonClick;
 
         private readonly object _reorderToken = new();
         private int _reorderControlId;
@@ -37,6 +38,7 @@ namespace Stratum.Editor
         private Vector2 _pressPos;
         private int _reorderFromIndex = -1;
         private int _reorderInsertIndex = -1;
+        private bool _listReorderPromotedOut;
 
         private int _renamingIndex = -1;
         private string _renamingOriginal;
@@ -55,12 +57,12 @@ namespace Stratum.Editor
         private bool _pendingBeginRename;
         private bool _pendingDelete;
 
-        private bool TrySelectRowCore(int index)
+        private bool SelectRowCore(int index)
         {
-            if (!CanSelect || index < 0) return false;
+            if (index < 0) return false;
             if (_lastItems != null && index >= _lastItems.Count) return false;
             _selectedIndex = index;
-            _onRowSelected?.Invoke(index);
+            _onRowSelect?.Invoke(index);
             return true;
         }
 
@@ -123,7 +125,7 @@ namespace Stratum.Editor
             _renameBindingList = null;
             if (!accept || idx < 0 || orig == null || buf == null || buf == orig || string.IsNullOrWhiteSpace(buf)) return;
             if (list != null && idx < list.Count) list[idx] = buf;
-            _onRowRenamed?.Invoke(idx);
+            _onRowEdit?.Invoke(idx);
         }
 
         private void CheckRenameBlur()
@@ -138,7 +140,7 @@ namespace Stratum.Editor
             items.RemoveAt(index);
             if (_selectedIndex == index) _selectedIndex = items.Count > 0 ? Mathf.Min(index, items.Count - 1) : -1;
             else if (_selectedIndex > index) _selectedIndex--;
-            _onRowRemoved?.Invoke(index);
+            _onRowRemove?.Invoke(index);
             GUI.changed = true;
         }
 
@@ -153,7 +155,7 @@ namespace Stratum.Editor
                 return;
             }
             if (_selectedIndex < 0 || !CanSelect) return;
-            if (Event.current.keyCode == KeyCode.F2 && CanRename) { _pendingBeginRename = true; Event.current.Use(); }
+            if (Event.current.keyCode == KeyCode.F2 && CanEdit) { _pendingBeginRename = true; Event.current.Use(); }
             if (Event.current.keyCode == KeyCode.Delete && CanRemove) { _pendingDelete = true; Event.current.Use(); }
         }
     }
