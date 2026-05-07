@@ -12,7 +12,7 @@ public interface IComponentManager
 
 internal sealed partial class ComponentManagerData
 {
-    [Field(Readonly = true)]
+    [Field(Readonly = true, Width = 300)]
     public string Key;
 
     [Field(Readonly = true)]

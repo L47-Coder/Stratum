@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: Frame
   m_Data:
     m_SerializedData: []
-  m_GUID: 90d67f31a925cea4eb2a85074d7c52d1
+  m_GUID: 9113e8cdcf491f642a329a9ab4d7fe81
   m_SerializeEntries:
   - m_GUID: 3946cd02736cdda48b5312266ad519e8
     m_Address: Frame/ComponentOrder

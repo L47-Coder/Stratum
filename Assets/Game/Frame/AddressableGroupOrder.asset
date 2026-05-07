@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AddressableGroupOrder
   m_EditorClassIdentifier: 
   _groupGuids:
-  - da349f2c1e26bfd4ba2f465946d049c3
-  - 54e558bff3e9dc04b9ad2c798a51e04d
-  - 6c7b023567a738b4f8db22e0a8f79865
-  - 0d12412c00c22fd409711a8e30a196eb
+  - d57bcc16a036e6f46842d9e9b125719b
+  - 42394562ec5474e4f985c46e32133b53
+  - 2408007416d6c2a4f9f08968d74d4847
+  - d8147f0d0a17dc140a92b15e76477b0c

@@ -30,7 +30,7 @@ internal sealed class AssetHandle<T> : IAssetHandle<T> where T : class
 
 internal sealed partial class AssetManagerData
 {
-    [Field(Readonly = true)]
+    [Field(Readonly = true, Width = 300)]
     public string Key;
 
     [Field(Readonly = true)]

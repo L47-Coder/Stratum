@@ -16,11 +16,31 @@ internal static class ComponentManagerRefresher
         var cfg = AssetDatabase.LoadAssetAtPath<ComponentManagerConfig>(ConfigAssetPath);
         if (cfg == null) return;
 
-        ManagerRefreshUtil.Sync(
-            (List<ComponentManagerData>)cfg.GetConfigList(),
-            CollectTargets(),
-            static item => item.Key,
-            static (key, address) => new ComponentManagerData { Key = key, ComponentConfigAddress = address });
+        var list = (List<ComponentManagerData>)cfg.GetConfigList();
+        var targets = CollectTargets();
+
+        for (var i = list.Count - 1; i >= 0; i--)
+        {
+            var item = list[i];
+            if (item == null || string.IsNullOrWhiteSpace(item.Key))
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            var key = item.Key.Trim();
+            if (!targets.TryGetValue(key, out var address))
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            item.ComponentConfigAddress = address;
+            targets.Remove(key);
+        }
+
+        foreach (var kv in targets)
+            list.Add(new ComponentManagerData { Key = kv.Key, ComponentConfigAddress = kv.Value });
 
         EditorUtility.SetDirty(cfg);
         AssetDatabase.SaveAssets();

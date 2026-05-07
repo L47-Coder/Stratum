@@ -41,20 +41,21 @@ internal sealed class PrefabData
 {
     public GameObject GameObject { get; }
     public Entity Entity;
+    public Dictionary<string, EntityComponentEntry> EntityEntryByKey { get; } = new(StringComparer.Ordinal);
     public List<string> InitialTypeKeys { get; } = new();
+
     public List<string> OrderedKeys { get; } = new();
-    public Dictionary<string, BaseComponent> Components { get; } = new();
+    public Dictionary<string, BaseComponent> Components { get; } = new(StringComparer.Ordinal);
     public PrefabData(GameObject gameObject) => GameObject = gameObject;
 }
 
 internal sealed partial class PrefabManagerData
 {
-    [Field(Readonly = true)]
+    [Field(Readonly = true, Width = 300)]
     public string Key;
 
     [Field(Readonly = true)]
     public string PrefabAddress;
-    public List<ComponentRef> InitialComponent = new();
 }
 
 internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncInitManager
@@ -180,32 +181,12 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
             throw new Exception("Prefab handle is invalid.");
 
         if (poolCache.InactiveQueue.Count == 0)
-            CreatePooledInstance(poolCache, data);
+            CreatePooledInstance(poolCache);
 
         var prefabData = poolCache.InactiveQueue.Dequeue();
         var prefabHandle = new PrefabHandle(key, prefabData);
         poolCache.PrefabHandles.Add(prefabHandle);
         _goToHandle[prefabData.GameObject] = prefabHandle;
-
-        foreach (var typeKey in prefabData.InitialTypeKeys)
-        {
-            var comp = _componentManager.CreateComponent(typeKey);
-            prefabData.Components[typeKey] = comp;
-            prefabData.OrderedKeys.Add(typeKey);
-        }
-
-        foreach (var typeKey in prefabData.OrderedKeys)
-            prefabData.Components[typeKey].InternalSetGameObject(prefabData.GameObject);
-
-        _orderedKeyBuffer.Clear();
-        _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-        foreach (var typeKey in _orderedKeyBuffer)
-        {
-            if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-            try { comp.InternalOnAdd(); }
-            catch (Exception e) { Debug.LogException(e); }
-        }
-        _orderedKeyBuffer.Clear();
 
         _activeInstances.Add(prefabData);
         prefabData.GameObject.SetActive(true);
@@ -223,7 +204,7 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         return prefabHandle;
     }
 
-    private void CreatePooledInstance(PoolCache poolCache, PrefabManagerData data)
+    private void CreatePooledInstance(PoolCache poolCache)
     {
         var gameObject = UnityEngine.Object.Instantiate(poolCache.AssetHandle.Result);
         gameObject.SetActive(false);
@@ -235,27 +216,95 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
                   ?? gameObject.AddComponent<Entity>();
         newPrefabData.Entity = entity;
 
-        entity.TriggerEnter     += (_, other) => DispatchTriggerEnter(newPrefabData, other);
-        entity.TriggerExit      += (_, other) => DispatchTriggerExit(newPrefabData, other);
-        entity.TriggerStay      += (_, other) => DispatchTriggerStay(newPrefabData, other);
-        entity.CollisionEnter   += (_, c)     => DispatchCollisionEnter(newPrefabData, c);
-        entity.CollisionExit    += (_, c)     => DispatchCollisionExit(newPrefabData, c);
-        entity.CollisionStay    += (_, c)     => DispatchCollisionStay(newPrefabData, c);
-        entity.TriggerEnter2D   += (_, other) => DispatchTriggerEnter2D(newPrefabData, other);
-        entity.TriggerExit2D    += (_, other) => DispatchTriggerExit2D(newPrefabData, other);
-        entity.TriggerStay2D    += (_, other) => DispatchTriggerStay2D(newPrefabData, other);
-        entity.CollisionEnter2D += (_, c)     => DispatchCollisionEnter2D(newPrefabData, c);
-        entity.CollisionExit2D  += (_, c)     => DispatchCollisionExit2D(newPrefabData, c);
-        entity.CollisionStay2D  += (_, c)     => DispatchCollisionStay2D(newPrefabData, c);
+        entity.TriggerEnter += (_, other) => DispatchTriggerEnter(newPrefabData, other);
+        entity.TriggerExit += (_, other) => DispatchTriggerExit(newPrefabData, other);
+        entity.TriggerStay += (_, other) => DispatchTriggerStay(newPrefabData, other);
+        entity.CollisionEnter += (_, c) => DispatchCollisionEnter(newPrefabData, c);
+        entity.CollisionExit += (_, c) => DispatchCollisionExit(newPrefabData, c);
+        entity.CollisionStay += (_, c) => DispatchCollisionStay(newPrefabData, c);
+        entity.TriggerEnter2D += (_, other) => DispatchTriggerEnter2D(newPrefabData, other);
+        entity.TriggerExit2D += (_, other) => DispatchTriggerExit2D(newPrefabData, other);
+        entity.TriggerStay2D += (_, other) => DispatchTriggerStay2D(newPrefabData, other);
+        entity.CollisionEnter2D += (_, c) => DispatchCollisionEnter2D(newPrefabData, c);
+        entity.CollisionExit2D += (_, c) => DispatchCollisionExit2D(newPrefabData, c);
+        entity.CollisionStay2D += (_, c) => DispatchCollisionStay2D(newPrefabData, c);
 
-        foreach (var compRef in data.InitialComponent)
+        foreach (var componentEntry in entity.Components)
         {
-            if (!compRef.IsValid) continue;
-            newPrefabData.InitialTypeKeys.Add(compRef.TypeKey);
+            if (componentEntry == null) continue;
+            if (string.IsNullOrEmpty(componentEntry.EntryKey)) continue;
+            if (newPrefabData.EntityEntryByKey.ContainsKey(componentEntry.EntryKey))
+            {
+                Debug.LogWarning($"[PrefabManager] Duplicate Entity entry key '{componentEntry.EntryKey}' ignored on prefab '{gameObject.name}'.");
+                continue;
+            }
+            newPrefabData.EntityEntryByKey[componentEntry.EntryKey] = componentEntry;
+
+            if (!componentEntry.InitOnStart) continue;
+            if (componentEntry.Data == null) continue;
+            newPrefabData.InitialTypeKeys.Add(componentEntry.EntryKey);
         }
         newPrefabData.InitialTypeKeys.Sort(_typeKeyComparer);
 
+        RestoreToInitialState(newPrefabData);
+
         poolCache.InactiveQueue.Enqueue(newPrefabData);
+    }
+
+    private void RestoreToInitialState(PrefabData prefabData)
+    {
+        _orderedKeyBuffer.Clear();
+        _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
+        for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
+        {
+            var typeKey = _orderedKeyBuffer[i];
+            if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
+            try { comp.InternalSetEnabled(false); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+        _orderedKeyBuffer.Clear();
+
+        var initialSet = HashSetPool.Get();
+        try
+        {
+            foreach (var key in prefabData.InitialTypeKeys) initialSet.Add(key);
+
+            _orderedKeyBuffer.Clear();
+            _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
+            for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
+            {
+                var typeKey = _orderedKeyBuffer[i];
+                if (initialSet.Contains(typeKey)) continue;
+                if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
+                try { comp.InternalOnRemove(); }
+                catch (Exception e) { Debug.LogException(e); }
+                prefabData.Components.Remove(typeKey);
+                prefabData.OrderedKeys.Remove(typeKey);
+            }
+            _orderedKeyBuffer.Clear();
+        }
+        finally
+        {
+            HashSetPool.Release(initialSet);
+        }
+
+        foreach (var typeKey in prefabData.InitialTypeKeys)
+        {
+            if (prefabData.Components.ContainsKey(typeKey)) continue;
+            if (!prefabData.EntityEntryByKey.TryGetValue(typeKey, out var componentEntry)) continue;
+            if (componentEntry?.Data == null) continue;
+
+            BaseComponent component;
+            try { component = componentEntry.Data.InternalCreateComponent(); }
+            catch (Exception e) { Debug.LogException(e); continue; }
+            if (component == null) continue;
+
+            prefabData.Components[typeKey] = component;
+            InsertByOrder(prefabData, typeKey);
+            component.InternalSetGameObject(prefabData.GameObject);
+            try { component.InternalOnAdd(); }
+            catch (Exception e) { Debug.LogException(e); }
+        }
     }
 
     public async UniTask ReleasePrefabAsync(IPrefabHandle handle)
@@ -272,27 +321,7 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         var prefabData = prefabHandle.PrefabData;
         _activeInstances.Remove(prefabData);
 
-        _orderedKeyBuffer.Clear();
-        _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-        for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
-        {
-            var typeKey = _orderedKeyBuffer[i];
-            if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-            try { comp.InternalSetEnabled(false); }
-            catch (Exception e) { Debug.LogException(e); }
-        }
-
-        for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
-        {
-            var typeKey = _orderedKeyBuffer[i];
-            if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-            try { comp.InternalOnRemove(); }
-            catch (Exception e) { Debug.LogException(e); }
-        }
-        _orderedKeyBuffer.Clear();
-
-        prefabData.Components.Clear();
-        prefabData.OrderedKeys.Clear();
+        RestoreToInitialState(prefabData);
 
         prefabData.GameObject.SetActive(false);
         poolCache.InactiveQueue.Enqueue(prefabData);
@@ -340,6 +369,8 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
 
             prefabData.Components.Clear();
             prefabData.OrderedKeys.Clear();
+            prefabData.EntityEntryByKey.Clear();
+            prefabData.InitialTypeKeys.Clear();
             _goToHandle.Remove(prefabData.GameObject);
 
             UnityEngine.Object.Destroy(prefabData.GameObject);
@@ -364,7 +395,19 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         if (prefabData.Components.ContainsKey(typeKey))
             throw new Exception($"Duplicate key: {typeKey}");
 
-        var component = _componentManager.CreateComponent<T>(key);
+        T component;
+        if (prefabData.EntityEntryByKey.TryGetValue(typeKey, out var componentEntry) && componentEntry?.Data != null)
+        {
+            var created = componentEntry.Data.InternalCreateComponent();
+            if (created is not T typed)
+                throw new Exception($"Component type mismatch on Entity entry: {typeKey}");
+            component = typed;
+        }
+        else
+        {
+            component = _componentManager.CreateComponent<T>(key);
+        }
+
         prefabData.Components[typeKey] = component;
         InsertByOrder(prefabData, typeKey);
         component.InternalSetGameObject(prefabData.GameObject);
@@ -476,6 +519,27 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         {
             if (data.Components.TryGetValue(typeKey, out var comp))
                 _dispatchBuffer.Add(comp);
+        }
+    }
+
+    // RestoreToInitialState 内部使用的轻量 HashSet 池，避免每次回池都分配
+    private static class HashSetPool
+    {
+        private static readonly Stack<HashSet<string>> _stack = new();
+
+        public static HashSet<string> Get()
+        {
+            if (_stack.Count == 0) return new HashSet<string>(StringComparer.Ordinal);
+            var set = _stack.Pop();
+            set.Clear();
+            return set;
+        }
+
+        public static void Release(HashSet<string> set)
+        {
+            if (set == null) return;
+            set.Clear();
+            _stack.Push(set);
         }
     }
 

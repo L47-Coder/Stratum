@@ -9,9 +9,9 @@ namespace Stratum.Editor
     internal sealed class ManagerViewerPage : IPage
     {
         public string GroupTitle => "Manager";
-        public string TabTitle   => "Viewer";
+        public string TabTitle => "Viewer";
 
-        private readonly ManagerLeftPanel  _leftPanel  = new();
+        private readonly ManagerLeftPanel _leftPanel = new();
         private readonly ManagerRightPanel _rightPanel = new();
         private SplitterHandle _splitter = new(220f);
 
@@ -31,7 +31,7 @@ namespace Stratum.Editor
 
         public void OnFirstEnter(Action<string> onSelected)
         {
-            _treeView.ExcludePatterns  = new() { "**/Generated", "**/Editor", "**/*.InternalsVisibleTo.cs", "**/*.asmdef" };
+            _treeView.ExcludePatterns = new() { "**/Generated", "**/Editor", "**/*.InternalsVisibleTo.cs", "**/*.asmdef" };
             _treeView.HiddenExtensions = new() { ".cs", ".asset" };
             _treeView.OnNodeSelect(onSelected);
         }
@@ -68,7 +68,7 @@ namespace Stratum.Editor
 
             switch (Path.GetExtension(_currentPath).ToLowerInvariant())
             {
-                case ".cs":    DrawCsFile(rect, _currentPath);    break;
+                case ".cs": DrawCsFile(rect, _currentPath); break;
                 case ".asset": DrawAssetFile(rect, _currentPath); break;
                 default:
                     GUI.Label(rect, "Unsupported file type.", EditorStyles.centeredGreyMiniLabel);
@@ -96,11 +96,11 @@ namespace Stratum.Editor
         {
             if (_cachedAssetPath != path)
             {
-                _cachedAssetPath       = path;
-                _cachedAsset           = AssetDatabase.LoadAssetAtPath<BaseManagerConfig>(path);
-                _cachedList            = null;
-                _cachedDrawMethod      = null;
-                _tableView             = null;
+                _cachedAssetPath = path;
+                _cachedAsset = AssetDatabase.LoadAssetAtPath<BaseManagerConfig>(path);
+                _cachedList = null;
+                _cachedDrawMethod = null;
+                _tableView = null;
                 _cachedRefresherScript = null;
 
                 if (_cachedAsset != null)
@@ -109,7 +109,7 @@ namespace Stratum.Editor
                     var elemType = _cachedAsset.ConfigItemType;
                     if (_cachedList != null && elemType != null)
                     {
-                        _tableView        = new TableControl();
+                        _tableView = new TableControl();
                         _cachedDrawMethod = typeof(TableControl).GetMethod(nameof(TableControl.Draw))
                             .MakeGenericMethod(elemType);
                         ResolveRefresherScript(path);
@@ -140,7 +140,7 @@ namespace Stratum.Editor
             if (_cachedRefresherScript != null)
                 AssetDatabase.OpenAsset(_cachedRefresherScript);
             else
-                UnityEngine.Debug.LogWarning("[ManagerViewerPage] Refresher script was not found.");
+                Debug.LogWarning("[ManagerViewerPage] Refresher script was not found.");
         }
     }
 }

@@ -18,11 +18,31 @@ internal static class AssetManagerRefresher
         var cfg = AssetDatabase.LoadAssetAtPath<AssetManagerConfig>(ConfigAssetPath);
         if (cfg == null) return;
 
-        ManagerRefreshUtil.Sync(
-            (List<AssetManagerData>)cfg.GetConfigList(),
-            CollectTargets(),
-            static item => item.Key,
-            static (key, address) => new AssetManagerData { Key = key, AssetAddress = address });
+        var list = (List<AssetManagerData>)cfg.GetConfigList();
+        var targets = CollectTargets();
+
+        for (var i = list.Count - 1; i >= 0; i--)
+        {
+            var item = list[i];
+            if (item == null || string.IsNullOrWhiteSpace(item.Key))
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            var key = item.Key.Trim();
+            if (!targets.TryGetValue(key, out var address))
+            {
+                list.RemoveAt(i);
+                continue;
+            }
+
+            item.AssetAddress = address;
+            targets.Remove(key);
+        }
+
+        foreach (var kv in targets)
+            list.Add(new AssetManagerData { Key = kv.Key, AssetAddress = kv.Value });
 
         EditorUtility.SetDirty(cfg);
         AssetDatabase.SaveAssets();

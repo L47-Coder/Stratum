@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
-using UnityEditor.AddressableAssets.Settings;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -63,25 +61,7 @@ namespace Stratum.Editor
 
             if (transferred.Count == 0) return 0;
             AssetDatabase.Refresh();
-            MarkAddressable(transferred);
             return transferred.Count;
-        }
-
-        private static void MarkAddressable(IReadOnlyList<string> paths)
-        {
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-            if (settings == null) { Debug.LogWarning("[AssetTransporter] AddressableAssetSettings not found."); return; }
-
-            var group = settings.DefaultGroup;
-            foreach (var p in paths)
-            {
-                var guid = AssetDatabase.AssetPathToGUID(p);
-                if (string.IsNullOrEmpty(guid)) { Debug.LogWarning($"[AssetTransporter] GUID not found: {p}"); continue; }
-                var entry = settings.CreateOrMoveEntry(guid, group);
-                entry.address = Path.GetFileNameWithoutExtension(p);
-                settings.SetDirty(AddressableAssetSettings.ModificationEvent.EntryMoved, entry, true);
-            }
-            AssetDatabase.SaveAssets();
         }
 
         private static string Rel(string rootAbs, string fullPath)
