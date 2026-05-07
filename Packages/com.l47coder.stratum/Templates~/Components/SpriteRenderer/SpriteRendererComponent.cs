@@ -32,12 +32,12 @@ public sealed partial class SpriteRendererComponent
     protected override void OnAdd()
     {
         SpriteRenderer = ComponentPool.Acquire<SpriteRenderer>(GameObject);
-        SpriteRenderer.sprite           = _componentData.Sprite;
-        SpriteRenderer.color            = _componentData.Color;
-        SpriteRenderer.flipX            = _componentData.FlipX;
-        SpriteRenderer.flipY            = _componentData.FlipY;
+        SpriteRenderer.sprite = _componentData.Sprite;
+        SpriteRenderer.color = _componentData.Color;
+        SpriteRenderer.flipX = _componentData.FlipX;
+        SpriteRenderer.flipY = _componentData.FlipY;
         SpriteRenderer.sortingLayerName = _componentData.SortingLayerName;
-        SpriteRenderer.sortingOrder     = _componentData.SortingOrder;
+        SpriteRenderer.sortingOrder = _componentData.SortingOrder;
     }
 
     protected override void OnRemove()

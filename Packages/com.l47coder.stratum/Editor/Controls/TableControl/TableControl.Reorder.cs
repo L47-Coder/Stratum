@@ -32,6 +32,7 @@ namespace Stratum.Editor
 
             if (EditorApplication.timeSinceStartup - owner._rowIndexInteractPressTime < RowIndexHoldToDragSeconds) return;
 
+            if (!owner.CanReorder) return; // hold-to-drag 仅用于内部重排，DragOut-only 走阈值路径
             owner.BeginReorderSession(owner._rowIndexInteractControlId, owner._rowIndexInteractDataIndex,
                 owner._rowIndexInteractRowRect, owner._rowIndexInteractRowHeight,
                 owner._rowIndexInteractListCount, owner._rowIndexInteractPressPos.y);
@@ -80,7 +81,19 @@ namespace Stratum.Editor
             if (e.type == EventType.MouseDrag &&
                 (e.mousePosition - _rowIndexInteractPressPos).sqrMagnitude >= RowIndexDragSlopPixels * RowIndexDragSlopPixels)
             {
-                BeginReorderSession(controlId, dataIndex, rowRect, rowHeight, listCount, e.mousePosition.y);
+                if (CanReorder)
+                {
+                    BeginReorderSession(controlId, dataIndex, rowRect, rowHeight, listCount, e.mousePosition.y);
+                }
+                else if (CanDragOut)
+                {
+                    DragAndDrop.PrepareStartDrag();
+                    DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
+                    _onRowDragOut?.Invoke(dataIndex);
+                    DragAndDrop.StartDrag("Row");
+                    GUIUtility.hotControl = 0;
+                    ClearRowIndexInteractAfterReorderOrCancel();
+                }
                 e.Use();
             }
         }

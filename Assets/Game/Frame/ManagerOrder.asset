@@ -12,4 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d01a9b8f92cf4549a96cb7e6b0ff560, type: 3}
   m_Name: ManagerOrder
   m_EditorClassIdentifier: 
-  _entries: []
+  _entries:
+  - Name: AManager
+    AssemblyQualifiedName: AManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null

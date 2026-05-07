@@ -86,7 +86,7 @@ namespace Stratum.Editor
                     }
                 }
 
-                if (CanReorder && CanOperateNode(node)) _dragSourcePath = node.FullPath;
+                if ((CanReorder || CanDragOut) && CanOperateNode(node)) _dragSourcePath = node.FullPath;
                 e.Use();
             }
 
@@ -99,6 +99,7 @@ namespace Stratum.Editor
                 DragAndDrop.PrepareStartDrag();
                 DragAndDrop.paths = new[] { dragPath };
                 DragAndDrop.objectReferences = Array.Empty<UnityEngine.Object>();
+                if (CanReorder) DragAndDrop.SetGenericData("StratumTreeReorder", this);
                 DragAndDrop.StartDrag(Path.GetFileName(dragPath));
                 _dragSourcePath = null;
                 e.Use();
@@ -112,7 +113,8 @@ namespace Stratum.Editor
             var e = Event.current;
             if (e.type == EventType.DragExited) { ClearDropState(true); return; }
             if (e.type != EventType.DragUpdated && e.type != EventType.DragPerform) return;
-            if (!CanReceiveDrop) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
+            var isOwnReorder = ReferenceEquals(DragAndDrop.GetGenericData("StratumTreeReorder"), this);
+            if (isOwnReorder ? !CanReorder : !CanReceiveDrop) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
             if (!string.IsNullOrEmpty(_searchNormalized)) { DragAndDrop.visualMode = DragAndDropVisualMode.Rejected; return; }
             if (DragAndDrop.paths == null || DragAndDrop.paths.Length == 0) return;
 

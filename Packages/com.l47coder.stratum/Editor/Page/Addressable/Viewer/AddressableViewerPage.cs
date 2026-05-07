@@ -314,17 +314,17 @@ namespace Stratum.Editor
     {
         private readonly TableControl _tableView = new()
         {
-            CanAdd     = false,
-            CanRemove  = false,
-            CanReorder = true,
+            CanAdd = false,
+            CanRemove = false,
+            CanReorder = false,
             CanDragOut = true,
-            KeyField   = "Address",
+            KeyField = "Address",
         };
 
         private AddressableAssetGroup _currentGroup;
         private AddressableAssetGroup _cachedGroup;
         private int _cachedEntryCount = -1;
-        private readonly List<AddressableEntryRow> _rows    = new();
+        private readonly List<AddressableEntryRow> _rows = new();
         private readonly List<AddressableAssetEntry> _entries = new();
 
         public AddressableEntryPanel()
@@ -398,10 +398,10 @@ namespace Stratum.Editor
                 _entries.Add(entry);
                 _rows.Add(new AddressableEntryRow
                 {
-                    Address  = entry.address,
+                    Address = entry.address,
                     AssetPath = entry.AssetPath,
-                    Labels   = string.Join(", ", entry.labels),
-                    Guid     = entry.guid,
+                    Labels = string.Join(", ", entry.labels),
+                    Guid = entry.guid,
                 });
             }
         }

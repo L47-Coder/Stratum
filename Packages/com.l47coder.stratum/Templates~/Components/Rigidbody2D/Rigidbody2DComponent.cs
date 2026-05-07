@@ -25,18 +25,18 @@ public sealed partial class Rigidbody2DComponent
 
     protected override void OnAdd()
     {
-        Rigidbody2D                          = ComponentPool.Acquire<Rigidbody2D>(GameObject);
-        Rigidbody2D.bodyType                 = _componentData.BodyType;
-        Rigidbody2D.simulated                = _componentData.Simulated;
-        Rigidbody2D.useAutoMass              = _componentData.UseAutoMass;
-        Rigidbody2D.mass                     = _componentData.Mass;
-        Rigidbody2D.drag                     = _componentData.Drag;
-        Rigidbody2D.angularDrag              = _componentData.AngularDrag;
-        Rigidbody2D.gravityScale             = _componentData.GravityScale;
-        Rigidbody2D.collisionDetectionMode   = _componentData.CollisionDetectionMode;
-        Rigidbody2D.sleepMode                = _componentData.SleepMode;
-        Rigidbody2D.interpolation            = _componentData.Interpolation;
-        Rigidbody2D.constraints              = _componentData.Constraints;
+        Rigidbody2D = ComponentPool.Acquire<Rigidbody2D>(GameObject);
+        Rigidbody2D.bodyType = _componentData.BodyType;
+        Rigidbody2D.simulated = _componentData.Simulated;
+        Rigidbody2D.useAutoMass = _componentData.UseAutoMass;
+        Rigidbody2D.mass = _componentData.Mass;
+        Rigidbody2D.drag = _componentData.Drag;
+        Rigidbody2D.angularDrag = _componentData.AngularDrag;
+        Rigidbody2D.gravityScale = _componentData.GravityScale;
+        Rigidbody2D.collisionDetectionMode = _componentData.CollisionDetectionMode;
+        Rigidbody2D.sleepMode = _componentData.SleepMode;
+        Rigidbody2D.interpolation = _componentData.Interpolation;
+        Rigidbody2D.constraints = _componentData.Constraints;
     }
 
     protected override void OnRemove()

@@ -20,13 +20,13 @@ public sealed partial class BoxCollider2DComponent
 
     protected override void OnAdd()
     {
-        BoxCollider2D                  = ComponentPool.Acquire<BoxCollider2D>(GameObject);
-        BoxCollider2D.isTrigger        = _componentData.IsTrigger;
-        BoxCollider2D.offset           = _componentData.Offset;
-        BoxCollider2D.size             = _componentData.Size;
-        BoxCollider2D.edgeRadius       = _componentData.EdgeRadius;
-        BoxCollider2D.usedByEffector   = _componentData.UsedByEffector;
-        BoxCollider2D.usedByComposite  = _componentData.UsedByComposite;
+        BoxCollider2D = ComponentPool.Acquire<BoxCollider2D>(GameObject);
+        BoxCollider2D.isTrigger = _componentData.IsTrigger;
+        BoxCollider2D.offset = _componentData.Offset;
+        BoxCollider2D.size = _componentData.Size;
+        BoxCollider2D.edgeRadius = _componentData.EdgeRadius;
+        BoxCollider2D.usedByEffector = _componentData.UsedByEffector;
+        BoxCollider2D.usedByComposite = _componentData.UsedByComposite;
     }
 
     protected override void OnRemove()

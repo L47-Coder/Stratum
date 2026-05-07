@@ -92,24 +92,33 @@ namespace Stratum.Editor
         private const float Padding = 8f;
         private const float RowH = 20f;
 
-        private static GUIStyle _keyLabelStyle;
-        private static GUIStyle _hintLabelStyle;
         private static GUIStyle _hintLabelCenterStyle;
-
-        private static GUIStyle KeyLabelStyle =>
-            _keyLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
-            { normal = { textColor = new Color(0.58f, 0.58f, 0.58f) } };
-
-        private static GUIStyle HintLabelStyle =>
-            _hintLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
-            { normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
+        private static GUIStyle _addEntityTitleStyle;
+        private static GUIStyle _addEntitySubStyle;
 
         private static GUIStyle HintLabelCenterStyle =>
             _hintLabelCenterStyle ??= new GUIStyle(EditorStyles.miniLabel)
             { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
 
+        private static GUIStyle AddEntityTitleStyle => _addEntityTitleStyle ??= new GUIStyle(EditorStyles.label)
+        {
+            fontSize = 13,
+            fontStyle = FontStyle.Bold,
+            alignment = TextAnchor.MiddleLeft,
+            normal = { textColor = new Color(0.85f, 0.85f, 0.85f) },
+        };
+
+        private static GUIStyle AddEntitySubStyle => _addEntitySubStyle ??= new GUIStyle(EditorStyles.miniLabel)
+        {
+            alignment = TextAnchor.MiddleLeft,
+            normal = { textColor = new Color(0.55f, 0.55f, 0.55f) },
+        };
+
         private static readonly Color AddrLinkRowBg = new(0.115f, 0.115f, 0.12f);
         private static readonly Color AddrLinkRowBgHover = new(0.145f, 0.15f, 0.168f);
+        private static readonly Color CardBg = new(0.13f, 0.13f, 0.14f);
+        private static readonly Color CardBorder = new(0.22f, 0.22f, 0.24f);
+
         private string _currentPath;
         private string _cachedPath;
         private GameObject _cachedPrefab;
@@ -117,12 +126,10 @@ namespace Stratum.Editor
         private SerializedObject _cachedSo;
 
         private bool _isAddressable;
-        private string _addrAddress;
         private string _addrGroup;
-        private string _addrLabels;
 
-        private readonly TableControl _tableView   = new();
-        private readonly FieldPopup   _configPopup = new();
+        private readonly TableControl _tableView = new();
+        private readonly FieldPopup _configPopup = new();
         private bool _tableSetup;
 
         // ── Public API ───────────────────────────────────────────────────────
@@ -166,7 +173,7 @@ namespace Stratum.Editor
                 return;
             }
 
-            DrawPanel(rect);
+            DrawEntityConfigPanel(rect.x, rect.y, rect.width, rect.yMax);
         }
 
         // ── Cache ─────────────────────────────────────────────────────────────
@@ -186,9 +193,7 @@ namespace Stratum.Editor
         private void RefreshAddressableInfo()
         {
             _isAddressable = false;
-            _addrAddress = string.Empty;
             _addrGroup = string.Empty;
-            _addrLabels = string.Empty;
 
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null) return;
@@ -198,85 +203,7 @@ namespace Stratum.Editor
             if (entry == null) return;
 
             _isAddressable = true;
-            _addrAddress = entry.address;
             _addrGroup = entry.parentGroup?.Name ?? string.Empty;
-            _addrLabels = string.Join(", ", entry.labels);
-        }
-
-        // ── Panel layout ──────────────────────────────────────────────────────
-
-        private void DrawPanel(Rect rect)
-        {
-            var addrHeaderH = CalcAddressHeaderHeight();
-
-            var x = rect.x;
-            var w = rect.width;
-            var y = rect.y;
-
-            DrawAddressableHeader(x, y, w, addrHeaderH);
-            y += addrHeaderH;
-
-            DrawEntityConfigPanel(x, y, w, rect.yMax);
-        }
-
-        private float CalcAddressHeaderHeight()
-        {
-            return RowH;
-        }
-
-        // ── Addressable header ────────────────────────────────────────────────
-
-        private void DrawAddressableHeader(float x, float y, float w, float h)
-        {
-            if (!_isAddressable)
-                DrawMarkAddressableHintBlock(ref y, x, w);
-            else
-                DrawAddressWorkbenchLinkRow(ref y, x, w);
-        }
-
-        private void DrawMarkAddressableHintBlock(ref float y, float x, float w)
-        {
-            var blockRect = new Rect(x, y, w, RowH);
-            var hover = blockRect.Contains(Event.current.mousePosition);
-
-            if (Event.current.type == EventType.Repaint)
-                EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
-
-            EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
-
-            if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
-            {
-                MarkAsAddressable();
-                Event.current.Use();
-            }
-
-            EditorGUI.LabelField(new Rect(x, y, w, RowH), "尚未加入 Addressable 组，点击标记", HintLabelCenterStyle);
-            y += RowH;
-        }
-
-        private void DrawAddressWorkbenchLinkRow(ref float y, float x, float w)
-        {
-            var blockRect = new Rect(x, y, w, RowH);
-            var hover = blockRect.Contains(Event.current.mousePosition);
-
-            if (Event.current.type == EventType.Repaint)
-                EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
-
-            EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
-
-            if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
-            {
-                AddressableViewerPage.NavigateFromPrefab(_addrGroup, _cachedPath);
-                Event.current.Use();
-            }
-
-            const float keyW = 56f;
-            var contentX = x + Padding;
-            var contentW = w - Padding * 2f;
-
-            EditorGUI.LabelField(new Rect(contentX, y, keyW, RowH), "Address", KeyLabelStyle);
-            EditorGUI.LabelField(new Rect(contentX + keyW, y, contentW - keyW, RowH), _addrAddress, EditorStyles.miniLabel);
-            y += RowH;
         }
 
         // ── Entity / EntityComponentEntry 表格 ────────────────────────────────
@@ -285,22 +212,7 @@ namespace Stratum.Editor
         {
             if (_cachedEntity == null)
             {
-                var pad = Padding;
-                var blockRect = new Rect(x + pad, y + pad, w - pad * 2f, RowH);
-                var hover = blockRect.Contains(Event.current.mousePosition);
-
-                if (Event.current.type == EventType.Repaint)
-                    EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
-
-                EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
-
-                if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
-                {
-                    AddEntity();
-                    Event.current.Use();
-                }
-
-                EditorGUI.LabelField(blockRect, "此预制体尚未挂载 Entity 组件，点击挂载", HintLabelCenterStyle);
+                DrawAddEntityPlaceholder(x, y, w, yMax);
                 return;
             }
 
@@ -324,14 +236,26 @@ namespace Stratum.Editor
             if (_tableSetup) return;
             _tableSetup = true;
 
-            _tableView.CanAdd         = true;
-            _tableView.CanReorder     = true;
-            _tableView.CanRemove      = true;
-            _tableView.CanSelect      = false;
-            _tableView.CanEdit        = true;
-            _tableView.ShowToolbar    = false;
+            _tableView.CanAdd = true;
+            _tableView.CanReorder = true;
+            _tableView.CanRemove = true;
+            _tableView.CanSelect = false;
+            _tableView.CanEdit = true;
+            _tableView.ShowToolbar = true;
             _tableView.MarkDuplicates = false;
+            _tableView.KeyField       = "EntryKey";
+            _tableView.ToolbarButtons.Add(new GUIContent(
+                EditorGUIUtility.IconContent("d_Linked").image,
+                "在 Addressable Viewer 中查看"));
             _tableView.OnRowExpandField((rowIndex, _, anchorRect) => OpenConfigPopup(rowIndex, anchorRect));
+            _tableView.OnButtonClick(idx =>
+            {
+                if (idx != 0) return;
+                if (_isAddressable)
+                    AddressableViewerPage.NavigateFromPrefab(_addrGroup, _cachedPath);
+                else
+                    MarkAsAddressable();
+            });
         }
 
         // ── ComponentType 变更时重建 Data ──────────────────────────────────────
@@ -367,7 +291,12 @@ namespace Stratum.Editor
                 anyFixed = true;
             }
 
-            if (anyFixed) _cachedSo.ApplyModifiedProperties();
+            if (!anyFixed) return;
+
+            _cachedSo.ApplyModifiedProperties();
+
+            foreach (var entry in _cachedEntity.Components)
+                entry.RefreshEntryKey();
         }
 
         // ── 打开 Config 弹窗 ──────────────────────────────────────────────────
@@ -388,6 +317,44 @@ namespace Stratum.Editor
                 DevWindow.Refresh();
             });
             _configPopup.Show(anchorRect, entry.Data);
+        }
+
+        // ── 无 Entity 占位视图 ────────────────────────────────────────────────
+
+        private void DrawAddEntityPlaceholder(float x, float y, float w, float yMax)
+        {
+            const float bannerH = 56f;
+            var bannerRect = new Rect(x, y, w, bannerH);
+            var hover = bannerRect.Contains(Event.current.mousePosition);
+
+            if (Event.current.type == EventType.Repaint)
+            {
+                EditorGUI.DrawRect(bannerRect, hover ? new Color(0.16f, 0.16f, 0.17f) : CardBg);
+                EditorGUI.DrawRect(new Rect(x, y + bannerH - 1, w, 1), CardBorder);
+            }
+
+            EditorGUIUtility.AddCursorRect(bannerRect, MouseCursor.Link);
+
+            if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
+            {
+                AddEntity();
+                Event.current.Use();
+            }
+
+            var cursorX = x + 16f;
+
+            // 图标
+            var iconContent = EditorGUIUtility.IconContent("Prefab Icon");
+            var iconSize = 32f;
+            var iconRect = new Rect(cursorX, y + (bannerH - iconSize) * 0.5f, iconSize, iconSize);
+            GUI.DrawTexture(iconRect, iconContent.image as Texture2D, ScaleMode.ScaleToFit, true,
+                            0f, new Color(1f, 1f, 1f, 0.45f), 0f, 0f);
+            cursorX += iconSize + 12f;
+
+            // 文字区域
+            var textY = y + (bannerH - 34f) * 0.5f;
+            GUI.Label(new Rect(cursorX, textY, w - 80f, 18f), "尚未挂载 Entity 组件", AddEntityTitleStyle);
+            GUI.Label(new Rect(cursorX, textY + 18f, w - 80f, 16f), "点击此处添加 Entity 组件以在框架中管理其生命周期与组件配置。", AddEntitySubStyle);
         }
 
         // ── 挂载 Entity ──────────────────────────────────────────────────────

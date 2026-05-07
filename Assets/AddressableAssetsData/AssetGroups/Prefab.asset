@@ -17,8 +17,8 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 0d12412c00c22fd409711a8e30a196eb
   m_SerializeEntries:
-  - m_GUID: 8140e74dfd550b74f817bf2e1fc0591d
-    m_Address: Prefab/A
+  - m_GUID: 78db61fb8e8cd8c44ab879b281884dfd
+    m_Address: Prefab/Test
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -12,7 +12,7 @@ namespace Stratum.Editor
     {
         private Action _onChanged;
 
-        private const float PopupW = 360f;
+        private const float PopupMinW = 240f;
         private const float PaddingV = 4f;
         private const float MaxHeight = 420f;
 
@@ -26,6 +26,7 @@ namespace Stratum.Editor
             private readonly FieldRenderer _renderer;
             private readonly Action _onChanged;
             private readonly float _contentH;
+            private readonly float _contentW;
 
             internal PopupContent(T item, bool @readonly, Action onChanged)
             {
@@ -33,10 +34,11 @@ namespace Stratum.Editor
                 _onChanged = onChanged;
                 var count = _renderer.Prepare(item);
                 _contentH = count > 0 ? _renderer.ContentHeight() : 22f;
+                _contentW = Mathf.Max(count > 0 ? _renderer.ContentWidth() : 0f, PopupMinW);
             }
 
             public override Vector2 GetWindowSize() =>
-                new(PopupW, Mathf.Min(_contentH + PaddingV * 2f, MaxHeight));
+                new(_contentW, Mathf.Min(_contentH + PaddingV * 2f, MaxHeight));
 
             public override void OnGUI(Rect rect)
             {
@@ -53,7 +55,6 @@ namespace Stratum.Editor
 
         private sealed class FieldRenderer
         {
-            private const float LabelWidth = 130f;
             private const float RowHeight = 22f;
             private const float RowGap = 2f;
             private const float PaddingH = 4f;
@@ -69,6 +70,7 @@ namespace Stratum.Editor
             private List<FieldDef> _fieldDefs;
             private Vector2 _scrollPos;
             private object _lastItem;
+            private float _columnWidth;
 
             private Dictionary<FieldInfo, object> _draft;
 
@@ -79,6 +81,14 @@ namespace Stratum.Editor
                 var t = item.GetType();
                 if (_cachedType != t) { _cachedType = t; _fieldDefs = null; }
                 _fieldDefs ??= BuildFieldDefs(t);
+
+                _columnWidth = _fieldDefs.Count > 0
+                    ? _fieldDefs.Max(def =>
+                    {
+                        var attrWidth = def.Field.GetCustomAttribute<FieldAttribute>(false)?.Width ?? 0f;
+                        return Mathf.Max(FieldLayoutUtil.GetMinWidth(def.Field), attrWidth);
+                    })
+                    : 130f;
 
                 _draft = new Dictionary<FieldInfo, object>(_fieldDefs.Count);
                 foreach (var def in _fieldDefs)
@@ -104,7 +114,7 @@ namespace Stratum.Editor
 
             private static bool IsDraftManaged(Type t)
             {
-                if (IsStringList(t)) return false;
+                if (FieldLayoutUtil.IsStringList(t)) return false;
                 if (t == typeof(AnimationCurve) || t == typeof(Gradient)) return false;
                 return true;
             }
@@ -112,6 +122,11 @@ namespace Stratum.Editor
             internal float ContentHeight() =>
                 _fieldDefs == null || _fieldDefs.Count == 0 ? 0f
                 : _fieldDefs.Count * (RowHeight + RowGap) - RowGap;
+
+            // 总宽 = 名称列 + 分割线(1px) + 控件列，两列等宽各为 _columnWidth
+            internal float ContentWidth() =>
+                _fieldDefs == null || _fieldDefs.Count == 0 ? 0f
+                : _columnWidth * 2f + 1f + PaddingH * 2f;
 
             internal void DrawRows(Rect contentRect)
             {
@@ -145,11 +160,11 @@ namespace Stratum.Editor
                 if (Event.current.type == EventType.Repaint)
                     EditorGUI.DrawRect(rowRect, stripe == 0 ? RowBg0 : RowBg1);
 
-                var divX = rowRect.x + LabelWidth;
+                var divX = rowRect.x + _columnWidth;
                 if (Event.current.type == EventType.Repaint)
                     EditorGUI.DrawRect(new Rect(divX, rowRect.y, 1f, rowRect.height), DividerColor);
 
-                var labelRect = new Rect(rowRect.x + PaddingH, rowRect.y + PaddingV, LabelWidth - PaddingH * 2f, rowRect.height - PaddingV * 2f);
+                var labelRect = new Rect(rowRect.x + PaddingH, rowRect.y + PaddingV, _columnWidth - PaddingH * 2f, rowRect.height - PaddingV * 2f);
                 var controlRect = new Rect(divX + 1f + PaddingH, rowRect.y + PaddingV, rowRect.xMax - divX - 1f - PaddingH * 2f, rowRect.height - PaddingV * 2f);
 
                 GUI.Label(labelRect, def.Title, LabelStyle);
@@ -165,7 +180,7 @@ namespace Stratum.Editor
 
                 var value = managed ? _draft[field] : field.GetValue(boxed);
 
-                if (IsStringList(type))
+                if (FieldLayoutUtil.IsStringList(type))
                 {
                     var list = value as List<string> ?? new List<string>();
                     var summary = list.Count == 0 ? "(空)" : $"[{list.Count}]  {string.Join(", ", list)}";
@@ -268,7 +283,7 @@ namespace Stratum.Editor
             {
                 const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
                 return type.GetFields(flags)
-                    .Where(IsSerializedField)
+                    .Where(FieldLayoutUtil.IsSerializedField)
                     .OrderBy(f => f.MetadataToken)
                     .Select(ToFieldDef)
                     .Where(d => d.HasValue)
@@ -284,17 +299,6 @@ namespace Stratum.Editor
                 return new FieldDef(title, attr?.Readonly ?? false, field,
                     field.GetCustomAttribute<DropdownAttribute>(false));
             }
-
-            private static bool IsSerializedField(FieldInfo f) =>
-                !f.IsStatic &&
-                !f.IsDefined(typeof(NonSerializedAttribute), false) &&
-                !f.IsDefined(typeof(HideInInspector), false) &&
-                (f.IsPublic || f.IsDefined(typeof(SerializeField), false));
-
-            private static bool IsStringList(Type type) =>
-                type.IsGenericType &&
-                type.GetGenericTypeDefinition() == typeof(List<>) &&
-                type.GetGenericArguments()[0] == typeof(string);
 
             private static GUIStyle _dropdownButtonStyle;
             private static GUIStyle DropdownButtonStyle =>
