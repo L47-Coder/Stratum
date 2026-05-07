@@ -19,7 +19,7 @@ namespace Stratum.Editor
                 return;
             }
 
-            var group   = EnsureGroup(settings, groupName);
+            var group = EnsureGroup(settings, groupName);
             var existing = settings.FindAssetEntry(guid);
             if (existing != null && existing.address == address && existing.parentGroup == group) return;
 

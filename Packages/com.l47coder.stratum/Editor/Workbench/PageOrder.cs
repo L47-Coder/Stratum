@@ -4,7 +4,8 @@ using System.Linq;
 using UnityEngine;
 
 namespace Stratum.Editor
-{    internal sealed class PageOrder : ScriptableObject
+{
+    internal sealed class PageOrder : ScriptableObject
     {
         [Serializable]
         private class GroupEntry

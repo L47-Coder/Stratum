@@ -23,8 +23,8 @@ namespace Stratum.Editor
                 {
                     result = method.Invoke(null, null) switch
                     {
-                        string[] arr        => arr,
-                        List<string> list   => list.ToArray(),
+                        string[] arr => arr,
+                        List<string> list => list.ToArray(),
                         IEnumerable<string> e => e.ToArray(),
                         _ => null,
                     };

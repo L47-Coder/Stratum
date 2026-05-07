@@ -67,12 +67,23 @@ namespace Stratum.Editor
     internal sealed class PrefabViewerLeftPanel
     {
         private readonly TreeControl _treeView = new();
+        private string _lastSelectedPath;
 
         public void OnFirstEnter(Action<string> onSelected)
         {
             _treeView.HiddenExtensions = new() { ".prefab" };
             _treeView.CanAdd = true;
-            _treeView.OnNodeSelected(onSelected);
+            _treeView.OnNodeSelected(path =>
+            {
+                _lastSelectedPath = path;
+                onSelected(path);
+            });
+            _treeView.OnNodeRenamed((oldPath, newPath) =>
+            {
+                if (!string.Equals(_lastSelectedPath, oldPath, StringComparison.OrdinalIgnoreCase)) return;
+                _lastSelectedPath = newPath;
+                onSelected(newPath);
+            });
         }
 
         public void OnGUI(Rect rect) =>
@@ -93,6 +104,8 @@ namespace Stratum.Editor
         private static GUIStyle _keyLabelStyle;
         private static GUIStyle _hintLabelStyle;
         private static GUIStyle _addrHintStyle;
+        private static GUIStyle _addrHintCenterStyle;
+        private static GUIStyle _hintLabelCenterStyle;
 
         private static GUIStyle _titleStyle;
 
@@ -115,10 +128,20 @@ namespace Stratum.Editor
             _addrHintStyle ??= new GUIStyle(EditorStyles.label)
             { normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
 
+        private static GUIStyle AddrHintCenterStyle =>
+            _addrHintCenterStyle ??= new GUIStyle(EditorStyles.label)
+            { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.68f, 0.68f, 0.68f) } };
+
+        private static GUIStyle HintLabelCenterStyle =>
+            _hintLabelCenterStyle ??= new GUIStyle(EditorStyles.miniLabel)
+            { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
+
         private static readonly Color HeaderBg = new(0.105f, 0.105f, 0.11f);
         private static readonly Color HeaderRule = new(0.2f, 0.2f, 0.22f);
         private static readonly Color ThumbBorder = new(0.06f, 0.06f, 0.07f);
         private static readonly Color ThumbBackdrop = new(0.15f, 0.15f, 0.16f);
+        private static readonly Color AddrLinkRowBg = new(0.115f, 0.115f, 0.12f);
+        private static readonly Color AddrLinkRowBgHover = new(0.145f, 0.15f, 0.168f);
         private string _currentPath;
         private string _cachedPath;
         private GameObject _cachedPrefab;
@@ -232,8 +255,9 @@ namespace Stratum.Editor
 
         private float CalcAddressHeaderHeight()
         {
-            var infoRows = !_isAddressable ? 1 : (string.IsNullOrEmpty(_addrLabels) ? 2 : 3);
-            var rightH = Padding + TitleRowH + 6f + infoRows * RowH + 8f + 22f + Padding;
+            var infoRows = !_isAddressable ? 2 : (string.IsNullOrEmpty(_addrLabels) ? 2 : 3);
+            // Title + gap + separator + gap + rows（未标记时为 2×RowH 提示块；已标记为 Address+Group 块或 +Labels）
+            var rightH = Padding + TitleRowH + 3f + 1f + 4f + infoRows * RowH + Padding;
             var leftH = Padding + PreviewSize + Padding;
             return Mathf.Max(leftH, rightH);
         }
@@ -249,7 +273,8 @@ namespace Stratum.Editor
             if (_cachedPreview == null)
                 _cachedPreview = AssetPreview.GetAssetPreview(_cachedPrefab);
 
-            var thumbOuter = new Rect(x + Padding, y + Padding, PreviewSize, PreviewSize);
+            // 缩略图垂直居中
+            var thumbOuter = new Rect(x + Padding, y + (h - PreviewSize) * 0.5f, PreviewSize, PreviewSize);
             if (Event.current.type == EventType.Repaint)
             {
                 EditorGUI.DrawRect(new Rect(thumbOuter.x - 1f, thumbOuter.y - 1f, thumbOuter.width + 2f, thumbOuter.height + 2f), ThumbBorder);
@@ -262,39 +287,101 @@ namespace Stratum.Editor
             else if (Event.current.type == EventType.Repaint)
                 EditorGUI.DrawRect(thumbInner, new Color(0.2f, 0.2f, 0.21f));
 
-            var rightX = thumbOuter.xMax + Padding + 2f;
+            var rightX = thumbOuter.xMax + Padding + 4f;
             var rightW = Mathf.Max(40f, x + w - rightX - Padding);
             var ry = y + Padding;
 
+            // 预制体名称
             var prefabTitle = Path.GetFileNameWithoutExtension(_cachedPath) ?? "Prefab";
             GUI.Label(new Rect(rightX, ry, rightW, TitleRowH), prefabTitle, TitleStyle);
-            ry += TitleRowH + 6f;
+            ry += TitleRowH + 3f;
+
+            // 标题下方细分隔线
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(new Rect(rightX, ry, rightW, 1f), HeaderRule);
+            ry += 4f;
 
             if (!_isAddressable)
-            {
-                EditorGUI.LabelField(new Rect(rightX, ry, rightW, RowH),
-                    "尚未加入 Addressable 组", AddrHintStyle);
-                ry += RowH + 8f;
-                if (GUI.Button(new Rect(rightX, ry, rightW, 22f), "标记为 Addressable", EditorStyles.miniButton))
-                    MarkAsAddressable();
-            }
+                DrawMarkAddressableHintBlock(ref ry, rightX, rightW);
             else
             {
-                DrawKeyValue(ref ry, rightX, rightW, "Address", _addrAddress);
-                DrawKeyValue(ref ry, rightX, rightW, "Group", _addrGroup);
+                DrawAddressGroupWorkbenchLinkBlock(ref ry, rightX, rightW);
                 if (!string.IsNullOrEmpty(_addrLabels))
                     DrawKeyValue(ref ry, rightX, rightW, "Labels", _addrLabels);
-                ry += 8f;
-                if (GUI.Button(new Rect(rightX, ry, rightW, 22f), "在 Dev Workbench 中查看", EditorStyles.miniButton))
-                    AddressableViewerPage.NavigateFromPrefab(_addrGroup);
             }
+        }
+
+        private void DrawMarkAddressableHintBlock(ref float y, float x, float w)
+        {
+            var blockH = RowH * 2f;
+            var blockRect = new Rect(x, y, w, blockH);
+            var hover = blockRect.Contains(Event.current.mousePosition);
+
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
+
+            EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
+
+            if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
+            {
+                MarkAsAddressable();
+                Event.current.Use();
+            }
+
+            const float paddingY = 4f;
+            const float lineH = 16f;
+
+            EditorGUI.LabelField(new Rect(x, y + paddingY, w, lineH), "尚未加入 Addressable 组", AddrHintCenterStyle);
+            EditorGUI.LabelField(new Rect(x, y + paddingY + lineH, w, lineH), "点击以标记为 Addressable", HintLabelCenterStyle);
+            y += blockH;
+        }
+
+        private void DrawAddressGroupWorkbenchLinkBlock(ref float y, float x, float w)
+        {
+            var blockH = RowH * 2f;
+            var blockRect = new Rect(x, y, w, blockH);
+            var hover = blockRect.Contains(Event.current.mousePosition);
+
+            if (Event.current.type == EventType.Repaint)
+                EditorGUI.DrawRect(blockRect, hover ? AddrLinkRowBgHover : AddrLinkRowBg);
+
+            EditorGUIUtility.AddCursorRect(blockRect, MouseCursor.Link);
+
+            if (Event.current.type == EventType.MouseDown && hover && Event.current.button == 0)
+            {
+                AddressableViewerPage.NavigateFromPrefab(_addrGroup);
+                Event.current.Use();
+            }
+
+            const float paddingX = 10f;
+            const float paddingY = 4f;
+            const float lineH = 16f;
+            const float keyW = 56f;
+
+            var innerX = x + paddingX;
+            var innerW = w - paddingX * 2f;
+            var yLine = y + paddingY;
+
+            EditorGUI.LabelField(new Rect(innerX, yLine, keyW, lineH), "Address", KeyLabelStyle);
+            EditorGUI.LabelField(new Rect(innerX + keyW, yLine, innerW - keyW, lineH), _addrAddress, EditorStyles.miniLabel);
+            
+            yLine += lineH;
+            
+            EditorGUI.LabelField(new Rect(innerX, yLine, keyW, lineH), "Group", KeyLabelStyle);
+            EditorGUI.LabelField(new Rect(innerX + keyW, yLine, innerW - keyW, lineH), _addrGroup, EditorStyles.miniLabel);
+
+            y += blockH;
         }
 
         private static void DrawKeyValue(ref float y, float x, float w, string key, string value)
         {
-            const float keyW = 64f;
-            EditorGUI.LabelField(new Rect(x, y, keyW, RowH), key, KeyLabelStyle);
-            EditorGUI.LabelField(new Rect(x + keyW + 4f, y, w - keyW - 4f, RowH),
+            const float paddingX = 10f;
+            const float keyW = 56f;
+            var innerX = x + paddingX;
+            var innerW = w - paddingX * 2f;
+
+            EditorGUI.LabelField(new Rect(innerX, y, keyW, RowH), key, KeyLabelStyle);
+            EditorGUI.LabelField(new Rect(innerX + keyW, y, innerW - keyW, RowH),
                 value, EditorStyles.miniLabel);
             y += RowH;
         }
@@ -421,9 +508,26 @@ namespace Stratum.Editor
                 Debug.LogWarning("[PrefabViewer] 找不到 AddressableAssetSettings，请先在 Addressables 创建配置。");
                 return;
             }
+
+            const string groupName = "Prefab";
+            var group = settings.FindGroup(groupName);
+            if (group == null)
+            {
+                var schemas = settings.DefaultGroup != null ? settings.DefaultGroup.Schemas : null;
+                group = settings.CreateGroup(groupName, false, false, false, schemas);
+            }
+
             var guid = AssetDatabase.AssetPathToGUID(_cachedPath);
-            var entry = settings.CreateOrMoveEntry(guid, settings.DefaultGroup);
-            entry.address = Path.GetFileNameWithoutExtension(_cachedPath);
+            var entry = settings.CreateOrMoveEntry(guid, group);
+
+            const string gamePrefix = "Assets/Game/";
+            var address = _cachedPath.StartsWith(gamePrefix, StringComparison.OrdinalIgnoreCase)
+                ? _cachedPath[gamePrefix.Length..]
+                : _cachedPath;
+            if (address.EndsWith(".prefab", StringComparison.OrdinalIgnoreCase))
+                address = address[..^".prefab".Length];
+
+            entry.address = address;
             EditorUtility.SetDirty(settings);
             AssetDatabase.SaveAssets();
             RefreshAddressableInfo();

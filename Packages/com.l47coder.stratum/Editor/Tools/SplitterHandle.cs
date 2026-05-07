@@ -17,7 +17,7 @@ namespace Stratum.Editor
         public (Rect left, Rect right) Draw(Rect rect, float minX, float maxX)
         {
             var visualRect = new Rect(rect.x + X, rect.y, VisualW, rect.height);
-            var hitRect    = new Rect(rect.x + X - HitExtra, rect.y, VisualW + HitExtra * 2f, rect.height);
+            var hitRect = new Rect(rect.x + X - HitExtra, rect.y, VisualW + HitExtra * 2f, rect.height);
 
             EditorGUIUtility.AddCursorRect(hitRect, MouseCursor.ResizeHorizontal);
 
@@ -35,8 +35,8 @@ namespace Stratum.Editor
 
             EditorGUI.DrawRect(visualRect, LineColor);
             return (
-                new Rect(rect.x,           rect.y, X,                              rect.height),
-                new Rect(visualRect.xMax,  rect.y, rect.width - X - VisualW,       rect.height)
+                new Rect(rect.x, rect.y, X, rect.height),
+                new Rect(visualRect.xMax, rect.y, rect.width - X - VisualW, rect.height)
             );
         }
     }

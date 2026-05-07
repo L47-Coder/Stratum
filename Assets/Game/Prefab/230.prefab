@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 7926332395519849953}
   - component: {fileID: 2930389028131088347}
   m_Layer: 0
-  m_Name: Capsule
+  m_Name: 230
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -98,24 +98,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - EntryKey: AComponent_10
+  - EntryKey: BComponent_20
+    InitOnStart: 1
+    ComponentType: BComponent
+    Data:
+      rid: 8899497855839895553
+  - EntryKey: BComponent_20
     InitOnStart: 1
     ComponentType: AComponent
     Data:
-      rid: 8899497832442757139
-  - EntryKey: AComponent_0
-    InitOnStart: 1
-    ComponentType: AComponent
-    Data:
-      rid: 8899497832442757150
+      rid: 8899497855839895552
   references:
     version: 2
     RefIds:
-    - rid: 8899497832442757139
+    - rid: 8899497855839895552
       type: {class: AComponentData, ns: , asm: Game.Components}
       data:
         Key: 
-    - rid: 8899497832442757150
-      type: {class: AComponentData, ns: , asm: Game.Components}
+    - rid: 8899497855839895553
+      type: {class: BComponentData, ns: , asm: Game.Components}
       data:
-        Key: 0
+        Key: 20
+        a: 222

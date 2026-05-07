@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _configs:
   - Key: 10
-    a: 111
+    a: 222
   - Key: 20
-    a: 111
+    a: 222
   - Key: 30
     a: 222

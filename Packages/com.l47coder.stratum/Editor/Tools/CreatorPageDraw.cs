@@ -31,17 +31,17 @@ namespace Stratum.Editor
         public const float DotLeftPad = 4f;
         public const float FieldSpacing = 4f;
 
-        public static readonly Color BgColor      = new(0.17f,  0.17f,  0.17f);
-        public static readonly Color CardBg        = new(0.215f, 0.215f, 0.215f);
-        public static readonly Color CardBorder    = new(0.13f,  0.13f,  0.13f);
-        public static readonly Color AccentBlue    = new(0.35f,  0.65f,  1f);
-        public static readonly Color HeaderText    = new(0.78f,  0.84f,  0.94f);
-        public static readonly Color ValueBg       = new(0.15f,  0.15f,  0.15f);
-        public static readonly Color ValueBorder   = new(0.11f,  0.11f,  0.11f);
-        public static readonly Color CreateColor   = new(0.29f,  0.78f,  0.40f);
-        public static readonly Color WriteColor    = new(0.95f,  0.75f,  0.22f);
-        public static readonly Color SkipColor     = new(0.85f,  0.35f,  0.35f);
-        public static readonly Color NeutralColor  = new(0.50f,  0.50f,  0.50f);
+        public static readonly Color BgColor = new(0.17f, 0.17f, 0.17f);
+        public static readonly Color CardBg = new(0.215f, 0.215f, 0.215f);
+        public static readonly Color CardBorder = new(0.13f, 0.13f, 0.13f);
+        public static readonly Color AccentBlue = new(0.35f, 0.65f, 1f);
+        public static readonly Color HeaderText = new(0.78f, 0.84f, 0.94f);
+        public static readonly Color ValueBg = new(0.15f, 0.15f, 0.15f);
+        public static readonly Color ValueBorder = new(0.11f, 0.11f, 0.11f);
+        public static readonly Color CreateColor = new(0.29f, 0.78f, 0.40f);
+        public static readonly Color WriteColor = new(0.95f, 0.75f, 0.22f);
+        public static readonly Color SkipColor = new(0.85f, 0.35f, 0.35f);
+        public static readonly Color NeutralColor = new(0.50f, 0.50f, 0.50f);
 
         private static readonly (Color color, string label)[] LegendItems =
         {
@@ -106,10 +106,10 @@ namespace Stratum.Editor
 
         public static void DrawOutline(Rect r, Color c)
         {
-            EditorGUI.DrawRect(new Rect(r.x,          r.y,          r.width, 1f),       c);
-            EditorGUI.DrawRect(new Rect(r.x,          r.yMax - 1f,  r.width, 1f),       c);
-            EditorGUI.DrawRect(new Rect(r.x,          r.y,          1f,      r.height), c);
-            EditorGUI.DrawRect(new Rect(r.xMax - 1f,  r.y,          1f,      r.height), c);
+            EditorGUI.DrawRect(new Rect(r.x, r.y, r.width, 1f), c);
+            EditorGUI.DrawRect(new Rect(r.x, r.yMax - 1f, r.width, 1f), c);
+            EditorGUI.DrawRect(new Rect(r.x, r.y, 1f, r.height), c);
+            EditorGUI.DrawRect(new Rect(r.xMax - 1f, r.y, 1f, r.height), c);
         }
 
         private static Texture2D _circleTex;
@@ -163,9 +163,9 @@ namespace Stratum.Editor
         public static Color StatusColor(PreviewStatus s) => s switch
         {
             PreviewStatus.Create => CreateColor,
-            PreviewStatus.Write  => WriteColor,
-            PreviewStatus.Skip   => SkipColor,
-            _                    => NeutralColor,
+            PreviewStatus.Write => WriteColor,
+            PreviewStatus.Skip => SkipColor,
+            _ => NeutralColor,
         };
 
         public static void DrawFieldLabel(Rect fullRect, string label, PreviewStatus status)
