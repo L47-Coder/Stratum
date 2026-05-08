@@ -24,7 +24,7 @@ namespace Stratum
     {
         public GameObject GameObject { get; private set; }
         public bool IsEnabled { get; private set; }
-        
+
         protected virtual void OnAdd() { }
         protected virtual void OnEnable() { }
         protected virtual void OnUpdate() { }

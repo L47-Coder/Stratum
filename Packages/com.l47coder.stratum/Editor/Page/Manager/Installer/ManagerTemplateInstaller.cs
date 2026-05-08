@@ -17,7 +17,7 @@ namespace Stratum.Editor
             public string id;
             public string displayName;
             public string description;
-            public bool   recommended;
+            public bool recommended;
         }
 
         [Serializable]
@@ -39,7 +39,7 @@ namespace Stratum.Editor
 
             try
             {
-                var json   = File.ReadAllText(manifestAbs);
+                var json = File.ReadAllText(manifestAbs);
                 var parsed = JsonUtility.FromJson<Manifest>(json);
                 _cachedManifest = parsed?.packages ?? new List<PackageInfo>();
             }
@@ -135,7 +135,7 @@ namespace Stratum.Editor
                     if (!string.Equals(Path.GetFileName(dir), managerName, StringComparison.OrdinalIgnoreCase))
                         continue;
 
-                    if (fallbackAbs == null) fallbackAbs = dir;
+                    fallbackAbs ??= dir;
 
                     if (File.Exists(Path.Combine(dir, LeafMarkerFileName)) ||
                         File.Exists(Path.Combine(dir, expectedScriptName)))

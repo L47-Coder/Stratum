@@ -37,49 +37,20 @@ namespace Stratum.Editor
 
         public void OnEnter() => FinishPendingGroupSelection(this);
 
-        private const float SplitterVisualW = 1f;
         private const float LeftPanelMin = 100f;
         private const float LeftPanelMax = 800f;
         private const float LeftPanelStart = 180f;
-        private static readonly Color SplitterColor = new(0.11f, 0.11f, 0.11f);
 
         private readonly AddressableGroupPanel _leftPanel = new();
         private readonly AddressableEntryPanel _rightPanel = new();
-        private float _splitterX = LeftPanelStart;
-        private bool _dragging;
+        private SplitterHandle _splitter = new(LeftPanelStart);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetGroup, _rightPanel.Invalidate);
 
         public void OnGUI(Rect rect)
         {
-            var visualRect = new Rect(rect.x + _splitterX, rect.y, SplitterVisualW, rect.height);
-            var hitRect = new Rect(rect.x + _splitterX - 2f, rect.y, SplitterVisualW + 4f, rect.height);
-
-            EditorGUIUtility.AddCursorRect(hitRect, MouseCursor.ResizeHorizontal);
-
-            var evt = Event.current;
-            switch (evt.type)
-            {
-                case EventType.MouseDown when hitRect.Contains(evt.mousePosition):
-                    _dragging = true;
-                    evt.Use();
-                    break;
-                case EventType.MouseDrag when _dragging:
-                    var maxX = Mathf.Min(LeftPanelMax, rect.width - LeftPanelMin - SplitterVisualW);
-                    _splitterX = Mathf.Clamp(evt.mousePosition.x - rect.x, LeftPanelMin, maxX);
-                    evt.Use();
-                    break;
-                case EventType.MouseUp when _dragging:
-                    _dragging = false;
-                    evt.Use();
-                    break;
-            }
-
-            var leftRect = new Rect(rect.x, rect.y, _splitterX, rect.height);
-            var rightRect = new Rect(visualRect.xMax, rect.y, rect.width - _splitterX - SplitterVisualW, rect.height);
-
+            var (leftRect, rightRect) = _splitter.Draw(rect, LeftPanelMin, LeftPanelMax);
             _leftPanel.OnGUI(leftRect);
-            EditorGUI.DrawRect(visualRect, SplitterColor);
             _rightPanel.OnGUI(rightRect);
         }
     }
@@ -158,8 +129,7 @@ namespace Stratum.Editor
         {
             _visibleGroups = GetSortedVisibleGroups(settings);
             _groupNames.Clear();
-            foreach (var g in _visibleGroups)
-                _groupNames.Add(g.Name);
+            _groupNames.AddRange(_visibleGroups.Select(g => g.Name));
         }
 
         private static List<AddressableAssetGroup> GetSortedVisibleGroups(AddressableAssetSettings settings)
@@ -198,9 +168,7 @@ namespace Stratum.Editor
             EditorUtility.SetDirty(s);
             AssetDatabase.SaveAssets();
 
-            _visibleGroups = GetSortedVisibleGroups(s);
-            _groupNames.Clear();
-            foreach (var g in _visibleGroups) _groupNames.Add(g.Name);
+            RebuildGroupList(s);
             _knownGroupCount = s.groups.Count;
         }
 
@@ -329,14 +297,12 @@ namespace Stratum.Editor
 
         public AddressableEntryPanel()
         {
-            // 行拖出控件时：设置跨控件拖拽载荷
             _tableView.OnRowDragOut(idx =>
             {
                 if (idx >= 0 && idx < _rows.Count)
                     DragAndDrop.SetGenericData("AddressableEntryGuid", _rows[idx].Guid);
             });
 
-            // 行在组内重排时：同步 _entries，保证 SyncAllEntries 的索引对应关系正确
             _tableView.OnRowMove((from, to) =>
             {
                 if (from < 0 || from >= _entries.Count) return;

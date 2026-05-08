@@ -24,7 +24,7 @@ namespace Stratum
             {
                 var field = Data.GetType().GetField("Key",
                     System.Reflection.BindingFlags.Instance |
-                    System.Reflection.BindingFlags.Public   |
+                    System.Reflection.BindingFlags.Public |
                     System.Reflection.BindingFlags.NonPublic);
                 var val = field?.GetValue(Data) as string;
                 if (!string.IsNullOrEmpty(val)) key = val;

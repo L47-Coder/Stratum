@@ -61,8 +61,6 @@ namespace Stratum.Editor
         private Action<int> _onButtonClick;
         private Action<int> _onRowDragOut;
         private Action<int> _onRowReceiveDrop;
-        // (rowIndex, fieldName, anchorRect) — 某行带 [Expandable] 字段的展开按钮被点击，
-        // anchorRect 供 PopupWindow.Show 定位
         private Action<int, string, Rect> _onRowExpandField;
 
         private Vector2 _lastGroupSize;
@@ -148,12 +146,7 @@ namespace Stratum.Editor
             return true;
         }
 
-        private static void RequestGuiVisualRefresh()
-        {
-            // 仅请求重绘（hover 高亮/拖拽视觉等），不污染 GUI.changed —— 后者只用于
-            // 表达“控件值真的变了”，否则外层（如 PrefabViewer）会把 hover 误判为数据变化。
-            (EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow)?.Repaint();
-        }
+        private static void RequestGuiVisualRefresh() => (EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow)?.Repaint();
 
         private void DrawCore<T>(Rect rect, List<T> list)
         {

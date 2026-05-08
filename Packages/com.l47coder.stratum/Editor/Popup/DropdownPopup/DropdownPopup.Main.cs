@@ -21,8 +21,7 @@ namespace Stratum.Editor
         private void ShowCore(Rect anchorRect, string[] items, string current)
         {
             if (items == null || items.Length == 0) return;
-            var width = Mathf.Max(anchorRect.width, MinW);
-            PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, width, _onConfirmed));
+            PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, Mathf.Max(anchorRect.width, MinW), _onConfirmed));
         }
 
         private sealed class Content : PopupWindowContent
@@ -110,13 +109,11 @@ namespace Stratum.Editor
                     if (isSelected) EditorGUI.DrawRect(rowRect, SelectedBg);
                     else if (isHover) EditorGUI.DrawRect(rowRect, HoverBg);
 
-                    var textRect = new Rect(rowRect.x + TextPadL, rowRect.y,
-                        rowRect.width - TextPadL - CheckmarkW, rowRect.height);
+                    var textRect = new Rect(rowRect.x + TextPadL, rowRect.y, rowRect.width - TextPadL - CheckmarkW, rowRect.height);
                     GUI.Label(textRect, item, isSelected ? SelectedRowStyle : NormalRowStyle);
 
                     if (isSelected)
-                        GUI.Label(new Rect(rowRect.xMax - CheckmarkW, rowRect.y, CheckmarkW, rowRect.height),
-                            "✓", CheckmarkStyle);
+                        GUI.Label(new Rect(rowRect.xMax - CheckmarkW, rowRect.y, CheckmarkW, rowRect.height), "✓", CheckmarkStyle);
                 }
 
                 EditorGUIUtility.AddCursorRect(rowRect, MouseCursor.Link);
@@ -140,17 +137,14 @@ namespace Stratum.Editor
                 }
             }
 
-            private static HashSet<string> ParseSelected(string current, string separator, bool multi)
-            {
-                var set = new HashSet<string>(StringComparer.Ordinal);
-                if (string.IsNullOrEmpty(current) || !multi) return set;
-                foreach (var s in current.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    var t = s.Trim();
-                    if (t.Length > 0) set.Add(t);
-                }
-                return set;
-            }
+            private static HashSet<string> ParseSelected(string current, string separator, bool multi) =>
+                string.IsNullOrEmpty(current) || !multi
+                    ? new HashSet<string>(StringComparer.Ordinal)
+                    : new HashSet<string>(
+                        current.Split(new[] { separator }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(s => s.Trim())
+                            .Where(s => s.Length > 0),
+                        StringComparer.Ordinal);
         }
 
         private static Color SelectedBg =>

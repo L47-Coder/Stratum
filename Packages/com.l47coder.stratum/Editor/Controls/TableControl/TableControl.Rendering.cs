@@ -422,7 +422,6 @@ namespace Stratum.Editor
                 return;
             }
 
-            // [Expandable]：渲染展开按钮，点击触发 OnRowExpandField 回调
             if (field.GetCustomAttribute<ExpandableAttribute>(false) != null)
             {
                 DrawExpandableCell(rect, value, index, field.Name);
@@ -462,11 +461,11 @@ namespace Stratum.Editor
                         if (items.Length > 0)
                         {
                             var capturedField = field;
-                            var capturedList  = list;
+                            var capturedList = list;
                             var capturedIndex = index;
                             var popup = new DropdownPopup
                             {
-                                Multi     = dropdown.Multi,
+                                Multi = dropdown.Multi,
                                 Separator = dropdown.Separator,
                             };
                             popup.OnConfirmed(finalValue =>
@@ -480,7 +479,6 @@ namespace Stratum.Editor
                             popup.Show(rect, items, cur);
                         }
                     }
-                    // DropdownPopup 通过回调写值，不走 EndChangeCheck 流程
                     newValue = cur;
                 }
                 else
@@ -543,7 +541,7 @@ namespace Stratum.Editor
             _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
             {
                 alignment = TextAnchor.MiddleLeft,
-                clipping  = TextClipping.Clip,
+                clipping = TextClipping.Clip,
             };
 
         private static GUIStyle _toggleLabelStyle;
@@ -588,12 +586,10 @@ namespace Stratum.Editor
             var e = Event.current;
             var isHover = rect.Contains(e.mousePosition);
 
-            // 鼠标变成手型，强化“可点击链接”的心理预期
             EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
 
             if (e.type == EventType.Repaint)
             {
-                // 悬停时的微弱背景
                 if (isHover)
                 {
                     EditorGUI.DrawRect(rect, EditorGUIUtility.isProSkin
@@ -601,7 +597,6 @@ namespace Stratum.Editor
                         : new Color(0f, 0f, 0f, 0.05f));
                 }
 
-                // 链接文本颜色
                 var linkColor = EditorGUIUtility.isProSkin
                     ? new Color(0.35f, 0.65f, 1f, 1f)
                     : new Color(0.1f, 0.4f, 0.8f, 1f);
@@ -609,7 +604,6 @@ namespace Stratum.Editor
                 var oldColor = GUI.contentColor;
                 GUI.contentColor = linkColor;
 
-                // 绘制文本
                 GUI.Label(rect, typeName, ExpandableLabelStyle);
 
                 GUI.contentColor = oldColor;

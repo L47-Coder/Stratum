@@ -6,13 +6,13 @@ namespace Stratum.Editor
     internal sealed class ManagerCreatorPage : IPage
     {
         public string GroupTitle => "Manager";
-        public string TabTitle   => "Creator";
+        public string TabTitle => "Creator";
 
         private const float IncludeConfigCardHeight = 42f;
 
-        private static readonly Color ConfigCardOnBg      = new(0.16f, 0.33f, 0.22f);
-        private static readonly Color ConfigCardOffBg     = new(0.23f, 0.23f, 0.23f);
-        private static readonly Color ConfigCardOnBorder  = new(0.30f, 0.78f, 0.42f);
+        private static readonly Color ConfigCardOnBg = new(0.16f, 0.33f, 0.22f);
+        private static readonly Color ConfigCardOffBg = new(0.23f, 0.23f, 0.23f);
+        private static readonly Color ConfigCardOnBorder = new(0.30f, 0.78f, 0.42f);
         private static readonly Color ConfigCardOffBorder = new(0.36f, 0.36f, 0.36f);
 
         private readonly ManagerCreatorState _state = new();
@@ -46,7 +46,7 @@ namespace Stratum.Editor
             var content = new Rect(
                 rect.x + CreatorPageDraw.HPad,
                 rect.y + CreatorPageDraw.VPad,
-                rect.width  - CreatorPageDraw.HPad * 2f,
+                rect.width - CreatorPageDraw.HPad * 2f,
                 rect.height - CreatorPageDraw.VPad * 2f);
 
             GUILayout.BeginArea(content);
@@ -98,7 +98,7 @@ namespace Stratum.Editor
             _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
             try
             {
-                CreatorPageDraw.DrawPreviewCard("Type names",   _state.GetNamePreviewItems());
+                CreatorPageDraw.DrawPreviewCard("Type names", _state.GetNamePreviewItems());
                 GUILayout.Space(CreatorPageDraw.SectionSpacing);
                 CreatorPageDraw.DrawPreviewCard("Output paths", _state.GetPathPreviewItems());
                 if (_state.IncludeConfig)
@@ -139,8 +139,8 @@ namespace Stratum.Editor
             EditorGUI.DrawRect(rect, isOn ? ConfigCardOnBg : ConfigCardOffBg);
             CreatorPageDraw.DrawOutline(rect, isOn ? ConfigCardOnBorder : ConfigCardOffBorder);
 
-            var titleRect  = new Rect(rect.x + 10f, rect.y + 5f,  rect.width - 72f, 18f);
-            var descRect   = new Rect(rect.x + 10f, rect.y + 21f, rect.width - 72f, 16f);
+            var titleRect = new Rect(rect.x + 10f, rect.y + 5f, rect.width - 72f, 18f);
+            var descRect = new Rect(rect.x + 10f, rect.y + 21f, rect.width - 72f, 16f);
             var toggleRect = new Rect(
                 rect.xMax - 44f,
                 rect.y + (rect.height - EditorGUIUtility.singleLineHeight) * 0.5f,

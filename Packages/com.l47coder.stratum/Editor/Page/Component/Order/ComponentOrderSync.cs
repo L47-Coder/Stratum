@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -19,11 +20,11 @@ namespace Stratum.Editor
 
             var liveTypes = TypeCache.GetTypesDerivedFrom<BaseComponent>()
                 .Where(t => !t.IsAbstract)
-                .ToDictionary(t => t.Name, t => t, System.StringComparer.Ordinal);
+                .ToDictionary(t => t.Name, t => t, StringComparer.Ordinal);
 
             var removed = config.Entries.RemoveAll(e => !liveTypes.ContainsKey(e.Name)) > 0;
 
-            var existing = new HashSet<string>(config.Entries.Select(e => e.Name), System.StringComparer.Ordinal);
+            var existing = new HashSet<string>(config.Entries.Select(e => e.Name), StringComparer.Ordinal);
             var added = false;
             foreach (var kv in liveTypes.Where(kv => !existing.Contains(kv.Key)))
             {

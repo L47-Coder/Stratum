@@ -6,7 +6,7 @@ namespace Stratum.Editor
     internal sealed class ManagerOrderPage : IPage
     {
         public string GroupTitle => "Manager";
-        public string TabTitle   => "Order";
+        public string TabTitle => "Order";
 
         private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanEdit = false };
         private ManagerOrderConfig _config;

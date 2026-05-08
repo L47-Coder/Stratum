@@ -270,11 +270,8 @@ namespace Stratum.Editor
             sb.AppendLine();
         }
 
-        private static string EscapeCSharpStringLiteral(string value)
-        {
-            if (string.IsNullOrEmpty(value)) return string.Empty;
-            return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
-        }
+        private static string EscapeCSharpStringLiteral(string value) =>
+            string.IsNullOrEmpty(value) ? string.Empty : value.Replace("\\", "\\\\").Replace("\"", "\\\"");
 
         private static Type FindType(string typeName)
         {
@@ -297,7 +294,7 @@ namespace Stratum.Editor
             for (var i = 1; i < parts.Length; i++)
             {
                 var parent = string.Join("/", parts, 0, i);
-                var child  = $"{parent}/{parts[i]}";
+                var child = $"{parent}/{parts[i]}";
                 if (!AssetDatabase.IsValidFolder(child))
                     AssetDatabase.CreateFolder(parent, parts[i]);
             }
@@ -311,9 +308,8 @@ namespace Stratum.Editor
         [InitializeOnLoadMethod]
         private static void ProcessPendingAssetCreation()
         {
-            // ── Creator 页面挂起的单条 ──────────────────────────────────────────
-            var managerName  = SessionState.GetString(ManagerCreatorState.SessionManagerNameKey,  string.Empty);
-            var assetPath    = SessionState.GetString(ManagerCreatorState.SessionAssetPathKey,    string.Empty);
+            var managerName = SessionState.GetString(ManagerCreatorState.SessionManagerNameKey, string.Empty);
+            var assetPath = SessionState.GetString(ManagerCreatorState.SessionAssetPathKey, string.Empty);
             var assetAddress = SessionState.GetString(ManagerCreatorState.SessionAssetAddressKey, string.Empty);
 
             if (!string.IsNullOrEmpty(managerName) && !string.IsNullOrEmpty(assetPath) && !string.IsNullOrEmpty(assetAddress))
@@ -326,7 +322,6 @@ namespace Stratum.Editor
                     ManagerCreationService.EnsureAssetAndAddressable(managerName, assetPath, assetAddress);
             }
 
-            // ── Installer 批量挂起（记录模板导入后的真实 asset path/address）───────────────
             var pending = SessionState.GetString(PendingTemplatesKey, string.Empty);
             if (string.IsNullOrEmpty(pending)) return;
 
@@ -356,25 +351,23 @@ namespace Stratum.Editor
             }
         }
 
-        /// <summary>Creator 页面：挂起单条 asset 创建。</summary>
         public static void ScheduleAssetCreation(ManagerCreationPlan plan)
         {
-            SessionState.SetString(ManagerCreatorState.SessionManagerNameKey,  plan.ManagerName);
-            SessionState.SetString(ManagerCreatorState.SessionAssetPathKey,    plan.AssetFilePath);
+            SessionState.SetString(ManagerCreatorState.SessionManagerNameKey, plan.ManagerName);
+            SessionState.SetString(ManagerCreatorState.SessionAssetPathKey, plan.AssetFilePath);
             SessionState.SetString(ManagerCreatorState.SessionAssetAddressKey, plan.AddressableAddressName);
         }
 
-        /// <summary>Installer：批量挂起模板导入后的 asset 创建，编译完成后逐一执行。</summary>
         public static void ScheduleTemplateInstall(string managerName, string assetPath, string assetAddress)
         {
             if (string.IsNullOrEmpty(managerName) || string.IsNullOrEmpty(assetPath) || string.IsNullOrEmpty(assetAddress))
                 return;
 
             var existing = SessionState.GetString(PendingTemplatesKey, string.Empty);
-            var record   = $"{managerName}|{assetPath.Replace('\\', '/')}|{assetAddress}";
-            var records  = string.IsNullOrEmpty(existing)
-                ? new System.Collections.Generic.List<string>()
-                : new System.Collections.Generic.List<string>(existing.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            var record = $"{managerName}|{assetPath.Replace('\\', '/')}|{assetAddress}";
+            var records = string.IsNullOrEmpty(existing)
+                ? new List<string>()
+                : new List<string>(existing.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
             if (!records.Contains(record)) records.Add(record);
             SessionState.SetString(PendingTemplatesKey, string.Join("\n", records));
         }
@@ -403,7 +396,7 @@ namespace Stratum.Editor
         public static string FindManagerAsset(string fileName) =>
             Find(ref _assets, ManagerCreatorState.RootAssetPath, fileName, ".asset");
 
-        public static void Invalidate() { _scripts = null; _assets = null; }
+        public static void Invalidate() => (_scripts, _assets) = (null, null);
 
         private static string Find(ref Dictionary<string, string> cache, string root, string fileName, string ext)
         {

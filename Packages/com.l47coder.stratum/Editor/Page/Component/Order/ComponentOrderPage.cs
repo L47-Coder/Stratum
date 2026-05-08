@@ -6,7 +6,7 @@ namespace Stratum.Editor
     internal sealed class ComponentOrderPage : IPage
     {
         public string GroupTitle => "Component";
-        public string TabTitle   => "Order";
+        public string TabTitle => "Order";
 
         private readonly TableControl _tableView = new() { CanAdd = false, CanRemove = false, CanEdit = false };
         private ComponentOrderConfig _config;

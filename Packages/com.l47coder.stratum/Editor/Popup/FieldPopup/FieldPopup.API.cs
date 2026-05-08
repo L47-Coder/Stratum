@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-
     public sealed partial class FieldPopup
     {
         public bool Readonly { get; set; }

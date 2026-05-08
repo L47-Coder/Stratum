@@ -25,15 +25,13 @@ namespace Stratum.Editor
 
         private static void OnPlayModeStateChanged(PlayModeStateChange change)
         {
-            if (change != PlayModeStateChange.ExitingEditMode) return;
-            if (Trigger != FrameworkSyncTrigger.BeforePlayMode) return;
-            RunSync("before play mode");
+            if (change == PlayModeStateChange.ExitingEditMode && Trigger == FrameworkSyncTrigger.BeforePlayMode)
+                RunSync("before play mode");
         }
 
         public static void OnDevWindowClosed()
         {
-            if (Trigger != FrameworkSyncTrigger.OnWorkbenchClose) return;
-            RunSync("on workbench close");
+            if (Trigger == FrameworkSyncTrigger.OnWorkbenchClose) RunSync("on workbench close");
         }
 
         public static int RunSync(string reason)

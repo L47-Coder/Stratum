@@ -6,7 +6,7 @@ namespace Stratum.Editor
     internal sealed class ComponentCreatorPage : IPage
     {
         public string GroupTitle => "Component";
-        public string TabTitle   => "Creator";
+        public string TabTitle => "Creator";
 
         private readonly ComponentCreatorState _state = new();
         private Vector2 _scroll;
@@ -37,7 +37,7 @@ namespace Stratum.Editor
             var content = new Rect(
                 rect.x + CreatorPageDraw.HPad,
                 rect.y + CreatorPageDraw.VPad,
-                rect.width  - CreatorPageDraw.HPad * 2f,
+                rect.width - CreatorPageDraw.HPad * 2f,
                 rect.height - CreatorPageDraw.VPad * 2f);
 
             GUILayout.BeginArea(content);
@@ -86,7 +86,7 @@ namespace Stratum.Editor
             _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
             try
             {
-                CreatorPageDraw.DrawPreviewCard("Type names",   _state.GetNamePreviewItems());
+                CreatorPageDraw.DrawPreviewCard("Type names", _state.GetNamePreviewItems());
                 GUILayout.Space(CreatorPageDraw.SectionSpacing);
                 CreatorPageDraw.DrawPreviewCard("Output paths", _state.GetPathPreviewItems());
                 GUILayout.Space(CreatorPageDraw.SectionSpacing);

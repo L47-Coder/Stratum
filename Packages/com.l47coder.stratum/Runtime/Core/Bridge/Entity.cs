@@ -4,22 +4,18 @@ using UnityEngine;
 
 namespace Stratum
 {
-    // ── 3D 触发器 ────────────────────────────────────────────────────
     public interface IOnTriggerEnter { void OnTriggerEntered(Collider other); }
     public interface IOnTriggerExit { void OnTriggerExited(Collider other); }
     public interface IOnTriggerStay { void OnTriggerStayed(Collider other); }
 
-    // ── 3D 碰撞 ──────────────────────────────────────────────────────
     public interface IOnCollisionEnter { void OnCollisionEntered(Collision c); }
     public interface IOnCollisionExit { void OnCollisionExited(Collision c); }
     public interface IOnCollisionStay { void OnCollisionStayed(Collision c); }
 
-    // ── 2D 触发器 ────────────────────────────────────────────────────
     public interface IOnTriggerEnter2D { void OnTriggerEntered2D(Collider2D other); }
     public interface IOnTriggerExit2D { void OnTriggerExited2D(Collider2D other); }
     public interface IOnTriggerStay2D { void OnTriggerStayed2D(Collider2D other); }
 
-    // ── 2D 碰撞 ──────────────────────────────────────────────────────
     public interface IOnCollisionEnter2D { void OnCollisionEntered2D(Collision2D c); }
     public interface IOnCollisionExit2D { void OnCollisionExited2D(Collision2D c); }
     public interface IOnCollisionStay2D { void OnCollisionStayed2D(Collision2D c); }
@@ -28,7 +24,6 @@ namespace Stratum
     {
         public List<EntityComponentEntry> Components = new();
 
-        // ── 3D 事件 ──────────────────────────────────────────────────
         internal event Action<GameObject, Collider> TriggerEnter;
         internal event Action<GameObject, Collider> TriggerExit;
         internal event Action<GameObject, Collider> TriggerStay;
@@ -36,7 +31,6 @@ namespace Stratum
         internal event Action<GameObject, Collision> CollisionExit;
         internal event Action<GameObject, Collision> CollisionStay;
 
-        // ── 2D 事件 ──────────────────────────────────────────────────
         internal event Action<GameObject, Collider2D> TriggerEnter2D;
         internal event Action<GameObject, Collider2D> TriggerExit2D;
         internal event Action<GameObject, Collider2D> TriggerStay2D;
@@ -44,7 +38,6 @@ namespace Stratum
         internal event Action<GameObject, Collision2D> CollisionExit2D;
         internal event Action<GameObject, Collision2D> CollisionStay2D;
 
-        // ── Unity 3D 回调 ─────────────────────────────────────────────
         private void OnTriggerEnter(Collider other) => TriggerEnter?.Invoke(gameObject, other);
         private void OnTriggerExit(Collider other) => TriggerExit?.Invoke(gameObject, other);
         private void OnTriggerStay(Collider other) => TriggerStay?.Invoke(gameObject, other);
@@ -52,7 +45,6 @@ namespace Stratum
         private void OnCollisionExit(Collision c) => CollisionExit?.Invoke(gameObject, c);
         private void OnCollisionStay(Collision c) => CollisionStay?.Invoke(gameObject, c);
 
-        // ── Unity 2D 回调 ─────────────────────────────────────────────
         private void OnTriggerEnter2D(Collider2D other) => TriggerEnter2D?.Invoke(gameObject, other);
         private void OnTriggerExit2D(Collider2D other) => TriggerExit2D?.Invoke(gameObject, other);
         private void OnTriggerStay2D(Collider2D other) => TriggerStay2D?.Invoke(gameObject, other);
@@ -60,7 +52,6 @@ namespace Stratum
         private void OnCollisionExit2D(Collision2D c) => CollisionExit2D?.Invoke(gameObject, c);
         private void OnCollisionStay2D(Collision2D c) => CollisionStay2D?.Invoke(gameObject, c);
 
-        // ── Unity 组件租借池 ──────────────────────────────────────────
         internal readonly Dictionary<Type, List<Component>> All = new();
         internal readonly Dictionary<Type, Stack<Component>> InPool = new();
     }

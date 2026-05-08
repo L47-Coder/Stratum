@@ -16,10 +16,8 @@ namespace Stratum.Editor
         private const float PaddingV = 4f;
         private const float MaxHeight = 420f;
 
-        private void ShowCore<T>(Rect anchorRect, T item)
-        {
+        private void ShowCore<T>(Rect anchorRect, T item) =>
             PopupWindow.Show(anchorRect, new PopupContent<T>(item, Readonly, _onChanged));
-        }
 
         private sealed class PopupContent<T> : PopupWindowContent
         {
@@ -48,8 +46,7 @@ namespace Stratum.Editor
 
             public override void OnClose()
             {
-                if (_renderer.Commit())
-                    _onChanged?.Invoke();
+                if (_renderer.Commit()) _onChanged?.Invoke();
             }
         }
 
@@ -112,18 +109,13 @@ namespace Stratum.Editor
                 return any;
             }
 
-            private static bool IsDraftManaged(Type t)
-            {
-                if (FieldLayoutUtil.IsStringList(t)) return false;
-                if (t == typeof(AnimationCurve) || t == typeof(Gradient)) return false;
-                return true;
-            }
+            private static bool IsDraftManaged(Type t) =>
+                !FieldLayoutUtil.IsStringList(t) && t != typeof(AnimationCurve) && t != typeof(Gradient);
 
             internal float ContentHeight() =>
                 _fieldDefs == null || _fieldDefs.Count == 0 ? 0f
                 : _fieldDefs.Count * (RowHeight + RowGap) - RowGap;
 
-            // 总宽 = 名称列 + 分割线(1px) + 控件列，两列等宽各为 _columnWidth
             internal float ContentWidth() =>
                 _fieldDefs == null || _fieldDefs.Count == 0 ? 0f
                 : _columnWidth * 2f + 1f + PaddingH * 2f;
@@ -225,10 +217,7 @@ namespace Stratum.Editor
                 EditorGUI.BeginChangeCheck();
                 object newValue;
 
-                if (type == typeof(string))
-                {
-                    newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
-                }
+                if (type == typeof(string)) newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
                 else if (type == typeof(int)) newValue = EditorGUI.IntField(rect, value is int iv ? iv : 0);
                 else if (type == typeof(float)) newValue = EditorGUI.FloatField(rect, value is float fv ? fv : 0f);
                 else if (type == typeof(bool)) newValue = DrawToggle(rect, value is bool bv && bv);

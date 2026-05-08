@@ -9,9 +9,9 @@ namespace Stratum.Editor
     internal sealed class ComponentViewerPage : IPage
     {
         public string GroupTitle => "Component";
-        public string TabTitle   => "Viewer";
+        public string TabTitle => "Viewer";
 
-        private readonly ComponentLeftPanel  _leftPanel  = new();
+        private readonly ComponentLeftPanel _leftPanel = new();
         private readonly ComponentRightPanel _rightPanel = new();
         private SplitterHandle _splitter = new(220f);
 
@@ -67,7 +67,7 @@ namespace Stratum.Editor
 
             switch (Path.GetExtension(_currentPath).ToLowerInvariant())
             {
-                case ".cs":    DrawCsFile(rect, _currentPath);    break;
+                case ".cs": DrawCsFile(rect, _currentPath); break;
                 case ".asset": DrawAssetFile(rect, _currentPath); break;
                 default:
                     GUI.Label(rect, "Unsupported file type.", EditorStyles.centeredGreyMiniLabel);
@@ -95,11 +95,11 @@ namespace Stratum.Editor
         {
             if (_cachedAssetPath != path)
             {
-                _cachedAssetPath  = path;
-                _cachedAsset      = AssetDatabase.LoadAssetAtPath<BaseComponentConfig>(path);
-                _cachedList       = null;
+                _cachedAssetPath = path;
+                _cachedAsset = AssetDatabase.LoadAssetAtPath<BaseComponentConfig>(path);
+                _cachedList = null;
                 _cachedDrawMethod = null;
-                _tableView        = null;
+                _tableView = null;
 
                 if (_cachedAsset != null)
                 {
@@ -107,7 +107,7 @@ namespace Stratum.Editor
                     var elemType = _cachedAsset.ConfigItemType;
                     if (_cachedList != null && elemType != null)
                     {
-                        _tableView        = new TableControl();
+                        _tableView = new TableControl();
                         _cachedDrawMethod = typeof(TableControl).GetMethod(nameof(TableControl.Draw))
                             .MakeGenericMethod(elemType);
                     }

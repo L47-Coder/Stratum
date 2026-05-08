@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEngine;
@@ -12,16 +13,13 @@ namespace Stratum.Editor
         public string GroupTitle => "Prefab";
         public string TabTitle => "Viewer";
 
-        private const float SplitterVisualW = 1f;
         private const float LeftPanelMin = 100f;
         private const float LeftPanelMax = 800f;
         private const float LeftPanelStart = 220f;
-        private static readonly Color SplitterColor = new(0.11f, 0.11f, 0.11f);
 
         private readonly PrefabViewerLeftPanel _leftPanel = new();
         private readonly PrefabViewerRightPanel _rightPanel = new();
-        private float _splitterX = LeftPanelStart;
-        private bool _dragging;
+        private SplitterHandle _splitter = new(LeftPanelStart);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
 
@@ -29,35 +27,8 @@ namespace Stratum.Editor
 
         public void OnGUI(Rect rect)
         {
-            var visualRect = new Rect(rect.x + _splitterX, rect.y, SplitterVisualW, rect.height);
-            var hitRect = new Rect(rect.x + _splitterX - 2f, rect.y, SplitterVisualW + 4f, rect.height);
-
-            EditorGUIUtility.AddCursorRect(hitRect, MouseCursor.ResizeHorizontal);
-
-            var evt = Event.current;
-            switch (evt.type)
-            {
-                case EventType.MouseDown when hitRect.Contains(evt.mousePosition):
-                    _dragging = true;
-                    evt.Use();
-                    break;
-                case EventType.MouseDrag when _dragging:
-                    var maxX = Mathf.Min(LeftPanelMax, rect.width - LeftPanelMin - SplitterVisualW);
-                    _splitterX = Mathf.Clamp(evt.mousePosition.x - rect.x, LeftPanelMin, maxX);
-                    evt.Use();
-                    break;
-                case EventType.MouseUp when _dragging:
-                    _dragging = false;
-                    evt.Use();
-                    break;
-            }
-
-            var leftRect = new Rect(rect.x, rect.y, _splitterX, rect.height);
-            var rightRect = new Rect(visualRect.xMax, rect.y,
-                                     rect.width - _splitterX - SplitterVisualW, rect.height);
-
+            var (leftRect, rightRect) = _splitter.Draw(rect, LeftPanelMin, LeftPanelMax);
             _leftPanel.OnGUI(leftRect);
-            EditorGUI.DrawRect(visualRect, SplitterColor);
             _rightPanel.OnGUI(rightRect);
         }
     }
@@ -82,15 +53,9 @@ namespace Stratum.Editor
     internal sealed class PrefabViewerRightPanel
     {
         private const float Padding = 8f;
-        private const float RowH = 20f;
 
-        private static GUIStyle _hintLabelCenterStyle;
         private static GUIStyle _addEntityTitleStyle;
         private static GUIStyle _addEntitySubStyle;
-
-        private static GUIStyle HintLabelCenterStyle =>
-            _hintLabelCenterStyle ??= new GUIStyle(EditorStyles.miniLabel)
-            { alignment = TextAnchor.MiddleCenter, normal = { textColor = new Color(0.65f, 0.65f, 0.65f) } };
 
         private static GUIStyle AddEntityTitleStyle => _addEntityTitleStyle ??= new GUIStyle(EditorStyles.label)
         {
@@ -106,8 +71,6 @@ namespace Stratum.Editor
             normal = { textColor = new Color(0.55f, 0.55f, 0.55f) },
         };
 
-        private static readonly Color AddrLinkRowBg = new(0.115f, 0.115f, 0.12f);
-        private static readonly Color AddrLinkRowBgHover = new(0.145f, 0.15f, 0.168f);
         private static readonly Color CardBg = new(0.13f, 0.13f, 0.14f);
         private static readonly Color CardBorder = new(0.22f, 0.22f, 0.24f);
 
@@ -142,8 +105,7 @@ namespace Stratum.Editor
 
             if (Directory.Exists(_currentPath))
             {
-                var inner = new Rect(rect.x + Padding, rect.y + Padding,
-                                     rect.width - Padding * 2, rect.height - Padding * 2);
+                var inner = new Rect(rect.x + Padding, rect.y + Padding, rect.width - Padding * 2, rect.height - Padding * 2);
                 GUI.Label(inner, _currentPath, EditorStyles.wordWrappedLabel);
                 return;
             }
@@ -293,10 +255,7 @@ namespace Stratum.Editor
         private static object CreateComponentDataWithDefaultKey(Type dataType)
         {
             var data = Activator.CreateInstance(dataType);
-            var keyField = dataType.GetField("Key",
-                System.Reflection.BindingFlags.Instance |
-                System.Reflection.BindingFlags.Public   |
-                System.Reflection.BindingFlags.NonPublic);
+            var keyField = dataType.GetField("Key", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
             if (keyField?.FieldType == typeof(string))
                 keyField.SetValue(data, "default");

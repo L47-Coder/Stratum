@@ -32,7 +32,7 @@ namespace Stratum.Editor
 
             if (EditorApplication.timeSinceStartup - owner._rowIndexInteractPressTime < RowIndexHoldToDragSeconds) return;
 
-            if (!owner.CanReorder) return; // hold-to-drag 仅用于内部重排，DragOut-only 走阈值路径
+            if (!owner.CanReorder) return;
             owner.BeginReorderSession(owner._rowIndexInteractControlId, owner._rowIndexInteractDataIndex,
                 owner._rowIndexInteractRowRect, owner._rowIndexInteractRowHeight,
                 owner._rowIndexInteractListCount, owner._rowIndexInteractPressPos.y);
@@ -137,7 +137,6 @@ namespace Stratum.Editor
             if (_draggingOwner != this || _reorder == null) return;
             var e = Event.current;
 
-            // 鼠标离开控件区域 → 切换为 DragAndDrop 跨控件拖拽
             if (CanDragOut && e.type == EventType.MouseDrag)
             {
                 var groupBounds = new Rect(0f, 0f, _lastGroupSize.x, _lastGroupSize.y);

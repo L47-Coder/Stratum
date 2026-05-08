@@ -9,51 +9,51 @@ namespace Stratum.Editor
 {
     internal sealed class ComponentCreatorState
     {
-        public const string RootAssetPath        = WorkbenchPaths.ComponentRoot;
-        public const string AddressableGroupName  = "ComponentConfig";
-        public const string GeneratedFolderName   = "Generated";
+        public const string RootAssetPath = WorkbenchPaths.ComponentRoot;
+        public const string AddressableGroupName = "ComponentConfig";
+        public const string GeneratedFolderName = "Generated";
 
         public const string SessionComponentNameKey = "ComponentCreator.ComponentName";
-        public const string SessionAssetPathKey     = "ComponentCreator.AssetPath";
-        public const string SessionAssetAddressKey  = "ComponentCreator.AssetAddress";
+        public const string SessionAssetPathKey = "ComponentCreator.AssetPath";
+        public const string SessionAssetAddressKey = "ComponentCreator.AssetAddress";
 
         private static readonly Regex ValidName = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
         public string InputComponentName { get; private set; } = string.Empty;
-        public bool   IsValid            { get; private set; }
-        public bool   HasPreview         => !string.IsNullOrEmpty(ComponentClassName);
-        public string ErrorMessage       { get; private set; } = string.Empty;
+        public bool IsValid { get; private set; }
+        public bool HasPreview => !string.IsNullOrEmpty(ComponentClassName);
+        public string ErrorMessage { get; private set; } = string.Empty;
 
-        public string ComponentClassName              { get; private set; } = string.Empty;
-        public string ComponentDataClassName          { get; private set; } = string.Empty;
-        public string ConfigClassName                 { get; private set; } = string.Empty;
-        public string ComponentFilePath               { get; private set; } = string.Empty;
-        public string GeneratedFolderPath             { get; private set; } = string.Empty;
+        public string ComponentClassName { get; private set; } = string.Empty;
+        public string ComponentDataClassName { get; private set; } = string.Empty;
+        public string ConfigClassName { get; private set; } = string.Empty;
+        public string ComponentFilePath { get; private set; } = string.Empty;
+        public string GeneratedFolderPath { get; private set; } = string.Empty;
         public string GeneratedComponentPartialFilePath { get; private set; } = string.Empty;
-        public string GeneratedConfigFilePath         { get; private set; } = string.Empty;
-        public string GeneratedDataFilePath           { get; private set; } = string.Empty;
-        public string AssetFilePath                   { get; private set; } = string.Empty;
-        public string AddressableAddress              { get; private set; } = string.Empty;
+        public string GeneratedConfigFilePath { get; private set; } = string.Empty;
+        public string GeneratedDataFilePath { get; private set; } = string.Empty;
+        public string AssetFilePath { get; private set; } = string.Empty;
+        public string AddressableAddress { get; private set; } = string.Empty;
 
         private string _parentFolder = RootAssetPath;
         private string _existingComponentFile = string.Empty;
-        private string _existingAsset         = string.Empty;
-        private bool   _componentFileExists;
-        private bool   _componentClassExists;
-        private bool   _componentDataExists;
-        private bool   _generatedFolderExists;
-        private bool   _assetExists;
+        private string _existingAsset = string.Empty;
+        private bool _componentFileExists;
+        private bool _componentClassExists;
+        private bool _componentDataExists;
+        private bool _generatedFolderExists;
+        private bool _assetExists;
 
-        private PreviewItem[] _nameItems        = Array.Empty<PreviewItem>();
-        private PreviewItem[] _pathItems        = Array.Empty<PreviewItem>();
+        private PreviewItem[] _nameItems = Array.Empty<PreviewItem>();
+        private PreviewItem[] _pathItems = Array.Empty<PreviewItem>();
         private PreviewItem[] _addressableItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
             InputComponentName = string.Empty;
-            IsValid            = false;
-            ErrorMessage       = string.Empty;
-            _parentFolder      = RootAssetPath;
+            IsValid = false;
+            ErrorMessage = string.Empty;
+            _parentFolder = RootAssetPath;
             ClearDerived();
         }
 
@@ -67,16 +67,16 @@ namespace Stratum.Editor
             {
                 ClearDerived();
                 ErrorMessage = string.Empty;
-                IsValid      = false;
+                IsValid = false;
                 return;
             }
             Apply(InputComponentName, _parentFolder);
         }
 
-        public PreviewItem[] GetNamePreviewItems()        => _nameItems;
-        public PreviewItem[] GetPathPreviewItems()        => _pathItems;
+        public PreviewItem[] GetNamePreviewItems() => _nameItems;
+        public PreviewItem[] GetPathPreviewItems() => _pathItems;
         public PreviewItem[] GetAddressablePreviewItems() => _addressableItems;
-        public PreviewStatus GetInputStatus()             => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
+        public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
         public ComponentCreationPlan BuildPlan() => new(
             InputComponentName,
@@ -103,7 +103,7 @@ namespace Stratum.Editor
             if (string.IsNullOrEmpty(parent))
             {
                 ErrorMessage = "Invalid parent folder.";
-                IsValid      = false;
+                IsValid = false;
                 ClearDerived();
                 return;
             }
@@ -112,7 +112,7 @@ namespace Stratum.Editor
             if (!parent.StartsWith(root, StringComparison.OrdinalIgnoreCase))
             {
                 ErrorMessage = "Parent folder must be inside the component root.";
-                IsValid      = false;
+                IsValid = false;
                 ClearDerived();
                 return;
             }
@@ -121,7 +121,7 @@ namespace Stratum.Editor
             if (!AssetDatabase.IsValidFolder(parent))
             {
                 ErrorMessage = "Invalid parent folder.";
-                IsValid      = false;
+                IsValid = false;
                 ClearDerived();
                 return;
             }
@@ -130,28 +130,28 @@ namespace Stratum.Editor
             if (!ValidName.IsMatch(trimmed))
             {
                 ErrorMessage = "Component name must follow C# naming conventions (PascalCase).";
-                IsValid      = false;
+                IsValid = false;
                 ClearDerived();
                 return;
             }
 
-            _parentFolder      = parent;
+            _parentFolder = parent;
             InputComponentName = trimmed;
-            ErrorMessage       = string.Empty;
-            IsValid            = true;
+            ErrorMessage = string.Empty;
+            IsValid = true;
 
-            ComponentClassName     = $"{trimmed}Component";
+            ComponentClassName = $"{trimmed}Component";
             ComponentDataClassName = $"{trimmed}ComponentData";
-            ConfigClassName        = $"{trimmed}ComponentConfig";
+            ConfigClassName = $"{trimmed}ComponentConfig";
 
             var folder = $"{parent}/{trimmed}";
-            ComponentFilePath                = $"{folder}/{ComponentClassName}.cs";
-            GeneratedFolderPath              = $"{folder}/{GeneratedFolderName}";
-            GeneratedComponentPartialFilePath= $"{GeneratedFolderPath}/{ComponentClassName}.Generated.cs";
-            GeneratedConfigFilePath          = $"{GeneratedFolderPath}/{ConfigClassName}.cs";
-            GeneratedDataFilePath            = $"{GeneratedFolderPath}/{ComponentDataClassName}.cs";
-            AssetFilePath                    = $"{folder}/{ConfigClassName}.asset";
-            AddressableAddress               = ComponentAddressConvention.AddressOf(trimmed);
+            ComponentFilePath = $"{folder}/{ComponentClassName}.cs";
+            GeneratedFolderPath = $"{folder}/{GeneratedFolderName}";
+            GeneratedComponentPartialFilePath = $"{GeneratedFolderPath}/{ComponentClassName}.Generated.cs";
+            GeneratedConfigFilePath = $"{GeneratedFolderPath}/{ConfigClassName}.cs";
+            GeneratedDataFilePath = $"{GeneratedFolderPath}/{ComponentDataClassName}.cs";
+            AssetFilePath = $"{folder}/{ConfigClassName}.asset";
+            AddressableAddress = ComponentAddressConvention.AddressOf(trimmed);
 
             RefreshPreview();
         }
@@ -160,8 +160,8 @@ namespace Stratum.Editor
         {
             RefreshExisting();
 
-            var cs    = ComponentCodeStatus();
-            var cfg   = GeneratedCodeStatus();
+            var cs = ComponentCodeStatus();
+            var cfg = GeneratedCodeStatus();
             var asset = AssetStatus();
 
             _nameItems = new[]
@@ -190,57 +190,47 @@ namespace Stratum.Editor
             _existingComponentFile = ResolveExisting(ComponentFilePath,
                 ComponentAssetIndex.FindComponentScript(Path.GetFileName(ComponentFilePath)));
             _generatedFolderExists = !string.IsNullOrEmpty(GeneratedFolderPath) && FolderExists(GeneratedFolderPath);
-            _existingAsset         = ResolveExisting(AssetFilePath,
+            _existingAsset = ResolveExisting(AssetFilePath,
                 ComponentAssetIndex.FindComponentAsset(Path.GetFileName(AssetFilePath)));
 
-            _componentFileExists  = !string.IsNullOrEmpty(_existingComponentFile);
-            _assetExists          = !string.IsNullOrEmpty(_existingAsset);
+            _componentFileExists = !string.IsNullOrEmpty(_existingComponentFile);
+            _assetExists = !string.IsNullOrEmpty(_existingAsset);
             _componentClassExists = TypeExists(ComponentClassName);
-            _componentDataExists  = TypeExists(ComponentDataClassName);
+            _componentDataExists = TypeExists(ComponentDataClassName);
         }
 
         private void ClearDerived()
         {
-            ComponentClassName               = string.Empty;
-            ComponentDataClassName           = string.Empty;
-            ConfigClassName                  = string.Empty;
-            ComponentFilePath                = string.Empty;
-            GeneratedFolderPath              = string.Empty;
-            GeneratedComponentPartialFilePath= string.Empty;
-            GeneratedConfigFilePath          = string.Empty;
-            GeneratedDataFilePath            = string.Empty;
-            AssetFilePath                    = string.Empty;
-            AddressableAddress               = string.Empty;
-            _existingComponentFile           = string.Empty;
-            _existingAsset                   = string.Empty;
-            _componentFileExists             = false;
-            _componentClassExists            = false;
-            _componentDataExists             = false;
-            _generatedFolderExists           = false;
-            _assetExists                     = false;
-            _nameItems                       = Array.Empty<PreviewItem>();
-            _pathItems                       = Array.Empty<PreviewItem>();
-            _addressableItems                = Array.Empty<PreviewItem>();
+            ComponentClassName = string.Empty;
+            ComponentDataClassName = string.Empty;
+            ConfigClassName = string.Empty;
+            ComponentFilePath = string.Empty;
+            GeneratedFolderPath = string.Empty;
+            GeneratedComponentPartialFilePath = string.Empty;
+            GeneratedConfigFilePath = string.Empty;
+            GeneratedDataFilePath = string.Empty;
+            AssetFilePath = string.Empty;
+            AddressableAddress = string.Empty;
+            _existingComponentFile = string.Empty;
+            _existingAsset = string.Empty;
+            _componentFileExists = false;
+            _componentClassExists = false;
+            _componentDataExists = false;
+            _generatedFolderExists = false;
+            _assetExists = false;
+            _nameItems = Array.Empty<PreviewItem>();
+            _pathItems = Array.Empty<PreviewItem>();
+            _addressableItems = Array.Empty<PreviewItem>();
         }
 
-        private PreviewStatus ComponentCodeStatus()
-        {
-            if (string.IsNullOrEmpty(ComponentClassName)) return PreviewStatus.Neutral;
-            return !_componentFileExists && !_componentClassExists && !_componentDataExists
-                ? PreviewStatus.Create : PreviewStatus.Skip;
-        }
+        private PreviewStatus ComponentCodeStatus() =>
+            string.IsNullOrEmpty(ComponentClassName) ? PreviewStatus.Neutral : !_componentFileExists && !_componentClassExists && !_componentDataExists ? PreviewStatus.Create : PreviewStatus.Skip;
 
-        private PreviewStatus GeneratedCodeStatus()
-        {
-            if (string.IsNullOrEmpty(GeneratedFolderPath)) return PreviewStatus.Neutral;
-            return _generatedFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
-        }
+        private PreviewStatus GeneratedCodeStatus() =>
+            string.IsNullOrEmpty(GeneratedFolderPath) ? PreviewStatus.Neutral : _generatedFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
 
-        private PreviewStatus AssetStatus()
-        {
-            if (string.IsNullOrEmpty(AssetFilePath)) return PreviewStatus.Neutral;
-            return _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
-        }
+        private PreviewStatus AssetStatus() =>
+            string.IsNullOrEmpty(AssetFilePath) ? PreviewStatus.Neutral : _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
 
         private static void EnsureFolder(string assetPath)
         {
@@ -252,29 +242,20 @@ namespace Stratum.Editor
             for (var i = 1; i < parts.Length; i++)
             {
                 var parent = string.Join("/", parts, 0, i);
-                var child  = $"{parent}/{parts[i]}";
+                var child = $"{parent}/{parts[i]}";
                 if (!AssetDatabase.IsValidFolder(child))
                     AssetDatabase.CreateFolder(parent, parts[i]);
             }
         }
 
-        private static bool FolderExists(string assetPath)
-        {
-            if (string.IsNullOrEmpty(assetPath)) return false;
-            return Directory.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
-        }
+        private static bool FolderExists(string assetPath) =>
+            !string.IsNullOrEmpty(assetPath) && Directory.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
 
-        private static string ResolveExisting(string preferred, string indexed)
-        {
-            if (FileExists(preferred)) return preferred;
-            return FileExists(indexed) ? indexed : string.Empty;
-        }
+        private static string ResolveExisting(string preferred, string indexed) =>
+            FileExists(preferred) ? preferred : FileExists(indexed) ? indexed : string.Empty;
 
-        private static bool FileExists(string assetPath)
-        {
-            if (string.IsNullOrEmpty(assetPath)) return false;
-            return File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
-        }
+        private static bool FileExists(string assetPath) =>
+            !string.IsNullOrEmpty(assetPath) && File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
 
         private static bool TypeExists(string typeName)
         {
@@ -304,7 +285,7 @@ namespace Stratum.Editor
         public readonly string GeneratedDataFilePath;
         public readonly string AssetFilePath;
         public readonly string AddressableAddress;
-        public readonly bool   ShouldCreateComponentFile;
+        public readonly bool ShouldCreateComponentFile;
 
         public ComponentCreationPlan(
             string componentName, string componentClassName, string componentDataClassName,
@@ -313,19 +294,19 @@ namespace Stratum.Editor
             string generatedConfigFilePath, string generatedDataFilePath,
             string assetFilePath, string addressableAddress, bool shouldCreateComponentFile)
         {
-            ComponentName                    = componentName;
-            ComponentClassName               = componentClassName;
-            ComponentDataClassName           = componentDataClassName;
-            ConfigClassName                  = configClassName;
-            EntityFolderPath                 = entityFolderPath;
-            ComponentFilePath                = componentFilePath;
-            GeneratedFolderPath              = generatedFolderPath;
-            GeneratedComponentPartialFilePath= generatedComponentPartialFilePath;
-            GeneratedConfigFilePath          = generatedConfigFilePath;
-            GeneratedDataFilePath            = generatedDataFilePath;
-            AssetFilePath                    = assetFilePath;
-            AddressableAddress               = addressableAddress;
-            ShouldCreateComponentFile        = shouldCreateComponentFile;
+            ComponentName = componentName;
+            ComponentClassName = componentClassName;
+            ComponentDataClassName = componentDataClassName;
+            ConfigClassName = configClassName;
+            EntityFolderPath = entityFolderPath;
+            ComponentFilePath = componentFilePath;
+            GeneratedFolderPath = generatedFolderPath;
+            GeneratedComponentPartialFilePath = generatedComponentPartialFilePath;
+            GeneratedConfigFilePath = generatedConfigFilePath;
+            GeneratedDataFilePath = generatedDataFilePath;
+            AssetFilePath = assetFilePath;
+            AddressableAddress = addressableAddress;
+            ShouldCreateComponentFile = shouldCreateComponentFile;
         }
     }
 }
