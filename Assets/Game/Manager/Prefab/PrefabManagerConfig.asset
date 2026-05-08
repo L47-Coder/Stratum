@@ -17,3 +17,5 @@ MonoBehaviour:
     PrefabAddress: Prefab/Player
   - Key: Ground
     PrefabAddress: Prefab/Ground
+  - Key: Bullet
+    PrefabAddress: Prefab/Bullet

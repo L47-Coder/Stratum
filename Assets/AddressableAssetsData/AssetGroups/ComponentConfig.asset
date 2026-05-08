@@ -17,8 +17,23 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d5bfcacd3e7fb874cbce2c85965027af
   m_SerializeEntries:
+  - m_GUID: 08ee706cbc14b8743b621001a942dbf7
+    m_Address: ComponentConfig/PlayerShootInput
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12320c92dd58b3045a1b6fbd59b3d6c3
     m_Address: ComponentConfig/Rigidbody2D
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 18cb24910752a224fa5a9e7991318b22
+    m_Address: ComponentConfig/Move
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: a02e7e452cd6c6848969ad3606d0652d
+    m_Address: ComponentConfig/PlayerMoveTargetInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -29,6 +44,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b25120976469f3043845b99fbcc49c03
     m_Address: ComponentConfig/BoxCollider2D
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e3c4bd27e662e2444a28bf1359f0102b
+    m_Address: ComponentConfig/Shoot
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

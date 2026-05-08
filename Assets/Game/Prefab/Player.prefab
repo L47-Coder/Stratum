@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -49,52 +49,58 @@ MonoBehaviour:
     InitOnStart: 1
     ComponentType: SpriteRendererComponent
     Data:
-      rid: 8899497881280446466
-  - EntryKey: BoxCollider2DComponent_default
+      rid: 8899497881280446479
+  - EntryKey: MoveComponent_default
     InitOnStart: 1
-    ComponentType: BoxCollider2DComponent
+    ComponentType: MoveComponent
     Data:
-      rid: 8899497878632267778
-  - EntryKey: Rigidbody2DComponent_default
-    InitOnStart: 0
-    ComponentType: Rigidbody2DComponent
+      rid: 8899497881280446485
+  - EntryKey: ShootComponent_default
+    InitOnStart: 1
+    ComponentType: ShootComponent
     Data:
-      rid: 8899497878632267777
+      rid: 8899497881280446487
+  - EntryKey: PlayerMoveTargetInputComponent_default
+    InitOnStart: 1
+    ComponentType: PlayerMoveTargetInputComponent
+    Data:
+      rid: 8899497881280446474
+  - EntryKey: PlayerShootInputComponent_default
+    InitOnStart: 1
+    ComponentType: PlayerShootInputComponent
+    Data:
+      rid: 8899497881280446483
   references:
     version: 2
     RefIds:
-    - rid: 8899497878632267777
-      type: {class: Rigidbody2DComponentData, ns: , asm: Game.Components}
+    - rid: 8899497881280446474
+      type: {class: PlayerMoveTargetInputComponentData, ns: , asm: Game.Components}
       data:
-        Key: 
-        BodyType: 0
-        Simulated: 1
-        UseAutoMass: 0
-        Mass: 1
-        Drag: 0
-        AngularDrag: 0.05
-        GravityScale: 1
-        CollisionDetectionMode: 0
-        SleepMode: 1
-        Interpolation: 0
-        Constraints: 0
-    - rid: 8899497878632267778
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: 
-        IsTrigger: 0
-        Offset: {x: 0, y: 0}
-        Size: {x: 1, y: 1}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
-    - rid: 8899497881280446466
+        Key: default
+    - rid: 8899497881280446479
       type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
       data:
-        Key: 
-        Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+        Key: default
+        Sprite: {fileID: 0}
         Color: {r: 1, g: 1, b: 1, a: 1}
         FlipX: 0
         FlipY: 0
         SortingLayerName: Default
         SortingOrder: 0
+    - rid: 8899497881280446483
+      type: {class: PlayerShootInputComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        ShootKey: 106
+        ShootOffset: 0.5
+    - rid: 8899497881280446485
+      type: {class: MoveComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        MoveSpeed: 5
+        TurnSpeed: 1800
+    - rid: 8899497881280446487
+      type: {class: ShootComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        BulletPrefabAddress: Bullet

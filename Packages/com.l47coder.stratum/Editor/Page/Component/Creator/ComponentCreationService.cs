@@ -253,19 +253,33 @@ namespace Stratum.Editor
                     ComponentCreationService.EnsureAssetAndAddressable(name, path, address);
             }
 
-            // ── Installer 批量挂起（逗号分隔的组件名列表）──────────────────────
+            // ── Installer 批量挂起（记录模板导入后的真实 asset path/address）───────────────
             var pending = SessionState.GetString(PendingTemplatesKey, string.Empty);
             if (string.IsNullOrEmpty(pending)) return;
 
             SessionState.EraseString(PendingTemplatesKey);
-            foreach (var componentName in pending.Split(','))
+            foreach (var record in pending.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (string.IsNullOrEmpty(componentName)) continue;
-                var n       = componentName;
-                var p       = $"{ComponentCreatorState.RootAssetPath}/{n}/{n}ComponentConfig.asset";
-                var a       = ComponentAddressConvention.AddressOf(n);
-                EditorApplication.delayCall += () =>
-                    ComponentCreationService.EnsureAssetAndAddressable(n, p, a);
+                var parts = record.Split(new[] { '|' }, 3);
+                if (parts.Length == 3)
+                {
+                    var n = parts[0];
+                    var p = parts[1];
+                    var a = parts[2];
+                    if (string.IsNullOrEmpty(n) || string.IsNullOrEmpty(p) || string.IsNullOrEmpty(a)) continue;
+                    EditorApplication.delayCall += () =>
+                        ComponentCreationService.EnsureAssetAndAddressable(n, p, a);
+                    continue;
+                }
+
+                foreach (var legacyName in record.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var n = legacyName;
+                    var p = $"{ComponentCreatorState.RootAssetPath}/{n}/{n}ComponentConfig.asset";
+                    var a = ComponentAddressConvention.AddressOf(n);
+                    EditorApplication.delayCall += () =>
+                        ComponentCreationService.EnsureAssetAndAddressable(n, p, a);
+                }
             }
         }
 
@@ -278,15 +292,25 @@ namespace Stratum.Editor
         }
 
         /// <summary>Installer：批量挂起模板导入后的 asset 创建，编译完成后逐一执行。</summary>
-        public static void ScheduleTemplateInstall(string componentName)
+        public static void ScheduleTemplateInstall(string componentName, string assetPath, string assetAddress)
         {
+            if (string.IsNullOrEmpty(componentName) || string.IsNullOrEmpty(assetPath) || string.IsNullOrEmpty(assetAddress))
+                return;
+
             var existing = SessionState.GetString(PendingTemplatesKey, string.Empty);
-            var names    = string.IsNullOrEmpty(existing)
+            var record   = $"{componentName}|{assetPath.Replace('\\', '/')}|{assetAddress}";
+            var records  = string.IsNullOrEmpty(existing)
                 ? new System.Collections.Generic.List<string>()
-                : new System.Collections.Generic.List<string>(existing.Split(','));
-            if (!names.Contains(componentName)) names.Add(componentName);
-            SessionState.SetString(PendingTemplatesKey, string.Join(",", names));
+                : new System.Collections.Generic.List<string>(existing.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            if (!records.Contains(record)) records.Add(record);
+            SessionState.SetString(PendingTemplatesKey, string.Join("\n", records));
         }
+
+        public static void ScheduleTemplateInstall(string componentName) =>
+            ScheduleTemplateInstall(
+                componentName,
+                $"{ComponentCreatorState.RootAssetPath}/{componentName}/{componentName}ComponentConfig.asset",
+                ComponentAddressConvention.AddressOf(componentName));
     }
 
     internal static class ComponentAssetIndex

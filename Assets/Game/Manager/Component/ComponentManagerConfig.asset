@@ -19,3 +19,11 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/BoxCollider2D
   - Key: ComponentConfig/Rigidbody2D
     ComponentConfigAddress: ComponentConfig/Rigidbody2D
+  - Key: ComponentConfig/Move
+    ComponentConfigAddress: ComponentConfig/Move
+  - Key: ComponentConfig/PlayerMoveTargetInput
+    ComponentConfigAddress: ComponentConfig/PlayerMoveTargetInput
+  - Key: ComponentConfig/PlayerShootInput
+    ComponentConfigAddress: ComponentConfig/PlayerShootInput
+  - Key: ComponentConfig/Shoot
+    ComponentConfigAddress: ComponentConfig/Shoot

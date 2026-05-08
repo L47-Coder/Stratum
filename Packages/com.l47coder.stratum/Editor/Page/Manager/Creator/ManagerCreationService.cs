@@ -326,19 +326,33 @@ namespace Stratum.Editor
                     ManagerCreationService.EnsureAssetAndAddressable(managerName, assetPath, assetAddress);
             }
 
-            // ── Installer 批量挂起 ───────────────────────────────────────────────
+            // ── Installer 批量挂起（记录模板导入后的真实 asset path/address）───────────────
             var pending = SessionState.GetString(PendingTemplatesKey, string.Empty);
             if (string.IsNullOrEmpty(pending)) return;
 
             SessionState.EraseString(PendingTemplatesKey);
-            foreach (var mgrName in pending.Split(','))
+            foreach (var record in pending.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (string.IsNullOrEmpty(mgrName)) continue;
-                var n = mgrName;
-                var p = $"{ManagerCreatorState.RootAssetPath}/{n}/{n}ManagerConfig.asset";
-                var a = ManagerAddressConvention.AddressOf(n);
-                EditorApplication.delayCall += () =>
-                    ManagerCreationService.EnsureAssetAndAddressable(n, p, a);
+                var parts = record.Split(new[] { '|' }, 3);
+                if (parts.Length == 3)
+                {
+                    var n = parts[0];
+                    var p = parts[1];
+                    var a = parts[2];
+                    if (string.IsNullOrEmpty(n) || string.IsNullOrEmpty(p) || string.IsNullOrEmpty(a)) continue;
+                    EditorApplication.delayCall += () =>
+                        ManagerCreationService.EnsureAssetAndAddressable(n, p, a);
+                    continue;
+                }
+
+                foreach (var legacyName in record.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    var n = legacyName;
+                    var p = $"{ManagerCreatorState.RootAssetPath}/{n}/{n}ManagerConfig.asset";
+                    var a = ManagerAddressConvention.AddressOf(n);
+                    EditorApplication.delayCall += () =>
+                        ManagerCreationService.EnsureAssetAndAddressable(n, p, a);
+                }
             }
         }
 
@@ -351,15 +365,25 @@ namespace Stratum.Editor
         }
 
         /// <summary>Installer：批量挂起模板导入后的 asset 创建，编译完成后逐一执行。</summary>
-        public static void ScheduleTemplateInstall(string managerName)
+        public static void ScheduleTemplateInstall(string managerName, string assetPath, string assetAddress)
         {
+            if (string.IsNullOrEmpty(managerName) || string.IsNullOrEmpty(assetPath) || string.IsNullOrEmpty(assetAddress))
+                return;
+
             var existing = SessionState.GetString(PendingTemplatesKey, string.Empty);
-            var names    = string.IsNullOrEmpty(existing)
+            var record   = $"{managerName}|{assetPath.Replace('\\', '/')}|{assetAddress}";
+            var records  = string.IsNullOrEmpty(existing)
                 ? new System.Collections.Generic.List<string>()
-                : new System.Collections.Generic.List<string>(existing.Split(','));
-            if (!names.Contains(managerName)) names.Add(managerName);
-            SessionState.SetString(PendingTemplatesKey, string.Join(",", names));
+                : new System.Collections.Generic.List<string>(existing.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries));
+            if (!records.Contains(record)) records.Add(record);
+            SessionState.SetString(PendingTemplatesKey, string.Join("\n", records));
         }
+
+        public static void ScheduleTemplateInstall(string managerName) =>
+            ScheduleTemplateInstall(
+                managerName,
+                $"{ManagerCreatorState.RootAssetPath}/{managerName}/{managerName}ManagerConfig.asset",
+                ManagerAddressConvention.AddressOf(managerName));
     }
 
     internal static class ManagerAssetIndex

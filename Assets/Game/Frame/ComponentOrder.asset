@@ -22,3 +22,15 @@ MonoBehaviour:
   - Name: SpriteRendererComponent
     AssemblyQualifiedName: SpriteRendererComponent, Game.Components, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  - Name: MoveComponent
+    AssemblyQualifiedName: MoveComponent, Game.Components, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - Name: PlayerMoveTargetInputComponent
+    AssemblyQualifiedName: PlayerMoveTargetInputComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - Name: PlayerShootInputComponent
+    AssemblyQualifiedName: PlayerShootInputComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - Name: ShootComponent
+    AssemblyQualifiedName: ShootComponent, Game.Components, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null

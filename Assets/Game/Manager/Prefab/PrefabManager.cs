@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using VContainer;
 using VContainer.Unity;
 using Stratum;
 
@@ -71,15 +72,17 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
 
     private readonly IAssetManager _assetManager;
     private readonly IComponentManager _componentManager;
+    private readonly IObjectResolver _container;
 
     private ComponentOrderConfig _componentOrder;
     private readonly Dictionary<string, int> _typeOrderIndex = new(StringComparer.Ordinal);
     private IComparer<string> _typeKeyComparer;
 
-    public PrefabManager(IAssetManager assetManager, IComponentManager componentManager)
+    public PrefabManager(IAssetManager assetManager, IComponentManager componentManager, IObjectResolver container)
     {
         _assetManager = assetManager;
         _componentManager = componentManager;
+        _container = container;
     }
 
     private class PoolCache
@@ -316,6 +319,8 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
             prefabData.Components[typeKey] = component;
             InsertByOrder(prefabData, typeKey);
             component.InternalSetGameObject(prefabData.GameObject);
+            try { _container.Inject(component); }
+            catch (Exception e) { Debug.LogException(e); }
             try { component.InternalOnAdd(); }
             catch (Exception e) { Debug.LogException(e); }
         }
@@ -402,6 +407,7 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         prefabData.Components[typeKey] = component;
         InsertByOrder(prefabData, typeKey);
         component.InternalSetGameObject(prefabData.GameObject);
+        _container.Inject(component);
         component.InternalOnAdd();
 
         if (_activeInstances.Contains(prefabData))

@@ -285,7 +285,7 @@ namespace Stratum.Editor
                     .FirstOrDefault(t => t.Name == expectedDataTypeName);
 
                 dataProp.managedReferenceValue = dataType != null
-                    ? Activator.CreateInstance(dataType)
+                    ? CreateComponentDataWithDefaultKey(dataType)
                     : null;
 
                 anyFixed = true;
@@ -297,6 +297,20 @@ namespace Stratum.Editor
 
             foreach (var entry in _cachedEntity.Components)
                 entry.RefreshEntryKey();
+        }
+
+        private static object CreateComponentDataWithDefaultKey(Type dataType)
+        {
+            var data = Activator.CreateInstance(dataType);
+            var keyField = dataType.GetField("Key",
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public   |
+                System.Reflection.BindingFlags.NonPublic);
+
+            if (keyField?.FieldType == typeof(string))
+                keyField.SetValue(data, "default");
+
+            return data;
         }
 
         // ── 打开 Config 弹窗 ──────────────────────────────────────────────────

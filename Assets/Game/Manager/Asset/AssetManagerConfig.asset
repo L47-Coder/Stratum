@@ -33,3 +33,13 @@ MonoBehaviour:
     AssetAddress: Prefab/Player
   - Key: Prefab/Ground
     AssetAddress: Prefab/Ground
+  - Key: Prefab/Bullet
+    AssetAddress: Prefab/Bullet
+  - Key: ComponentConfig/Move
+    AssetAddress: ComponentConfig/Move
+  - Key: ComponentConfig/PlayerMoveTargetInput
+    AssetAddress: ComponentConfig/PlayerMoveTargetInput
+  - Key: ComponentConfig/PlayerShootInput
+    AssetAddress: ComponentConfig/PlayerShootInput
+  - Key: ComponentConfig/Shoot
+    AssetAddress: ComponentConfig/Shoot
