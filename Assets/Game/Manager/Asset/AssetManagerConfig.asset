@@ -31,3 +31,5 @@ MonoBehaviour:
     AssetAddress: ComponentConfig/Rigidbody2D
   - Key: Prefab/Player
     AssetAddress: Prefab/Player
+  - Key: Prefab/Ground
+    AssetAddress: Prefab/Ground

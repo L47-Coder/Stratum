@@ -89,6 +89,10 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         public readonly HashSet<PrefabData> AllInstances = new();
         public readonly Queue<PrefabData> InactiveQueue = new();
         public IAssetHandle<GameObject> AssetHandle;
+        public Vector3 InitialLocalPosition;
+        public Quaternion InitialLocalRotation;
+        public Vector3 InitialLocalScale = Vector3.one;
+        public bool HasInitialTransform;
     }
 
     public async UniTask InitAsync(CancellationToken token)
@@ -163,6 +167,7 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
                 try
                 {
                     var assetHandle = await _assetManager.LoadAssetAsync<GameObject>(data.PrefabAddress);
+                    CaptureInitialTransform(poolCache, assetHandle.Result);
 
                     poolCache.AssetHandle = assetHandle;
                     poolCache.AssetCompletion.TrySetResult(assetHandle);
@@ -188,6 +193,9 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         poolCache.PrefabHandles.Add(prefabHandle);
         _goToHandle[prefabData.GameObject] = prefabHandle;
 
+        ApplyInitialTransform(poolCache, prefabData);
+        BuildInitialComponents(prefabData);
+
         _activeInstances.Add(prefabData);
         prefabData.GameObject.SetActive(true);
 
@@ -212,8 +220,8 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         var newPrefabData = new PrefabData(gameObject);
         poolCache.AllInstances.Add(newPrefabData);
 
-        var entity = gameObject.GetComponent<Entity>()
-                  ?? gameObject.AddComponent<Entity>();
+        if (!gameObject.TryGetComponent<Entity>(out var entity))
+            entity = gameObject.AddComponent<Entity>();
         newPrefabData.Entity = entity;
 
         entity.TriggerEnter += (_, other) => DispatchTriggerEnter(newPrefabData, other);
@@ -246,12 +254,30 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         }
         newPrefabData.InitialTypeKeys.Sort(_typeKeyComparer);
 
-        RestoreToInitialState(newPrefabData);
-
+        ApplyInitialTransform(poolCache, newPrefabData);
         poolCache.InactiveQueue.Enqueue(newPrefabData);
     }
 
-    private void RestoreToInitialState(PrefabData prefabData)
+    private static void CaptureInitialTransform(PoolCache poolCache, GameObject prefab)
+    {
+        if (poolCache == null || prefab == null) return;
+        var t = prefab.transform;
+        poolCache.InitialLocalPosition = t.localPosition;
+        poolCache.InitialLocalRotation = t.localRotation;
+        poolCache.InitialLocalScale = t.localScale;
+        poolCache.HasInitialTransform = true;
+    }
+
+    private static void ApplyInitialTransform(PoolCache poolCache, PrefabData prefabData)
+    {
+        if (poolCache == null || prefabData?.GameObject == null || !poolCache.HasInitialTransform) return;
+        var t = prefabData.GameObject.transform;
+        t.SetParent(null, false);
+        t.SetLocalPositionAndRotation(poolCache.InitialLocalPosition, poolCache.InitialLocalRotation);
+        t.localScale = poolCache.InitialLocalScale;
+    }
+
+    private void ClearAllComponents(PrefabData prefabData)
     {
         _orderedKeyBuffer.Clear();
         _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
@@ -259,38 +285,26 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         {
             var typeKey = _orderedKeyBuffer[i];
             if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-            try { comp.InternalSetEnabled(false); }
+            if (comp.IsEnabled)
+            {
+                try { comp.InternalSetEnabled(false); }
+                catch (Exception e) { Debug.LogException(e); }
+            }
+            try { comp.InternalOnRemove(); }
             catch (Exception e) { Debug.LogException(e); }
         }
         _orderedKeyBuffer.Clear();
+        prefabData.Components.Clear();
+        prefabData.OrderedKeys.Clear();
+    }
 
-        var initialSet = HashSetPool.Get();
-        try
-        {
-            foreach (var key in prefabData.InitialTypeKeys) initialSet.Add(key);
-
-            _orderedKeyBuffer.Clear();
-            _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-            for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
-            {
-                var typeKey = _orderedKeyBuffer[i];
-                if (initialSet.Contains(typeKey)) continue;
-                if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-                try { comp.InternalOnRemove(); }
-                catch (Exception e) { Debug.LogException(e); }
-                prefabData.Components.Remove(typeKey);
-                prefabData.OrderedKeys.Remove(typeKey);
-            }
-            _orderedKeyBuffer.Clear();
-        }
-        finally
-        {
-            HashSetPool.Release(initialSet);
-        }
+    private void BuildInitialComponents(PrefabData prefabData)
+    {
+        if (prefabData.Components.Count > 0 || prefabData.OrderedKeys.Count > 0)
+            ClearAllComponents(prefabData);
 
         foreach (var typeKey in prefabData.InitialTypeKeys)
         {
-            if (prefabData.Components.ContainsKey(typeKey)) continue;
             if (!prefabData.EntityEntryByKey.TryGetValue(typeKey, out var componentEntry)) continue;
             if (componentEntry?.Data == null) continue;
 
@@ -321,7 +335,8 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         var prefabData = prefabHandle.PrefabData;
         _activeInstances.Remove(prefabData);
 
-        RestoreToInitialState(prefabData);
+        ClearAllComponents(prefabData);
+        ApplyInitialTransform(poolCache, prefabData);
 
         prefabData.GameObject.SetActive(false);
         poolCache.InactiveQueue.Enqueue(prefabData);
@@ -342,33 +357,9 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
 
         foreach (var prefabData in poolCache.AllInstances)
         {
-            var wasActive = _activeInstances.Remove(prefabData);
+            _activeInstances.Remove(prefabData);
 
-            _orderedKeyBuffer.Clear();
-            _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-
-            if (wasActive)
-            {
-                for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
-                {
-                    var typeKey = _orderedKeyBuffer[i];
-                    if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-                    try { comp.InternalSetEnabled(false); }
-                    catch (Exception e) { Debug.LogException(e); }
-                }
-            }
-
-            for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
-            {
-                var typeKey = _orderedKeyBuffer[i];
-                if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
-                try { comp.InternalOnRemove(); }
-                catch (Exception e) { Debug.LogException(e); }
-            }
-            _orderedKeyBuffer.Clear();
-
-            prefabData.Components.Clear();
-            prefabData.OrderedKeys.Clear();
+            ClearAllComponents(prefabData);
             prefabData.EntityEntryByKey.Clear();
             prefabData.InitialTypeKeys.Clear();
             _goToHandle.Remove(prefabData.GameObject);
@@ -519,27 +510,6 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         {
             if (data.Components.TryGetValue(typeKey, out var comp))
                 _dispatchBuffer.Add(comp);
-        }
-    }
-
-    // RestoreToInitialState 内部使用的轻量 HashSet 池，避免每次回池都分配
-    private static class HashSetPool
-    {
-        private static readonly Stack<HashSet<string>> _stack = new();
-
-        public static HashSet<string> Get()
-        {
-            if (_stack.Count == 0) return new HashSet<string>(StringComparer.Ordinal);
-            var set = _stack.Pop();
-            set.Clear();
-            return set;
-        }
-
-        public static void Release(HashSet<string> set)
-        {
-            if (set == null) return;
-            set.Clear();
-            _stack.Push(set);
         }
     }
 

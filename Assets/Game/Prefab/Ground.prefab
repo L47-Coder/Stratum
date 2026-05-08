@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1494174255419732663
+--- !u!1 &7372735394342080802
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,22 +8,22 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6900086185418808110}
-  - component: {fileID: 2864665697244683779}
+  - component: {fileID: 6670919501751845166}
+  - component: {fileID: 3793696108458234293}
   m_Layer: 0
-  m_Name: Player
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6900086185418808110
+--- !u!4 &6670919501751845166
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494174255419732663}
+  m_GameObject: {fileID: 7372735394342080802}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -32,38 +32,43 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2864665697244683779
+--- !u!114 &3793696108458234293
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1494174255419732663}
+  m_GameObject: {fileID: 7372735394342080802}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d6f32edc864a52c4fa2bb38a4303d51b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - EntryKey: SpriteRendererComponent_default
-    InitOnStart: 1
-    ComponentType: SpriteRendererComponent
-    Data:
-      rid: 8899497881280446466
   - EntryKey: BoxCollider2DComponent_default
     InitOnStart: 1
     ComponentType: BoxCollider2DComponent
     Data:
-      rid: 8899497878632267778
+      rid: 8899497881280446467
   - EntryKey: Rigidbody2DComponent_default
-    InitOnStart: 0
+    InitOnStart: 1
     ComponentType: Rigidbody2DComponent
     Data:
-      rid: 8899497878632267777
+      rid: 8899497881280446468
   references:
     version: 2
     RefIds:
-    - rid: 8899497878632267777
+    - rid: 8899497881280446467
+      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
+      data:
+        Key: 
+        IsTrigger: 0
+        Offset: {x: 0, y: 0}
+        Size: {x: 1, y: 1}
+        EdgeRadius: 0
+        UsedByEffector: 0
+        UsedByComposite: 0
+    - rid: 8899497881280446468
       type: {class: Rigidbody2DComponentData, ns: , asm: Game.Components}
       data:
         Key: 
@@ -74,27 +79,7 @@ MonoBehaviour:
         Drag: 0
         AngularDrag: 0.05
         GravityScale: 1
-        CollisionDetectionMode: 0
-        SleepMode: 1
+        CollisionDetectionMode: 1
+        SleepMode: 0
         Interpolation: 0
-        Constraints: 0
-    - rid: 8899497878632267778
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: 
-        IsTrigger: 0
-        Offset: {x: 0, y: 0}
-        Size: {x: 1, y: 1}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
-    - rid: 8899497881280446466
-      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
-      data:
-        Key: 
-        Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-        Color: {r: 1, g: 1, b: 1, a: 1}
-        FlipX: 0
-        FlipY: 0
-        SortingLayerName: Default
-        SortingOrder: 0
+        Constraints: 7

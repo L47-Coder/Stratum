@@ -242,8 +242,8 @@ namespace Stratum.Editor
             _tableView.CanSelect = false;
             _tableView.CanEdit = true;
             _tableView.ShowToolbar = true;
-            _tableView.MarkDuplicates = false;
-            _tableView.KeyField       = "EntryKey";
+            _tableView.MarkDuplicates = true;
+            _tableView.KeyField = "EntryKey";
             _tableView.ToolbarButtons.Add(new GUIContent(
                 EditorGUIUtility.IconContent("d_Linked").image,
                 "在 Addressable Viewer 中查看"));

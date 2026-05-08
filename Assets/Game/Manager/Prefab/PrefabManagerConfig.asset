@@ -15,3 +15,5 @@ MonoBehaviour:
   _configs:
   - Key: Player
     PrefabAddress: Prefab/Player
+  - Key: Ground
+    PrefabAddress: Prefab/Ground
