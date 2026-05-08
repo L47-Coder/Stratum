@@ -7,13 +7,13 @@ namespace Stratum
     [Serializable]
     public sealed class EntityComponentEntry
     {
-        [Field(Title = "类型键", Readonly = true, Width = 300)]
+        [Field(Readonly = true, Width = 300)]
         public string EntryKey = string.Empty;
 
-        [Field(Title = "生成时加入", Width = 70)]
+        [Field(Width = 90)]
         public bool InitOnStart = true;
 
-        [Field(Title = "组件类型", Width = 280)]
+        [Field(Width = 280)]
         [Dropdown(nameof(GetComponentTypeOptions))]
         public string ComponentType;
 

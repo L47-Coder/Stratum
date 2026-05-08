@@ -185,7 +185,7 @@ namespace Stratum.Editor
             _tableView.KeyField = "EntryKey";
             _tableView.ToolbarButtons.Add(new GUIContent(
                 EditorGUIUtility.IconContent("d_Linked").image,
-                "在 Addressable Viewer 中查看"));
+                "View in Addressable Viewer"));
             _tableView.OnRowEdit(_ => MarkComponentDataChanged());
             _tableView.OnRowAdd(_ => MarkComponentDataChanged());
             _tableView.OnRowRemove(_ => MarkComponentDataChanged());
@@ -311,8 +311,8 @@ namespace Stratum.Editor
             cursorX += iconSize + 12f;
 
             var textY = y + (bannerH - 34f) * 0.5f;
-            GUI.Label(new Rect(cursorX, textY, w - 80f, 18f), "尚未挂载 Entity 组件", AddEntityTitleStyle);
-            GUI.Label(new Rect(cursorX, textY + 18f, w - 80f, 16f), "点击此处添加 Entity 组件以在框架中管理其生命周期与组件配置。", AddEntitySubStyle);
+            GUI.Label(new Rect(cursorX, textY, w - 80f, 18f), "Entity component is not attached", AddEntityTitleStyle);
+            GUI.Label(new Rect(cursorX, textY + 18f, w - 80f, 16f), "Click to add Entity for lifecycle and component configuration.", AddEntitySubStyle);
         }
 
         private void AddEntity()
@@ -329,7 +329,7 @@ namespace Stratum.Editor
             var settings = AddressableAssetSettingsDefaultObject.Settings;
             if (settings == null)
             {
-                Debug.LogWarning("[PrefabViewer] 找不到 AddressableAssetSettings，请先在 Addressables 创建配置。");
+                Debug.LogWarning("[PrefabViewer] AddressableAssetSettings not found. Create Addressables settings first.");
                 return;
             }
 

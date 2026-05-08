@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6670919501751845166}
-  - component: {fileID: 3793696108458234293}
+  - component: {fileID: 8490397990590589391}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &3793696108458234293
+--- !u!114 &8490397990590589391
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -49,16 +49,16 @@ MonoBehaviour:
     InitOnStart: 1
     ComponentType: SpriteRendererComponent
     Data:
-      rid: 8899497881280446472
+      rid: 8899497881280446488
   references:
     version: 2
     RefIds:
-    - rid: 8899497881280446472
+    - rid: 8899497881280446488
       type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
       data:
-        Key: 
-        Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-        Color: {r: 1, g: 0, b: 0, a: 1}
+        Key: default
+        Sprite: {fileID: 0}
+        Color: {r: 1, g: 1, b: 1, a: 1}
         FlipX: 0
         FlipY: 0
         SortingLayerName: Default
