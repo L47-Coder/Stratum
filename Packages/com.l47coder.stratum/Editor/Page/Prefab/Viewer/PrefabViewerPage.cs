@@ -62,10 +62,6 @@ namespace Stratum.Editor
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Left Panel
-    // ─────────────────────────────────────────────────────────────────────────
-
     internal sealed class PrefabViewerLeftPanel
     {
         private readonly TreeControl _treeView = new();
@@ -82,10 +78,6 @@ namespace Stratum.Editor
         public void OnGUI(Rect rect) =>
             _treeView.Draw(rect, WorkbenchPaths.PrefabRoot);
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Right Panel
-    // ─────────────────────────────────────────────────────────────────────────
 
     internal sealed class PrefabViewerRightPanel
     {
@@ -131,8 +123,7 @@ namespace Stratum.Editor
         private readonly TableControl _tableView = new();
         private readonly FieldPopup _configPopup = new();
         private bool _tableSetup;
-
-        // ── Public API ───────────────────────────────────────────────────────
+        private bool _pendingComponentDataSave;
 
         public void SetPath(string path)
         {
@@ -140,8 +131,6 @@ namespace Stratum.Editor
             _currentPath = path;
             _cachedPath = null;
         }
-
-        // ── Draw entry ───────────────────────────────────────────────────────
 
         public void OnGUI(Rect rect)
         {
@@ -176,8 +165,6 @@ namespace Stratum.Editor
             DrawEntityConfigPanel(rect.x, rect.y, rect.width, rect.yMax);
         }
 
-        // ── Cache ─────────────────────────────────────────────────────────────
-
         private void RefreshCacheIfNeeded()
         {
             if (_cachedPath == _currentPath) return;
@@ -206,8 +193,6 @@ namespace Stratum.Editor
             _addrGroup = entry.parentGroup?.Name ?? string.Empty;
         }
 
-        // ── Entity / EntityComponentEntry 表格 ────────────────────────────────
-
         private void DrawEntityConfigPanel(float x, float y, float w, float yMax)
         {
             if (_cachedEntity == null)
@@ -219,17 +204,9 @@ namespace Stratum.Editor
             EnsureTableSetup();
 
             var tableRect = new Rect(x, y, w, yMax - y);
-            EditorGUI.BeginChangeCheck();
             _tableView.Draw(tableRect, _cachedEntity.Components);
-            if (EditorGUI.EndChangeCheck())
-            {
-                SyncComponentDataTypes();
-                EditorUtility.SetDirty(_cachedEntity);
-                if (_cachedPrefab != null) PrefabUtility.SavePrefabAsset(_cachedPrefab);
-            }
+            SavePendingComponentDataChanges();
         }
-
-        // ── 表格初始化 ────────────────────────────────────────────────────────
 
         private void EnsureTableSetup()
         {
@@ -247,6 +224,10 @@ namespace Stratum.Editor
             _tableView.ToolbarButtons.Add(new GUIContent(
                 EditorGUIUtility.IconContent("d_Linked").image,
                 "在 Addressable Viewer 中查看"));
+            _tableView.OnRowEdit(_ => MarkComponentDataChanged());
+            _tableView.OnRowAdd(_ => MarkComponentDataChanged());
+            _tableView.OnRowRemove(_ => MarkComponentDataChanged());
+            _tableView.OnRowMove((_, _) => MarkComponentDataChanged());
             _tableView.OnRowExpandField((rowIndex, _, anchorRect) => OpenConfigPopup(rowIndex, anchorRect));
             _tableView.OnButtonClick(idx =>
             {
@@ -258,7 +239,17 @@ namespace Stratum.Editor
             });
         }
 
-        // ── ComponentType 变更时重建 Data ──────────────────────────────────────
+        private void MarkComponentDataChanged() => _pendingComponentDataSave = true;
+
+        private void SavePendingComponentDataChanges()
+        {
+            if (!_pendingComponentDataSave) return;
+            _pendingComponentDataSave = false;
+
+            SyncComponentDataTypes();
+            EditorUtility.SetDirty(_cachedEntity);
+            if (_cachedPrefab != null) PrefabUtility.SavePrefabAsset(_cachedPrefab);
+        }
 
         private void SyncComponentDataTypes()
         {
@@ -313,8 +304,6 @@ namespace Stratum.Editor
             return data;
         }
 
-        // ── 打开 Config 弹窗 ──────────────────────────────────────────────────
-
         private void OpenConfigPopup(int index, Rect anchorRect)
         {
             if (_cachedSo == null || _cachedEntity == null) return;
@@ -332,8 +321,6 @@ namespace Stratum.Editor
             });
             _configPopup.Show(anchorRect, entry.Data);
         }
-
-        // ── 无 Entity 占位视图 ────────────────────────────────────────────────
 
         private void DrawAddEntityPlaceholder(float x, float y, float w, float yMax)
         {
@@ -357,7 +344,6 @@ namespace Stratum.Editor
 
             var cursorX = x + 16f;
 
-            // 图标
             var iconContent = EditorGUIUtility.IconContent("Prefab Icon");
             var iconSize = 32f;
             var iconRect = new Rect(cursorX, y + (bannerH - iconSize) * 0.5f, iconSize, iconSize);
@@ -365,13 +351,10 @@ namespace Stratum.Editor
                             0f, new Color(1f, 1f, 1f, 0.45f), 0f, 0f);
             cursorX += iconSize + 12f;
 
-            // 文字区域
             var textY = y + (bannerH - 34f) * 0.5f;
             GUI.Label(new Rect(cursorX, textY, w - 80f, 18f), "尚未挂载 Entity 组件", AddEntityTitleStyle);
             GUI.Label(new Rect(cursorX, textY + 18f, w - 80f, 16f), "点击此处添加 Entity 组件以在框架中管理其生命周期与组件配置。", AddEntitySubStyle);
         }
-
-        // ── 挂载 Entity ──────────────────────────────────────────────────────
 
         private void AddEntity()
         {
@@ -381,8 +364,6 @@ namespace Stratum.Editor
             PrefabUtility.UnloadPrefabContents(contents);
             _cachedPath = null;
         }
-
-        // ── Addressable actions ───────────────────────────────────────────────
 
         private void MarkAsAddressable()
         {

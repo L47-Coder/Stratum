@@ -164,7 +164,6 @@ namespace Stratum.Editor
                                     _columnPreferredWidths[lastIdx] + deltaFrame);
                             }
                         }
-                        GUI.changed = true;
                         RequestGuiVisualRefresh();
                         e.Use();
                     }
