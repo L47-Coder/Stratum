@@ -6,6 +6,13 @@ namespace Stratum.Editor
 {
     internal static class ManagerOrderSync
     {
+        [EditorSync(-1000)]
+        public static void Run()
+        {
+            var config = AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(WorkbenchPaths.ManagerOrder);
+            Sync(config);
+        }
+
         public static void Sync(ManagerOrderConfig config)
         {
             if (config == null) return;

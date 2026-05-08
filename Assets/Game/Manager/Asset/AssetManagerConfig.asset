@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd74a82ca52d3d648b6362df2dca5091, type: 3}
+  m_Name: AssetManagerConfig
+  m_EditorClassIdentifier: 
+  _configs:
+  - Key: Frame/ComponentOrder
+    AssetAddress: Frame/ComponentOrder
+  - Key: Frame/ManagerOrder
+    AssetAddress: Frame/ManagerOrder
+  - Key: ManagerConfig/Asset
+    AssetAddress: ManagerConfig/Asset
+  - Key: ManagerConfig/Component
+    AssetAddress: ManagerConfig/Component
+  - Key: ManagerConfig/Prefab
+    AssetAddress: ManagerConfig/Prefab
+  - Key: ComponentConfig/SpriteRenderer
+    AssetAddress: ComponentConfig/SpriteRenderer
+  - Key: ComponentConfig/BoxCollider2D
+    AssetAddress: ComponentConfig/BoxCollider2D
+  - Key: ComponentConfig/Rigidbody2D
+    AssetAddress: ComponentConfig/Rigidbody2D
+  - Key: Prefab/Player
+    AssetAddress: Prefab/Player
