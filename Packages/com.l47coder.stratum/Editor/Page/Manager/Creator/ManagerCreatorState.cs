@@ -21,7 +21,6 @@ namespace Stratum.Editor
         private static readonly Regex ValidManagerNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
         public string InputManagerName { get; private set; } = string.Empty;
-        public bool IncludeConfig { get; private set; } = true;
         public bool IsValid { get; private set; }
         public bool HasPreview => !string.IsNullOrEmpty(ManagerClassName);
         public string ErrorMessage { get; private set; } = string.Empty;
@@ -56,7 +55,6 @@ namespace Stratum.Editor
         public void Reset()
         {
             InputManagerName = string.Empty;
-            IncludeConfig = true;
             IsValid = false;
             ErrorMessage = string.Empty;
             _parentFolderAssetPath = RootAssetPath;
@@ -66,12 +64,6 @@ namespace Stratum.Editor
         public void SetInputManagerName(string managerName) => ApplyInput(managerName, RootAssetPath);
 
         public void SetInputWithParentFolder(string parentAssetPath, string managerName) => ApplyInput(managerName, parentAssetPath);
-
-        public void SetIncludeConfig(bool includeConfig)
-        {
-            IncludeConfig = includeConfig;
-            RefreshDerivedState();
-        }
 
         public void RefreshDerivedState()
         {
@@ -91,7 +83,7 @@ namespace Stratum.Editor
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
         public ManagerCreationPlan BuildPlan() => new(
-            InputManagerName, IncludeConfig,
+            InputManagerName,
             ManagerInterfaceName, ManagerClassName, ConfigClassName, ManagerDataStructName,
             EntityFolderPath, ManagerTargetFilePath,
             GeneratedFolderPath, GeneratedManagerPartialFilePath,
@@ -128,18 +120,18 @@ namespace Stratum.Editor
 
             ManagerInterfaceName = $"I{InputManagerName}Manager";
             ManagerClassName = $"{InputManagerName}Manager";
-            ConfigClassName = IncludeConfig ? $"{InputManagerName}ManagerConfig" : string.Empty;
-            ManagerDataStructName = IncludeConfig ? $"{InputManagerName}ManagerData" : string.Empty;
+            ConfigClassName = $"{InputManagerName}ManagerConfig";
+            ManagerDataStructName = $"{InputManagerName}ManagerData";
 
             var entityFolder = $"{_parentFolderAssetPath}/{InputManagerName}";
             ManagerTargetFilePath = $"{entityFolder}/{ManagerClassName}.cs";
             GeneratedFolderPath = $"{entityFolder}/{GeneratedFolderName}";
             GeneratedManagerPartialFilePath = $"{GeneratedFolderPath}/{ManagerClassName}.Generated.cs";
-            GeneratedConfigFilePath = IncludeConfig ? $"{GeneratedFolderPath}/{ConfigClassName}.cs" : string.Empty;
-            GeneratedDataFilePath = IncludeConfig ? $"{GeneratedFolderPath}/{ManagerDataStructName}.cs" : string.Empty;
-            AssetTargetFilePath = IncludeConfig ? $"{entityFolder}/{ConfigClassName}.asset" : string.Empty;
-            AddressableAddressName = IncludeConfig ? ManagerAddressConvention.AddressOf(InputManagerName) : string.Empty;
-            RefresherFilePath = IncludeConfig ? $"{entityFolder}/Editor/{InputManagerName}ManagerRefresher.cs" : string.Empty;
+            GeneratedConfigFilePath = $"{GeneratedFolderPath}/{ConfigClassName}.cs";
+            GeneratedDataFilePath = $"{GeneratedFolderPath}/{ManagerDataStructName}.cs";
+            AssetTargetFilePath = $"{entityFolder}/{ConfigClassName}.asset";
+            AddressableAddressName = ManagerAddressConvention.AddressOf(InputManagerName);
+            RefresherFilePath = $"{entityFolder}/Editor/{InputManagerName}ManagerRefresher.cs";
 
             RefreshPreviewCache();
         }
@@ -199,10 +191,10 @@ namespace Stratum.Editor
             string.IsNullOrEmpty(GeneratedFolderPath) ? PreviewStatus.Neutral : _generatedFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
 
         private PreviewStatus GetAssetStatus() =>
-            !IncludeConfig || string.IsNullOrEmpty(AssetTargetFilePath) ? PreviewStatus.Neutral : _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
+            string.IsNullOrEmpty(AssetTargetFilePath) ? PreviewStatus.Neutral : _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
 
         private PreviewStatus GetRefresherStatus() =>
-            !IncludeConfig || string.IsNullOrEmpty(RefresherFilePath) ? PreviewStatus.Neutral : _refresherFileExists ? PreviewStatus.Skip : PreviewStatus.Create;
+            string.IsNullOrEmpty(RefresherFilePath) ? PreviewStatus.Neutral : _refresherFileExists ? PreviewStatus.Skip : PreviewStatus.Create;
 
         private void RefreshPreviewCache()
         {
@@ -213,45 +205,27 @@ namespace Stratum.Editor
             var assetStatus = GetAssetStatus();
             var refresherStatus = GetRefresherStatus();
 
-            _namePreviewItems = IncludeConfig
-                ? new[]
-                {
-                    new PreviewItem("Interface",     ManagerInterfaceName, managerStatus),
-                    new PreviewItem("Manager class", ManagerClassName,     managerStatus),
-                    new PreviewItem("Config class",  ConfigClassName,      generatedStatus),
-                    new PreviewItem("Data class",    ManagerDataStructName,generatedStatus),
-                }
-                : new[]
-                {
-                    new PreviewItem("Interface",     ManagerInterfaceName, managerStatus),
-                    new PreviewItem("Manager class", ManagerClassName,     managerStatus),
-                };
+            _namePreviewItems = new[]
+            {
+                new PreviewItem("Interface",     ManagerInterfaceName, managerStatus),
+                new PreviewItem("Manager class", ManagerClassName,     managerStatus),
+                new PreviewItem("Config class",  ConfigClassName,      generatedStatus),
+                new PreviewItem("Data class",    ManagerDataStructName,generatedStatus),
+            };
 
-            _pathPreviewItems = IncludeConfig
-                ? new[]
-                {
-                    new PreviewItem("Manager script",  _managerFileExists     ? _existingManagerFilePath   : ManagerTargetFilePath,  managerStatus),
-                    new PreviewItem("Generated folder",GeneratedFolderPath,    generatedStatus),
-                    new PreviewItem("Asset file",      _assetExists           ? _existingAssetPath         : AssetTargetFilePath,    assetStatus),
-                    new PreviewItem("Refresher script",_refresherFileExists   ? _existingRefresherFilePath : RefresherFilePath,      refresherStatus),
-                }
-                : new[]
-                {
-                    new PreviewItem("Manager script",  _managerFileExists ? _existingManagerFilePath : ManagerTargetFilePath, managerStatus),
-                    new PreviewItem("Generated folder",GeneratedFolderPath, generatedStatus),
-                };
+            _pathPreviewItems = new[]
+            {
+                new PreviewItem("Manager script",  _managerFileExists     ? _existingManagerFilePath   : ManagerTargetFilePath,  managerStatus),
+                new PreviewItem("Generated folder",GeneratedFolderPath,    generatedStatus),
+                new PreviewItem("Asset file",      _assetExists           ? _existingAssetPath         : AssetTargetFilePath,    assetStatus),
+                new PreviewItem("Refresher script",_refresherFileExists   ? _existingRefresherFilePath : RefresherFilePath,      refresherStatus),
+            };
 
-            _addressablePreviewItems = IncludeConfig
-                ? new[]
-                {
-                    new PreviewItem("Addressable group",   AddressableGroupName,  assetStatus),
-                    new PreviewItem("Addressable address", AddressableAddressName,assetStatus),
-                }
-                : new[]
-                {
-                    new PreviewItem("Addressable group",   "—",                 PreviewStatus.Neutral),
-                    new PreviewItem("Addressable address", "(config disabled)", PreviewStatus.Neutral),
-                };
+            _addressablePreviewItems = new[]
+            {
+                new PreviewItem("Addressable group",   AddressableGroupName,  assetStatus),
+                new PreviewItem("Addressable address", AddressableAddressName,assetStatus),
+            };
         }
 
         private void RefreshExistingTargets()
@@ -261,9 +235,8 @@ namespace Stratum.Editor
 
             _generatedFolderExists = !string.IsNullOrEmpty(GeneratedFolderPath) && FolderExists(GeneratedFolderPath);
 
-            _existingAssetPath = IncludeConfig
-                ? ResolveExisting(AssetTargetFilePath, ManagerAssetIndex.FindManagerAsset(Path.GetFileName(AssetTargetFilePath)))
-                : string.Empty;
+            _existingAssetPath = ResolveExisting(AssetTargetFilePath,
+                ManagerAssetIndex.FindManagerAsset(Path.GetFileName(AssetTargetFilePath)));
 
             _existingRefresherFilePath = string.Empty;
             if (!string.IsNullOrEmpty(RefresherFilePath) && FileExists(RefresherFilePath))
@@ -327,7 +300,6 @@ namespace Stratum.Editor
     internal readonly struct ManagerCreationPlan
     {
         public readonly string ManagerName;
-        public readonly bool IncludeConfig;
         public readonly string ManagerInterfaceName;
         public readonly string ManagerClassName;
         public readonly string ConfigClassName;
@@ -344,7 +316,7 @@ namespace Stratum.Editor
         public readonly bool ShouldCreateManagerFile;
 
         public ManagerCreationPlan(
-            string managerName, bool includeConfig,
+            string managerName,
             string managerInterfaceName, string managerClassName, string configClassName, string managerDataStructName,
             string entityFolderPath, string managerTargetFilePath,
             string generatedFolderPath, string generatedManagerPartialFilePath,
@@ -353,7 +325,6 @@ namespace Stratum.Editor
             bool shouldCreateManagerFile)
         {
             ManagerName = managerName;
-            IncludeConfig = includeConfig;
             ManagerInterfaceName = managerInterfaceName;
             ManagerClassName = managerClassName;
             ConfigClassName = configClassName;

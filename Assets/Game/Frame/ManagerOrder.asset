@@ -25,3 +25,12 @@ MonoBehaviour:
   - Name: EventManager
     AssemblyQualifiedName: EventManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+  - Name: MessageManager
+    AssemblyQualifiedName: MessageManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - Name: TaskManager
+    AssemblyQualifiedName: TaskManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - Name: SpriteManager
+    AssemblyQualifiedName: SpriteManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null

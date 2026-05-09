@@ -31,31 +31,25 @@ namespace Stratum.Editor
 
         private static void CreateManager(ManagerCreationPlan plan)
         {
-            var configTypeAvailable = plan.IncludeConfig && FindType(plan.ConfigClassName) != null;
+            var configTypeAvailable = FindType(plan.ConfigClassName) != null;
 
             if (plan.ShouldCreateManagerFile) WriteManagerCode(plan);
 
             EnsureFolder(plan.GeneratedFolderPath);
             WriteManagerPartialGeneratedCode(plan);
-            if (plan.IncludeConfig)
-            {
-                WriteConfigGeneratedCode(plan);
-                WriteDataGeneratedCode(plan);
-                WriteRefresherCode(plan);
-            }
+            WriteConfigGeneratedCode(plan);
+            WriteDataGeneratedCode(plan);
+            WriteRefresherCode(plan);
 
             if (!string.IsNullOrEmpty(plan.EntityFolderPath))
                 WriteLeafMarker(plan.EntityFolderPath);
 
             AssetDatabase.Refresh();
 
-            if (plan.IncludeConfig)
-            {
-                if (configTypeAvailable)
-                    EnsureAssetAndAddressable(plan.ManagerName, plan.AssetFilePath, plan.AddressableAddressName);
-                else
-                    ManagerPostCompileAssetService.ScheduleAssetCreation(plan);
-            }
+            if (configTypeAvailable)
+                EnsureAssetAndAddressable(plan.ManagerName, plan.AssetFilePath, plan.AddressableAddressName);
+            else
+                ManagerPostCompileAssetService.ScheduleAssetCreation(plan);
 
             ManagerAssetIndex.Invalidate();
         }
@@ -63,7 +57,7 @@ namespace Stratum.Editor
         private static void WriteManagerCode(ManagerCreationPlan plan)
         {
             var sb = new StringBuilder();
-            if (plan.IncludeConfig) sb.AppendLine("using System.Collections.Generic;");
+            sb.AppendLine("using System.Collections.Generic;");
             sb.AppendLine("using Stratum;");
             sb.AppendLine();
             sb.AppendLine($"public interface {plan.ManagerInterfaceName}");
@@ -71,26 +65,15 @@ namespace Stratum.Editor
             sb.AppendLine();
             sb.AppendLine("}");
             sb.AppendLine();
-
-            if (plan.IncludeConfig)
-            {
-                sb.AppendLine($"internal sealed partial class {plan.ManagerDataStructName}");
-                sb.AppendLine("{");
-                sb.AppendLine("    public string Key;");
-                sb.AppendLine("}");
-                sb.AppendLine();
-                sb.AppendLine($"internal sealed partial class {plan.ManagerClassName} : {plan.ManagerInterfaceName}");
-                sb.AppendLine("{");
-                sb.AppendLine($"    private readonly Dictionary<string, {plan.ManagerDataStructName}> _managerDataDict = new();");
-                sb.AppendLine("}");
-            }
-            else
-            {
-                sb.AppendLine($"internal partial class {plan.ManagerClassName} : {plan.ManagerInterfaceName}");
-                sb.AppendLine("{");
-                sb.AppendLine();
-                sb.AppendLine("}");
-            }
+            sb.AppendLine($"internal sealed partial class {plan.ManagerDataStructName}");
+            sb.AppendLine("{");
+            sb.AppendLine("    public string Key;");
+            sb.AppendLine("}");
+            sb.AppendLine();
+            sb.AppendLine($"internal sealed partial class {plan.ManagerClassName} : {plan.ManagerInterfaceName}");
+            sb.AppendLine("{");
+            sb.AppendLine($"    private readonly Dictionary<string, {plan.ManagerDataStructName}> _managerDataDict = new();");
+            sb.AppendLine("}");
 
             EnsureFolder(Path.GetDirectoryName(plan.ManagerTargetFilePath));
             File.WriteAllText(plan.ManagerTargetFilePath, sb.ToString(), Encoding.UTF8);
@@ -152,29 +135,17 @@ namespace Stratum.Editor
             sb.AppendLine("using Stratum;");
             sb.AppendLine("using UnityEngine.Scripting;");
             sb.AppendLine();
-
-            if (plan.IncludeConfig)
-            {
-                sb.AppendLine("[Preserve]");
-                sb.AppendLine($"internal sealed partial class {plan.ManagerClassName} : BaseManager");
-                sb.AppendLine("{");
-                sb.AppendLine("    protected override async UniTask SetManagerDataDict()");
-                sb.AppendLine("    {");
-                sb.AppendLine($"        var config = await FrameworkLoader.LoadAsync<{plan.ConfigClassName}>(\"{EscapeCSharpStringLiteral(plan.AddressableAddressName)}\");");
-                sb.AppendLine("        _managerDataDict.Clear();");
-                sb.AppendLine("        foreach (var kv in config.ExportManagerDataDict())");
-                sb.AppendLine($"            _managerDataDict[kv.Key] = ({plan.ManagerDataStructName})kv.Value;");
-                sb.AppendLine("    }");
-                sb.AppendLine("}");
-            }
-            else
-            {
-                sb.AppendLine("[Preserve]");
-                sb.AppendLine($"internal partial class {plan.ManagerClassName} : BaseManager");
-                sb.AppendLine("{");
-                sb.AppendLine("    protected override UniTask SetManagerDataDict() => UniTask.CompletedTask;");
-                sb.AppendLine("}");
-            }
+            sb.AppendLine("[Preserve]");
+            sb.AppendLine($"internal sealed partial class {plan.ManagerClassName} : BaseManager");
+            sb.AppendLine("{");
+            sb.AppendLine("    protected override async UniTask SetManagerDataDict()");
+            sb.AppendLine("    {");
+            sb.AppendLine($"        var config = await FrameworkLoader.LoadAsync<{plan.ConfigClassName}>(\"{EscapeCSharpStringLiteral(plan.AddressableAddressName)}\");");
+            sb.AppendLine("        _managerDataDict.Clear();");
+            sb.AppendLine("        foreach (var kv in config.ExportManagerDataDict())");
+            sb.AppendLine($"            _managerDataDict[kv.Key] = ({plan.ManagerDataStructName})kv.Value;");
+            sb.AppendLine("    }");
+            sb.AppendLine("}");
 
             EnsureFolder(Path.GetDirectoryName(plan.GeneratedManagerPartialFilePath));
             File.WriteAllText(plan.GeneratedManagerPartialFilePath, sb.ToString(), Encoding.UTF8);
