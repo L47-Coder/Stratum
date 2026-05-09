@@ -17,6 +17,7 @@ namespace Stratum.Editor
         public const string SessionAssetPathKey = "ManagerCreator.AssetPath";
         public const string SessionAssetAddressKey = "ManagerCreator.AssetAddress";
 
+        private const string ManagerAssemblyName = "Game.Managers";
         private static readonly Regex ValidManagerNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
         public string InputManagerName { get; private set; } = string.Empty;
@@ -305,13 +306,18 @@ namespace Stratum.Editor
         private static bool TypeExists(string typeName)
         {
             if (string.IsNullOrEmpty(typeName)) return false;
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                if (!string.Equals(assembly.GetName().Name, ManagerAssemblyName, StringComparison.Ordinal))
+                    continue;
+
                 try { foreach (var t in assembly.GetTypes()) if (t.Name == typeName) return true; }
                 catch (ReflectionTypeLoadException e)
                 { foreach (var t in e.Types) if (t != null && t.Name == typeName) return true; }
                 catch { }
             }
+
             return false;
         }
 

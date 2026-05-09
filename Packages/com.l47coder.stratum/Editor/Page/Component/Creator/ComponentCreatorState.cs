@@ -17,6 +17,7 @@ namespace Stratum.Editor
         public const string SessionAssetPathKey = "ComponentCreator.AssetPath";
         public const string SessionAssetAddressKey = "ComponentCreator.AssetAddress";
 
+        private const string ComponentAssemblyName = "Game.Components";
         private static readonly Regex ValidName = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
         public string InputComponentName { get; private set; } = string.Empty;
@@ -260,13 +261,18 @@ namespace Stratum.Editor
         private static bool TypeExists(string typeName)
         {
             if (string.IsNullOrEmpty(typeName)) return false;
+
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
+                if (!string.Equals(assembly.GetName().Name, ComponentAssemblyName, StringComparison.Ordinal))
+                    continue;
+
                 try { foreach (var t in assembly.GetTypes()) if (t.Name == typeName) return true; }
                 catch (ReflectionTypeLoadException e)
                 { foreach (var t in e.Types) if (t != null && t.Name == typeName) return true; }
                 catch { }
             }
+
             return false;
         }
     }

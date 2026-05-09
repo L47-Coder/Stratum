@@ -22,3 +22,6 @@ MonoBehaviour:
   - Name: PrefabManager
     AssemblyQualifiedName: PrefabManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+  - Name: EventManager
+    AssemblyQualifiedName: EventManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
