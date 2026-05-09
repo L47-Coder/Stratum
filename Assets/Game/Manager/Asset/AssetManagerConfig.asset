@@ -43,3 +43,13 @@ MonoBehaviour:
     AssetAddress: ComponentConfig/PlayerShootInput
   - Key: ComponentConfig/Shoot
     AssetAddress: ComponentConfig/Shoot
+  - Key: ManagerConfig/Sprite
+    AssetAddress: ManagerConfig/Sprite
+  - Key: ManagerConfig/Layer2D
+    AssetAddress: ManagerConfig/Layer2D
+  - Key: ManagerConfig/Event
+    AssetAddress: ManagerConfig/Event
+  - Key: ManagerConfig/Message
+    AssetAddress: ManagerConfig/Message
+  - Key: ManagerConfig/Task
+    AssetAddress: ManagerConfig/Task

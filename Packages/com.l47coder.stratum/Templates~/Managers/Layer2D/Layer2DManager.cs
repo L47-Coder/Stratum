@@ -27,84 +27,79 @@ internal sealed partial class Layer2DManagerData
 
 internal sealed partial class Layer2DManager : ILayer2DManager, IAsyncInitManager
 {
+    private const string ManagerRootName = "Layer2DRoot";
+    private const string ObjectRootName = "ObjectRoot";
+    private const string CanvasRootName = "CanvasRoot";
+
     private readonly Dictionary<string, Layer2DManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<int, Transform> _objectNodes = new();
     private readonly Dictionary<int, Transform> _canvasNodes = new();
+    private Transform _managerRoot;
     private Transform _objectRoot;
     private Transform _canvasRoot;
 
     public async UniTask InitAsync(CancellationToken token)
     {
-        _objectRoot = GameObject.Find("ObjectRoot")?.transform;
-        _canvasRoot = GameObject.Find("CanvasRoot")?.transform;
+        _managerRoot = CreateRoot(ManagerRootName);
+        _objectRoot = CreateRoot(ObjectRootName, _managerRoot);
+        _canvasRoot = CreateRoot(CanvasRootName, _managerRoot);
         await UniTask.CompletedTask;
     }
 
     public void SetLayer(Transform tr, Layer2DRootType root, int layer)
     {
         if (tr == null) return;
-
-        switch (root)
+        var parent = root switch
         {
-            case Layer2DRootType.Object:
-                SetObjectLayer(tr, layer);
-                break;
-            case Layer2DRootType.Canvas:
-                SetCanvasLayer(tr, layer);
-                break;
-        }
+            Layer2DRootType.Object => GetOrCreateObjectLayerNode(layer),
+            Layer2DRootType.Canvas => GetOrCreateCanvasLayerNode(layer),
+            _ => throw new ArgumentOutOfRangeException(nameof(root), root, null),
+        };
+        tr.SetParent(parent, false);
     }
 
-    private void SetObjectLayer(Transform tr, int layer)
+    private Transform GetOrCreateObjectLayerNode(int layer) =>
+        _objectNodes.TryGetValue(layer, out var node) ? node : CreateObjectLayerNode(layer);
+
+    private Transform CreateObjectLayerNode(int layer)
     {
-        if (_objectRoot == null)
-        {
-            Debug.LogWarning("[Layer2DManager] ObjectRoot not found.");
-            return;
-        }
-
-        if (!_objectNodes.TryGetValue(layer, out var node))
-        {
-            var nodeObject = new GameObject(layer.ToString());
-            var sortingGroup = nodeObject.AddComponent<SortingGroup>();
-            sortingGroup.sortingOrder = layer;
-
-            nodeObject.transform.SetParent(_objectRoot, false);
-            SortRootChildren(_objectRoot);
-            _objectNodes[layer] = node = nodeObject.transform;
-        }
-
-        tr.SetParent(node, false);
+        var go = new GameObject(layer.ToString());
+        var sortingGroup = go.AddComponent<SortingGroup>();
+        sortingGroup.sortingOrder = layer;
+        go.transform.SetParent(_objectRoot, false);
+        SortRootChildren(_objectRoot);
+        var tr = go.transform;
+        _objectNodes[layer] = tr;
+        return tr;
     }
 
-    private void SetCanvasLayer(Transform tr, int layer)
+    private Transform GetOrCreateCanvasLayerNode(int layer) =>
+        _canvasNodes.TryGetValue(layer, out var node) ? node : CreateCanvasLayerNode(layer);
+
+    private Transform CreateCanvasLayerNode(int layer)
     {
-        if (_canvasRoot == null)
-        {
-            Debug.LogWarning("[Layer2DManager] CanvasRoot not found.");
-            return;
-        }
+        var go = new GameObject(layer.ToString());
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceCamera;
+        canvas.worldCamera = Camera.main;
+        canvas.sortingOrder = layer;
+        var scaler = go.AddComponent<CanvasScaler>();
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution = new Vector2(2560, 1600);
+        scaler.matchWidthOrHeight = 0.5f;
+        go.AddComponent<GraphicRaycaster>();
+        go.transform.SetParent(_canvasRoot, false);
+        SortRootChildren(_canvasRoot);
+        var tr = go.transform;
+        _canvasNodes[layer] = tr;
+        return tr;
+    }
 
-        if (!_canvasNodes.TryGetValue(layer, out var node))
-        {
-            var nodeObject = new GameObject(layer.ToString());
-            var canvas = nodeObject.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceCamera;
-            canvas.worldCamera = Camera.main;
-            canvas.sortingOrder = layer;
-
-            var scaler = nodeObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(2560, 1600);
-            scaler.matchWidthOrHeight = 0.5f;
-
-            nodeObject.AddComponent<GraphicRaycaster>();
-            nodeObject.transform.SetParent(_canvasRoot, false);
-            SortRootChildren(_canvasRoot);
-            _canvasNodes[layer] = node = nodeObject.transform;
-        }
-
-        tr.SetParent(node, false);
+    private static Transform CreateRoot(string name, Transform parent = null)
+    {
+        var root = new GameObject(name).transform;
+        root.SetParent(parent, false);
+        return root;
     }
 
     private static void SortRootChildren(Transform root)
