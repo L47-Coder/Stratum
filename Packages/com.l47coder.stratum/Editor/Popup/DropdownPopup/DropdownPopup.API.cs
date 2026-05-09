@@ -7,6 +7,7 @@ namespace Stratum.Editor
     {
         public bool Multi { get; set; }
         public string Separator { get; set; } = ", ";
+        public bool Search { get; set; } = true;
 
         public void OnConfirmed(Action<string> callback) => _onConfirmed = callback;
 

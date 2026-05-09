@@ -45,31 +45,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - EntryKey: SpriteRendererComponent_default
+  - EntryKey: BoxCollider2DComponent_default
     InitOnStart: 1
-    ComponentType: SpriteRendererComponent
+    ComponentType: BoxCollider2DComponent
     Data:
-      rid: 8899497881280446479
+      rid: 8899497910235299843
   - EntryKey: MoveComponent_default
     InitOnStart: 1
     ComponentType: MoveComponent
     Data:
       rid: 8899497881280446485
-  - EntryKey: ShootComponent_default
+  - EntryKey: SpriteRendererComponent_default
     InitOnStart: 1
-    ComponentType: ShootComponent
+    ComponentType: SpriteRendererComponent
     Data:
-      rid: 8899497881280446487
+      rid: 8899497910235299845
   - EntryKey: PlayerMoveTargetInputComponent_default
     InitOnStart: 1
     ComponentType: PlayerMoveTargetInputComponent
     Data:
       rid: 8899497881280446474
-  - EntryKey: PlayerShootInputComponent_default
+  - EntryKey: BoxCollider2DComponent_default
     InitOnStart: 1
-    ComponentType: PlayerShootInputComponent
+    ComponentType: BoxCollider2DComponent
     Data:
-      rid: 8899497881280446483
+      rid: 8899497910235299844
   references:
     version: 2
     RefIds:
@@ -77,30 +77,39 @@ MonoBehaviour:
       type: {class: PlayerMoveTargetInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-    - rid: 8899497881280446479
-      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-        Color: {r: 1, g: 1, b: 1, a: 1}
-        FlipX: 0
-        FlipY: 0
-        SortingLayerName: Default
-        SortingOrder: 0
-    - rid: 8899497881280446483
-      type: {class: PlayerShootInputComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        ShootKey: 106
-        ShootOffset: 0.5
     - rid: 8899497881280446485
       type: {class: MoveComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         MoveSpeed: 5
         TurnSpeed: 1800
-    - rid: 8899497881280446487
-      type: {class: ShootComponentData, ns: , asm: Game.Components}
+    - rid: 8899497910235299843
+      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-        BulletPrefabAddress: Bullet
+        IsTrigger: 0
+        Offset: {x: 0, y: 0}
+        Size: {x: 1, y: 1}
+        EdgeRadius: 0
+        UsedByEffector: 0
+        UsedByComposite: 0
+    - rid: 8899497910235299844
+      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        IsTrigger: 0
+        Offset: {x: 0, y: 0}
+        Size: {x: 1, y: 1}
+        EdgeRadius: 0
+        UsedByEffector: 0
+        UsedByComposite: 0
+    - rid: 8899497910235299845
+      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        Sprite: {fileID: 0}
+        Color: {r: 1, g: 1, b: 1, a: 1}
+        FlipX: 0
+        FlipY: 0
+        SortingLayerName: Default
+        SortingOrder: 0

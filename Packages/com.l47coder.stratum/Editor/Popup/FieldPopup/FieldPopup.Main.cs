@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -180,92 +179,28 @@ namespace Stratum.Editor
                     return;
                 }
 
-                if (type == typeof(string) && def.Dropdown != null)
+                var captDraft = _draft;
+                var captField = field;
+                var captBoxed = boxed;
+                var captManaged = managed;
+                var opts = new FieldDrawer.Options
                 {
-                    var cur = value as string ?? string.Empty;
-                    if (GUI.Button(rect, string.IsNullOrEmpty(cur) ? "(未选择)" : cur, DropdownButtonStyle))
+                    DelayedNumeric = false,
+                    UnfocusOnMouseDown = false,
+                    UnsupportedLabelStyle = ReadonlyValueStyle,
+                    Dropdown = def.Dropdown,
+                    OnAsyncWrite = v =>
                     {
-                        var items = DropdownAttributeResolver.ResolveItems(field, def.Dropdown.Method);
-                        if (items.Length > 0)
-                        {
-                            var captDraft = _draft;
-                            var captField = field;
-                            var popup = new DropdownPopup
-                            {
-                                Multi = def.Dropdown.Multi,
-                                Separator = def.Dropdown.Separator,
-                            };
-                            popup.OnConfirmed(finalValue => captDraft[captField] = finalValue);
-                            popup.Show(rect, items, cur);
-                        }
-                    }
-                    return;
-                }
+                        if (captManaged) captDraft[captField] = v;
+                        else captField.SetValue(captBoxed, v);
+                        GUI.changed = true;
+                    },
+                };
 
-                var supported =
-                    type == typeof(string) || type == typeof(int) || type == typeof(float) ||
-                    type == typeof(bool) || type.IsEnum ||
-                    typeof(UnityEngine.Object).IsAssignableFrom(type) ||
-                    type == typeof(AnimationCurve) || type == typeof(Gradient) ||
-                    type == typeof(Color) ||
-                    type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) ||
-                    type == typeof(Vector2Int) || type == typeof(Vector3Int) || type == typeof(Quaternion) ||
-                    type == typeof(LayerMask);
-
-                if (!supported) { EditorGUI.LabelField(rect, value?.ToString() ?? "null", ReadonlyValueStyle); return; }
-
-                EditorGUI.BeginChangeCheck();
-                object newValue;
-
-                if (type == typeof(string)) newValue = EditorGUI.TextField(rect, value as string ?? string.Empty);
-                else if (type == typeof(int)) newValue = EditorGUI.IntField(rect, value is int iv ? iv : 0);
-                else if (type == typeof(float)) newValue = EditorGUI.FloatField(rect, value is float fv ? fv : 0f);
-                else if (type == typeof(bool)) newValue = DrawToggle(rect, value is bool bv && bv);
-                else if (type.IsEnum) newValue = EditorGUI.EnumPopup(rect, (Enum)value);
-                else if (type == typeof(AnimationCurve)) newValue = EditorGUI.CurveField(rect, value as AnimationCurve ?? new AnimationCurve());
-                else if (type == typeof(Gradient)) newValue = EditorGUI.GradientField(rect, value as Gradient ?? new Gradient());
-                else if (type == typeof(Color)) newValue = EditorGUI.ColorField(rect, value is Color cv ? cv : Color.white);
-                else if (type == typeof(Vector2)) newValue = EditorGUI.Vector2Field(rect, GUIContent.none, value is Vector2 v2 ? v2 : default);
-                else if (type == typeof(Vector3)) newValue = EditorGUI.Vector3Field(rect, GUIContent.none, value is Vector3 v3 ? v3 : default);
-                else if (type == typeof(Vector4)) newValue = EditorGUI.Vector4Field(rect, GUIContent.none, value is Vector4 v4 ? v4 : default);
-                else if (type == typeof(Vector2Int)) newValue = EditorGUI.Vector2IntField(rect, GUIContent.none, value is Vector2Int vi2 ? vi2 : default);
-                else if (type == typeof(Vector3Int)) newValue = EditorGUI.Vector3IntField(rect, GUIContent.none, value is Vector3Int vi3 ? vi3 : default);
-                else if (type == typeof(Quaternion))
-                {
-                    var q = value is Quaternion qv ? qv : Quaternion.identity;
-                    newValue = Quaternion.Euler(EditorGUI.Vector3Field(rect, GUIContent.none, q.eulerAngles));
-                }
-                else if (type == typeof(LayerMask))
-                {
-                    var mask = value is LayerMask lm ? lm : default;
-                    var concat = InternalEditorUtility.LayerMaskToConcatenatedLayersMask(mask);
-                    newValue = (LayerMask)(int)InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(EditorGUI.MaskField(rect, concat, InternalEditorUtility.layers));
-                }
-                else newValue = EditorGUI.ObjectField(rect, value as UnityEngine.Object, type, true);
-
-                if (!EditorGUI.EndChangeCheck()) return;
+                if (!FieldDrawer.TryDraw(rect, field, value, in opts, out var newValue)) return;
                 if (managed) _draft[field] = newValue;
                 else field.SetValue(boxed, newValue);
                 GUI.changed = true;
-            }
-
-            private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);
-            private static readonly Color ToggleOffColor = new(0.72f, 0.22f, 0.22f, 0.88f);
-
-            private static GUIStyle _toggleStyle;
-            private static GUIStyle ToggleStyle => _toggleStyle ??= new GUIStyle(EditorStyles.miniLabel)
-            { alignment = TextAnchor.MiddleCenter, normal = { textColor = Color.white }, fontStyle = FontStyle.Bold };
-
-            private static bool DrawToggle(Rect rect, bool cur)
-            {
-                if (Event.current.type == EventType.Repaint)
-                {
-                    EditorGUI.DrawRect(rect, cur ? ToggleOnColor : ToggleOffColor);
-                    GUI.Label(rect, cur ? "✓" : "✕", ToggleStyle);
-                }
-                if (Event.current.type == EventType.MouseDown && Event.current.button == 0 && rect.Contains(Event.current.mousePosition))
-                { GUI.changed = true; Event.current.Use(); return !cur; }
-                return cur;
             }
 
             private static List<FieldDef> BuildFieldDefs(Type type)
@@ -288,14 +223,6 @@ namespace Stratum.Editor
                 return new FieldDef(title, attr?.Readonly ?? false, field,
                     field.GetCustomAttribute<DropdownAttribute>(false));
             }
-
-            private static GUIStyle _dropdownButtonStyle;
-            private static GUIStyle DropdownButtonStyle =>
-                _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
-                {
-                    alignment = TextAnchor.MiddleLeft,
-                    clipping = TextClipping.Clip,
-                };
 
             private static GUIStyle _labelStyle;
             private static GUIStyle LabelStyle => _labelStyle ??= new GUIStyle(EditorStyles.miniLabel)

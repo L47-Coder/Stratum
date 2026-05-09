@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Stratum;
 using UnityEditor;
-using UnityEditorInternal;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -401,9 +400,6 @@ namespace Stratum.Editor
 
         private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field, DropdownAttribute dropdown)
         {
-            if (Event.current.type == EventType.MouseDown && rect.Contains(Event.current.mousePosition))
-                GUI.FocusControl(null);
-
             var boxed = (object)list[index];
             var value = field.GetValue(boxed);
             var type = field.FieldType;
@@ -428,148 +424,31 @@ namespace Stratum.Editor
                 return;
             }
 
-            var isSupported =
-                type == typeof(string) || type == typeof(int) || type == typeof(float) ||
-                type == typeof(bool) || type.IsEnum ||
-                typeof(UnityEngine.Object).IsAssignableFrom(type) ||
-                type == typeof(AnimationCurve) || type == typeof(Gradient) ||
-                type == typeof(Color) ||
-                type == typeof(Vector2) || type == typeof(Vector3) || type == typeof(Vector4) ||
-                type == typeof(Vector2Int) || type == typeof(Vector3Int) ||
-                type == typeof(Quaternion) ||
-                type == typeof(LayerMask);
-
-            if (!isSupported)
+            var capturedField = field;
+            var capturedList = list;
+            var capturedIndex = index;
+            var opts = new FieldDrawer.Options
             {
-                EditorGUI.LabelField(rect, value?.ToString() ?? "null", EditorStyles.miniLabel);
-                return;
-            }
-
-            EditorGUI.BeginChangeCheck();
-            object newValue;
-
-            if (type == typeof(string))
-            {
-                if (dropdown != null)
+                DelayedNumeric = true,
+                UnfocusOnMouseDown = true,
+                UnsupportedLabelStyle = EditorStyles.miniLabel,
+                Dropdown = dropdown,
+                OnAsyncWrite = v =>
                 {
-                    var cur = value as string ?? string.Empty;
-                    var displayLabel = string.IsNullOrEmpty(cur) ? "(未选择)" : cur;
-                    if (GUI.Button(rect, displayLabel, DropdownButtonStyle))
-                    {
-                        GUI.FocusControl(null);
-                        var items = DropdownAttributeResolver.ResolveItems(field, dropdown.Method);
-                        if (items.Length > 0)
-                        {
-                            var capturedField = field;
-                            var capturedList = list;
-                            var capturedIndex = index;
-                            var popup = new DropdownPopup
-                            {
-                                Multi = dropdown.Multi,
-                                Separator = dropdown.Separator,
-                            };
-                            popup.OnConfirmed(finalValue =>
-                            {
-                                var b = (object)capturedList[capturedIndex];
-                                capturedField.SetValue(b, finalValue);
-                                capturedList[capturedIndex] = (T)b;
-                                _pendingDirty = true;
-                                _onRowEdit?.Invoke(capturedIndex);
-                            });
-                            popup.Show(rect, items, cur);
-                        }
-                    }
-                    newValue = cur;
-                }
-                else
-                    newValue = EditorGUI.DelayedTextField(rect, value as string ?? string.Empty);
-            }
-            else if (type == typeof(int))
-                newValue = EditorGUI.DelayedIntField(rect, value is int iv ? iv : 0);
-            else if (type == typeof(float))
-                newValue = EditorGUI.DelayedFloatField(rect, value is float fv ? fv : 0f);
-            else if (type == typeof(bool))
-                newValue = DrawToggleCell(rect, value is bool bv && bv);
-            else if (type.IsEnum)
-                newValue = EditorGUI.EnumPopup(rect, (Enum)value);
-            else if (type == typeof(AnimationCurve))
-                newValue = EditorGUI.CurveField(rect, value as AnimationCurve ?? new AnimationCurve());
-            else if (type == typeof(Gradient))
-                newValue = EditorGUI.GradientField(rect, value as Gradient ?? new Gradient());
-            else if (type == typeof(Color))
-                newValue = EditorGUI.ColorField(rect, value is Color cv ? cv : Color.white);
-            else if (type == typeof(Vector2))
-                newValue = EditorGUI.Vector2Field(rect, GUIContent.none, value is Vector2 v2 ? v2 : default);
-            else if (type == typeof(Vector3))
-                newValue = EditorGUI.Vector3Field(rect, GUIContent.none, value is Vector3 v3 ? v3 : default);
-            else if (type == typeof(Vector4))
-                newValue = EditorGUI.Vector4Field(rect, GUIContent.none, value is Vector4 v4 ? v4 : default);
-            else if (type == typeof(Vector2Int))
-                newValue = EditorGUI.Vector2IntField(rect, GUIContent.none, value is Vector2Int vi2 ? vi2 : default);
-            else if (type == typeof(Vector3Int))
-                newValue = EditorGUI.Vector3IntField(rect, GUIContent.none, value is Vector3Int vi3 ? vi3 : default);
-            else if (type == typeof(Quaternion))
-            {
-                var q = value is Quaternion qv ? qv : Quaternion.identity;
-                var euler = EditorGUI.Vector3Field(rect, GUIContent.none, q.eulerAngles);
-                newValue = Quaternion.Euler(euler);
-            }
-            else if (type == typeof(LayerMask))
-            {
-                var mask = value is LayerMask lm ? lm : new LayerMask();
-                var concatenated = InternalEditorUtility.LayerMaskToConcatenatedLayersMask(mask);
-                var picked = EditorGUI.MaskField(rect, concatenated, InternalEditorUtility.layers);
-                newValue = (LayerMask)(int)InternalEditorUtility.ConcatenatedLayersMaskToLayerMask(picked);
-            }
-            else
-                newValue = EditorGUI.ObjectField(rect, value as UnityEngine.Object, type, true);
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                field.SetValue(boxed, newValue);
-                list[index] = (T)boxed;
-                GUI.changed = true;
-                _onRowEdit?.Invoke(index);
-            }
-        }
-
-        private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);
-        private static readonly Color ToggleOffColor = new(0.72f, 0.22f, 0.22f, 0.88f);
-
-        private static GUIStyle _dropdownButtonStyle;
-        private static GUIStyle DropdownButtonStyle =>
-            _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
-            {
-                alignment = TextAnchor.MiddleLeft,
-                clipping = TextClipping.Clip,
+                    var b = (object)capturedList[capturedIndex];
+                    capturedField.SetValue(b, v);
+                    capturedList[capturedIndex] = (T)b;
+                    _pendingDirty = true;
+                    GUI.changed = true;
+                    _onRowEdit?.Invoke(capturedIndex);
+                },
             };
 
-        private static GUIStyle _toggleLabelStyle;
-        private static GUIStyle ToggleLabelStyle => _toggleLabelStyle ??= new GUIStyle(EditorStyles.miniLabel)
-        {
-            alignment = TextAnchor.MiddleCenter,
-            normal = { textColor = Color.white },
-            fontStyle = FontStyle.Bold,
-        };
-
-        private static bool DrawToggleCell(Rect rect, bool current)
-        {
-            if (Event.current.type == EventType.Repaint)
-            {
-                EditorGUI.DrawRect(rect, current ? ToggleOnColor : ToggleOffColor);
-                GUI.Label(rect, current ? "✓" : "✕", ToggleLabelStyle);
-            }
-
-            if (Event.current.type == EventType.MouseDown &&
-                Event.current.button == 0 &&
-                rect.Contains(Event.current.mousePosition))
-            {
-                GUI.changed = true;
-                Event.current.Use();
-                return !current;
-            }
-
-            return current;
+            if (!FieldDrawer.TryDraw(rect, field, value, in opts, out var newValue)) return;
+            field.SetValue(boxed, newValue);
+            list[index] = (T)boxed;
+            GUI.changed = true;
+            _onRowEdit?.Invoke(index);
         }
 
         private static GUIStyle _expandableLabelStyle;

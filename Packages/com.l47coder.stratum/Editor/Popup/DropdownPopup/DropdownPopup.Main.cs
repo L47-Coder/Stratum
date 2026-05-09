@@ -13,6 +13,9 @@ namespace Stratum.Editor
         private const float ScrollbarW = 14f;
         private const float MaxH = 280f;
         private const float MinW = 120f;
+        private const float SearchGap = 4f;
+        private const float SearchPadH = 2f;
+        private const float SearchH = 16f;
         private const float CheckmarkW = 22f;
         private const float TextPadL = 6f;
 
@@ -21,7 +24,7 @@ namespace Stratum.Editor
         private void ShowCore(Rect anchorRect, string[] items, string current)
         {
             if (items == null || items.Length == 0) return;
-            PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, Mathf.Max(anchorRect.width, MinW), _onConfirmed));
+            PopupWindow.Show(anchorRect, new Content(items, current, Multi, Separator, Search, Mathf.Max(anchorRect.width, MinW), _onConfirmed));
         }
 
         private sealed class Content : PopupWindowContent
@@ -29,35 +32,106 @@ namespace Stratum.Editor
             private readonly string[] _items;
             private readonly bool _multi;
             private readonly string _separator;
+            private readonly bool _searchEnabled;
             private readonly float _width;
             private readonly Action<string> _onConfirmed;
             private readonly HashSet<string> _selected;
             private readonly string _initialValue;
+            private readonly List<int> _visible = new();
 
+            private string _filter = string.Empty;
+            private bool _focusedSearch;
             private Vector2 _scroll;
-            private int _hoverIndex = -1;
+            private int _hoverVisibleIndex = -1;
             private bool _changed;
             private bool _confirmedSingle;
             private string _confirmedSingleValue;
 
-            internal Content(string[] items, string current, bool multi, string separator, float width, Action<string> onConfirmed)
+            internal Content(string[] items, string current, bool multi, string separator, bool searchEnabled, float width, Action<string> onConfirmed)
             {
                 _items = items;
                 _multi = multi;
                 _separator = string.IsNullOrEmpty(separator) ? ", " : separator;
+                _searchEnabled = searchEnabled;
                 _width = width;
                 _onConfirmed = onConfirmed;
                 _initialValue = current ?? string.Empty;
                 _selected = ParseSelected(current, _separator, multi);
+                RebuildVisible();
             }
 
+            private void RebuildVisible()
+            {
+                _visible.Clear();
+                if (string.IsNullOrEmpty(_filter))
+                {
+                    for (var i = 0; i < _items.Length; i++)
+                        _visible.Add(i);
+                    return;
+                }
+
+                for (var i = 0; i < _items.Length; i++)
+                {
+                    if (_items[i].IndexOf(_filter, StringComparison.OrdinalIgnoreCase) >= 0)
+                        _visible.Add(i);
+                }
+            }
+
+            private float ListAreaHeight
+            {
+                get
+                {
+                    if (_visible.Count == 0)
+                        return _searchEnabled && !string.IsNullOrEmpty(_filter) ? RowH : 0f;
+                    return Mathf.Min(_visible.Count * RowH, MaxH);
+                }
+            }
+
+            private float SearchExtraHeight => _searchEnabled ? SearchH + SearchGap : 0f;
+
             public override Vector2 GetWindowSize() =>
-                new(_width, PaddingV * 2f + Mathf.Min(_items.Length * RowH, MaxH));
+                new(_width, PaddingV * 2f + SearchExtraHeight + ListAreaHeight);
+
+            private void ApplyWindowSize()
+            {
+                if (editorWindow == null) return;
+                var sz = GetWindowSize();
+                var pos = editorWindow.position;
+                pos.width = sz.x;
+                pos.height = sz.y;
+                editorWindow.position = pos;
+            }
 
             public override void OnGUI(Rect rect)
             {
-                var inner = new Rect(rect.x, rect.y + PaddingV, rect.width, rect.height - PaddingV * 2f);
-                var contentH = _items.Length * RowH;
+                var yTop = rect.y + PaddingV;
+                var usableW = rect.width;
+
+                if (_searchEnabled)
+                {
+                    var searchRect = new Rect(rect.x + SearchPadH, yTop, usableW - SearchPadH * 2f, SearchH);
+                    GUI.SetNextControlName("StratumDropdownSearch");
+                    EditorGUI.BeginChangeCheck();
+                    _filter = EditorGUI.TextField(searchRect, _filter, SearchFieldStyle);
+                    if (EditorGUI.EndChangeCheck())
+                    {
+                        RebuildVisible();
+                        ApplyWindowSize();
+                    }
+
+                    if (!_focusedSearch && Event.current.type == EventType.Layout)
+                    {
+                        EditorGUI.FocusTextInControl("StratumDropdownSearch");
+                        _focusedSearch = true;
+                    }
+
+                    yTop += SearchH + SearchGap;
+                }
+
+                var inner = new Rect(rect.x, yTop, rect.width, Mathf.Max(0f, rect.yMax - PaddingV - yTop));
+                var contentH = _visible.Count == 0 && _searchEnabled && !string.IsNullOrEmpty(_filter)
+                    ? RowH
+                    : _visible.Count * RowH;
                 var needScroll = contentH > inner.height + 0.5f;
                 var viewW = needScroll ? inner.width - ScrollbarW : inner.width;
 
@@ -67,16 +141,25 @@ namespace Stratum.Editor
                 var newHover = -1;
                 var e = Event.current;
 
-                for (var i = 0; i < _items.Length; i++)
+                if (_visible.Count == 0)
                 {
-                    var rowRect = new Rect(0f, i * RowH, viewW, RowH);
-                    if (rowRect.Contains(e.mousePosition)) newHover = i;
-                    DrawRow(rowRect, i);
+                    if (_searchEnabled && !string.IsNullOrEmpty(_filter))
+                        GUI.Label(new Rect(0f, 0f, viewW, RowH), "（无匹配）", EditorStyles.centeredGreyMiniLabel);
+                }
+                else
+                {
+                    for (var vi = 0; vi < _visible.Count; vi++)
+                    {
+                        var itemIndex = _visible[vi];
+                        var rowRect = new Rect(0f, vi * RowH, viewW, RowH);
+                        if (rowRect.Contains(e.mousePosition)) newHover = vi;
+                        DrawRow(rowRect, itemIndex, vi);
+                    }
                 }
 
-                if (e.type == EventType.MouseMove && newHover != _hoverIndex)
+                if (e.type == EventType.MouseMove && newHover != _hoverVisibleIndex)
                 {
-                    _hoverIndex = newHover;
+                    _hoverVisibleIndex = newHover;
                     editorWindow?.Repaint();
                 }
 
@@ -97,11 +180,11 @@ namespace Stratum.Editor
                     _onConfirmed.Invoke(_confirmedSingleValue);
             }
 
-            private void DrawRow(Rect rowRect, int index)
+            private void DrawRow(Rect rowRect, int itemIndex, int visibleIndex)
             {
-                var item = _items[index];
+                var item = _items[itemIndex];
                 var isSelected = _multi ? _selected.Contains(item) : item == _initialValue;
-                var isHover = index == _hoverIndex;
+                var isHover = visibleIndex == _hoverVisibleIndex;
                 var e = Event.current;
 
                 if (e.type == EventType.Repaint)
@@ -175,6 +258,16 @@ namespace Stratum.Editor
                 fontStyle = FontStyle.Bold,
                 padding = new RectOffset(0, 0, 0, 0),
                 normal = { textColor = Color.white },
+            };
+
+        private static GUIStyle _searchFieldStyle;
+
+        private static GUIStyle SearchFieldStyle =>
+            _searchFieldStyle ??= new GUIStyle(EditorStyles.toolbarSearchField)
+            {
+                fixedHeight = 0f,
+                fontSize = 12,
+                alignment = TextAnchor.MiddleLeft,
             };
 
         private static GUIStyle _checkmarkStyle;

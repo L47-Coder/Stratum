@@ -8,6 +8,7 @@ namespace Stratum
         public string Method { get; }
         public bool Multi { get; set; }
         public string Separator { get; set; } = ", ";
+        public bool Search { get; set; } = true;
 
         public DropdownAttribute(string method) => Method = method;
     }
