@@ -21,12 +21,13 @@ internal sealed partial class ComponentManagerData
 
 internal sealed partial class ComponentManager : IComponentManager, IAsyncInitManager
 {
-    private readonly Dictionary<string, ComponentManagerData> _managerDataDict = new();
-    private readonly Dictionary<string, BaseComponentData> _componentDataDict = new();
+    private readonly Dictionary<string, ComponentManagerData> _managerDataDict = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, BaseComponentData> _componentDataDict = new(StringComparer.Ordinal);
 
     public async UniTask InitAsync(CancellationToken token)
     {
         _componentDataDict.Clear();
+
         foreach (var data in _managerDataDict.Values)
         {
             var componentConfig = await FrameworkLoader.LoadAsync<BaseComponentConfig>(data.ComponentConfigAddress);

@@ -22,6 +22,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2e41d2ae7531dc04692beba64fd031e0
+    m_Address: ManagerConfig/Layer2D
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4ec3614bcafc03246a77321ce879d2ea
     m_Address: ManagerConfig/Event
     m_ReadOnly: 0

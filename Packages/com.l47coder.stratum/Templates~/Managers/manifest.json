@@ -9,13 +9,43 @@
     {
       "id": "Component",
       "displayName": "Component Manager",
-      "description": "Registers BaseComponent instances and coordinates their lifecycle and message dispatch.",
+      "description": "Loads component configs and creates BaseComponent instances by type key.",
+      "recommended": true
+    },
+    {
+      "id": "Event",
+      "displayName": "Event Manager",
+      "description": "Publishes synchronous and asynchronous typed events with subscription handles.",
+      "recommended": true
+    },
+    {
+      "id": "Layer2D",
+      "displayName": "Layer2D Manager",
+      "description": "Organizes 2D object and canvas roots into ordered runtime layer nodes.",
+      "recommended": true
+    },
+    {
+      "id": "Message",
+      "displayName": "Message Manager",
+      "description": "Registers message handlers and dispatches synchronous or asynchronous message calls.",
       "recommended": true
     },
     {
       "id": "Prefab",
       "displayName": "Prefab Manager",
-      "description": "Pools and instantiates prefabs; pairs with Asset Manager for loading.",
+      "description": "Pools prefab instances and coordinates component lifecycle dispatch.",
+      "recommended": true
+    },
+    {
+      "id": "Sprite",
+      "displayName": "Sprite Manager",
+      "description": "Loads sprites through Asset Manager and tracks SpriteHandle lifetimes.",
+      "recommended": true
+    },
+    {
+      "id": "Task",
+      "displayName": "Task Manager",
+      "description": "Builds and runs frame-driven task chains with actions, waits, loops and lifetimes.",
       "recommended": true
     }
   ]

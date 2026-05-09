@@ -34,3 +34,6 @@ MonoBehaviour:
   - Name: SpriteManager
     AssemblyQualifiedName: SpriteManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+  - Name: Layer2DManager
+    AssemblyQualifiedName: Layer2DManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
+using Stratum;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using Stratum;
 
-public interface IAssetHandle<out T> where T : class
+public interface IAssetHandle<T> where T : class
 {
     public T Result { get; }
 }
@@ -21,10 +21,11 @@ internal sealed class AssetHandle<T> : IAssetHandle<T> where T : class
 {
     public string Key { get; }
     public T Result { get; }
+
     public AssetHandle(string key, T result)
     {
-        Result = result;
         Key = key;
+        Result = result;
     }
 }
 
@@ -39,10 +40,10 @@ internal sealed partial class AssetManagerData
 
 internal sealed partial class AssetManager : IAssetManager
 {
-    private readonly Dictionary<string, AssetManagerData> _managerDataDict = new();
-    private readonly Dictionary<string, AssetCache> _assetCaches = new();
+    private readonly Dictionary<string, AssetManagerData> _managerDataDict = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, AssetCache> _assetCaches = new(StringComparer.Ordinal);
 
-    private class AssetCache
+    private sealed class AssetCache
     {
         public readonly UniTaskCompletionSource<AsyncOperationHandle> OperationCompletion = new();
         public readonly HashSet<object> AssetHandles = new();
@@ -54,27 +55,7 @@ internal sealed partial class AssetManager : IAssetManager
         if (string.IsNullOrEmpty(key) || !_managerDataDict.TryGetValue(key, out var data))
             throw new Exception($"Invalid key: {key}");
 
-        if (!_assetCaches.TryGetValue(key, out var assetCache))
-        {
-            assetCache = new AssetCache();
-            _assetCaches[key] = assetCache;
-            UniTask.Void(async () =>
-            {
-                try
-                {
-                    var operationHandle = Addressables.LoadAssetAsync<T>(data.AssetAddress);
-                    await operationHandle.ToUniTask();
-
-                    assetCache.OperationHandle = operationHandle;
-                    assetCache.OperationCompletion.TrySetResult(operationHandle);
-                }
-                catch (Exception ex)
-                {
-                    assetCache.OperationCompletion.TrySetException(ex);
-                }
-            });
-        }
-
+        var assetCache = GetOrCreateCache<T>(key, data.AssetAddress);
         if (!assetCache.OperationHandle.IsValid())
             await assetCache.OperationCompletion.Task;
 
@@ -102,11 +83,10 @@ internal sealed partial class AssetManager : IAssetManager
         if (!assetCache.OperationHandle.IsValid())
             await assetCache.OperationCompletion.Task;
 
-        if (assetCache.OperationHandle.IsValid())
-        {
-            Addressables.Release(assetCache.OperationHandle);
-            _assetCaches.Remove(assetHandle.Key);
-        }
+        if (!assetCache.OperationHandle.IsValid()) return;
+
+        Addressables.Release(assetCache.OperationHandle);
+        _assetCaches.Remove(assetHandle.Key);
     }
 
     public async UniTask ReleaseAllAssetAsync()
@@ -119,6 +99,34 @@ internal sealed partial class AssetManager : IAssetManager
             if (assetCache.OperationHandle.IsValid())
                 Addressables.Release(assetCache.OperationHandle);
         }
+
         _assetCaches.Clear();
+    }
+
+    private AssetCache GetOrCreateCache<T>(string key, string assetAddress) where T : class
+    {
+        if (_assetCaches.TryGetValue(key, out var assetCache))
+            return assetCache;
+
+        assetCache = new AssetCache();
+        _assetCaches[key] = assetCache;
+
+        UniTask.Void(async () =>
+        {
+            try
+            {
+                var operationHandle = Addressables.LoadAssetAsync<T>(assetAddress);
+                await operationHandle.ToUniTask();
+
+                assetCache.OperationHandle = operationHandle;
+                assetCache.OperationCompletion.TrySetResult(operationHandle);
+            }
+            catch (Exception ex)
+            {
+                assetCache.OperationCompletion.TrySetException(ex);
+            }
+        });
+
+        return assetCache;
     }
 }
