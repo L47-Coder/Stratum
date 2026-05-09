@@ -19,12 +19,6 @@
       "recommended": true
     },
     {
-      "id": "Layer2D",
-      "displayName": "Layer2D Manager",
-      "description": "Organizes 2D object and canvas roots into ordered runtime layer nodes.",
-      "recommended": true
-    },
-    {
       "id": "Message",
       "displayName": "Message Manager",
       "description": "Registers message handlers and dispatches synchronous or asynchronous message calls.",

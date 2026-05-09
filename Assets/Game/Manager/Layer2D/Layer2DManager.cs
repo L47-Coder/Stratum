@@ -27,22 +27,19 @@ internal sealed partial class Layer2DManagerData
 
 internal sealed partial class Layer2DManager : ILayer2DManager, IAsyncInitManager
 {
-    private const string ManagerRootName = "Layer2DRoot";
     private const string ObjectRootName = "ObjectRoot";
     private const string CanvasRootName = "CanvasRoot";
 
     private readonly Dictionary<string, Layer2DManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<int, Transform> _objectNodes = new();
     private readonly Dictionary<int, Transform> _canvasNodes = new();
-    private Transform _managerRoot;
     private Transform _objectRoot;
-    private Transform _canvasRoot;
+    private RectTransform _canvasRoot;
 
     public async UniTask InitAsync(CancellationToken token)
     {
-        _managerRoot = CreateRoot(ManagerRootName);
-        _objectRoot = CreateRoot(ObjectRootName, _managerRoot);
-        _canvasRoot = CreateRoot(CanvasRootName, _managerRoot);
+        _objectRoot = CreateObjectRoot();
+        _canvasRoot = CreateCanvasRoot();
         await UniTask.CompletedTask;
     }
 
@@ -56,6 +53,18 @@ internal sealed partial class Layer2DManager : ILayer2DManager, IAsyncInitManage
             _ => throw new ArgumentOutOfRangeException(nameof(root), root, null),
         };
         tr.SetParent(parent, false);
+    }
+
+    private Transform CreateObjectRoot()
+    {
+        var go = new GameObject(ObjectRootName);
+        return go.transform;
+    }
+
+    private RectTransform CreateCanvasRoot()
+    {
+        var go = new GameObject(CanvasRootName, typeof(RectTransform));
+        return (RectTransform)go.transform;
     }
 
     private Transform GetOrCreateObjectLayerNode(int layer) =>
@@ -78,11 +87,12 @@ internal sealed partial class Layer2DManager : ILayer2DManager, IAsyncInitManage
 
     private Transform CreateCanvasLayerNode(int layer)
     {
-        var go = new GameObject(layer.ToString());
+        var go = new GameObject(layer.ToString(), typeof(RectTransform));
         var canvas = go.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceCamera;
         canvas.worldCamera = Camera.main;
         canvas.sortingOrder = layer;
+        canvas.vertexColorAlwaysGammaSpace = true;
         var scaler = go.AddComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(2560, 1600);
@@ -93,13 +103,6 @@ internal sealed partial class Layer2DManager : ILayer2DManager, IAsyncInitManage
         var tr = go.transform;
         _canvasNodes[layer] = tr;
         return tr;
-    }
-
-    private static Transform CreateRoot(string name, Transform parent = null)
-    {
-        var root = new GameObject(name).transform;
-        root.SetParent(parent, false);
-        return root;
     }
 
     private static void SortRootChildren(Transform root)
