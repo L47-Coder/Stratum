@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 769892b555148ba49877b3d2806d381d
+    m_Address: ComponentConfig/Lifetime
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 91a43d4036191e74682dff49cf998f1d
     m_Address: ComponentConfig/PointerMoveTargetInput
     m_ReadOnly: 0

@@ -9,10 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f0efc09db8335642a7cdfea1a93142f, type: 3}
-  m_Name: ProjectileSpawnComponentConfig
+  m_Script: {fileID: 11500000, guid: a5a0801d53a07754aa59e38389479076, type: 3}
+  m_Name: LifetimeComponentConfig
   m_EditorClassIdentifier: 
   _configs:
   - Key: default
-    ProjectilePrefabAddress: Bullet
-    SpawnsPerSecond: 10

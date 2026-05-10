@@ -40,3 +40,6 @@ MonoBehaviour:
   - Name: ProjectileSpawnComponent
     AssemblyQualifiedName: ProjectileSpawnComponent, Game.Components, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  - Name: LifetimeComponent
+    AssemblyQualifiedName: LifetimeComponent, Game.Components, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null

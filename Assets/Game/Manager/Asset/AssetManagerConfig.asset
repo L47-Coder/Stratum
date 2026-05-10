@@ -57,3 +57,5 @@ MonoBehaviour:
     AssetAddress: ManagerConfig/Message
   - Key: ManagerConfig/Task
     AssetAddress: ManagerConfig/Task
+  - Key: ComponentConfig/Lifetime
+    AssetAddress: ComponentConfig/Lifetime

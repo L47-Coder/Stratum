@@ -31,3 +31,5 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/ProjectileFireInput
   - Key: ComponentConfig/ProjectileSpawn
     ComponentConfigAddress: ComponentConfig/ProjectileSpawn
+  - Key: ComponentConfig/Lifetime
+    ComponentConfigAddress: ComponentConfig/Lifetime
