@@ -21,15 +21,13 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/Rigidbody2D
   - Key: ComponentConfig/LinearMoveToTarget
     ComponentConfigAddress: ComponentConfig/LinearMoveToTarget
-  - Key: ComponentConfig/LerpMoveToTarget
-    ComponentConfigAddress: ComponentConfig/LerpMoveToTarget
   - Key: ComponentConfig/LinearMoveAlongDirection
     ComponentConfigAddress: ComponentConfig/LinearMoveAlongDirection
   - Key: ComponentConfig/AxisMoveTargetInput
     ComponentConfigAddress: ComponentConfig/AxisMoveTargetInput
   - Key: ComponentConfig/PointerMoveTargetInput
     ComponentConfigAddress: ComponentConfig/PointerMoveTargetInput
-  - Key: ComponentConfig/PlayerShootInput
-    ComponentConfigAddress: ComponentConfig/PlayerShootInput
-  - Key: ComponentConfig/Shoot
-    ComponentConfigAddress: ComponentConfig/Shoot
+  - Key: ComponentConfig/ProjectileFireInput
+    ComponentConfigAddress: ComponentConfig/ProjectileFireInput
+  - Key: ComponentConfig/ProjectileSpawn
+    ComponentConfigAddress: ComponentConfig/ProjectileSpawn

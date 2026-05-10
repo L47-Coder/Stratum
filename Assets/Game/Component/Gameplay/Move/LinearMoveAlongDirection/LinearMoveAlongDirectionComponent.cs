@@ -5,54 +5,30 @@ public sealed partial class LinearMoveAlongDirectionComponentData
 {
     public string Key;
     public float MoveSpeed = 5f;
-    public Vector2 MoveDirection = Vector2.right;
 }
 
 public sealed partial class LinearMoveAlongDirectionComponent
 {
+    private const float DirEpsilonSqr = 1e-6f;
+
     private readonly LinearMoveAlongDirectionComponentData _componentData;
-    private Vector2 _normalizedDirection;
-    private bool _hasDirection;
+    private Vector2? _direction;
 
-    public void SetMoveDirection(Vector2 direction)
-    {
-        if (!TryNormalize(direction, out Vector2 normalized)) return;
-        _normalizedDirection = normalized;
-        _hasDirection = true;
-    }
+    public void SetMoveDirection(Vector2 dir) => _direction = dir.sqrMagnitude <= DirEpsilonSqr ? null : dir.normalized;
 
-    protected override void OnEnable()
-    {
-        RefreshDirectionFromComponentData();
-    }
+    public void StopMove() => _direction = null;
+
+    public void SetMoveSpeed(float moveSpeed) => _componentData.MoveSpeed = moveSpeed;
 
     protected override void OnUpdate()
     {
-        if (!_hasDirection || GameObject == null) return;
+        if (_direction == null || GameObject == null) return;
 
         Transform t = GameObject.transform;
-        Vector3 position = t.position;
-        Vector2 delta = _normalizedDirection * (_componentData.MoveSpeed * Time.deltaTime);
-        t.position = new Vector3(position.x + delta.x, position.y + delta.y, position.z);
-    }
-
-    private void RefreshDirectionFromComponentData()
-    {
-        if (!TryNormalize(_componentData.MoveDirection, out Vector2 normalized)) return;
-        _normalizedDirection = normalized;
-        _hasDirection = true;
-    }
-
-    private static bool TryNormalize(Vector2 direction, out Vector2 normalized)
-    {
-        float sqrMag = direction.sqrMagnitude;
-        if (sqrMag <= 0f)
-        {
-            normalized = default;
-            return false;
-        }
-
-        normalized = direction * (1f / Mathf.Sqrt(sqrMag));
-        return true;
+        Vector3 p = t.position;
+        Vector2 current = new(p.x, p.y);
+        float step = _componentData.MoveSpeed * Time.deltaTime;
+        Vector2 next = current + _direction.Value * step;
+        t.position = new Vector3(next.x, next.y, p.z);
     }
 }

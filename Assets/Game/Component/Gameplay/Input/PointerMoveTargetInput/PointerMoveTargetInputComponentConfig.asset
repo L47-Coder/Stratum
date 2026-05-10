@@ -15,4 +15,5 @@ MonoBehaviour:
   _configs:
   - Key: default
     WorldCamera: {fileID: 0}
+    MouseButton: 0
     MoveTargetComponentKey: default

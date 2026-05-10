@@ -37,18 +37,16 @@ MonoBehaviour:
     AssetAddress: Prefab/Bullet
   - Key: ComponentConfig/LinearMoveToTarget
     AssetAddress: ComponentConfig/LinearMoveToTarget
-  - Key: ComponentConfig/LerpMoveToTarget
-    AssetAddress: ComponentConfig/LerpMoveToTarget
   - Key: ComponentConfig/LinearMoveAlongDirection
     AssetAddress: ComponentConfig/LinearMoveAlongDirection
   - Key: ComponentConfig/AxisMoveTargetInput
     AssetAddress: ComponentConfig/AxisMoveTargetInput
   - Key: ComponentConfig/PointerMoveTargetInput
     AssetAddress: ComponentConfig/PointerMoveTargetInput
-  - Key: ComponentConfig/PlayerShootInput
-    AssetAddress: ComponentConfig/PlayerShootInput
-  - Key: ComponentConfig/Shoot
-    AssetAddress: ComponentConfig/Shoot
+  - Key: ComponentConfig/ProjectileFireInput
+    AssetAddress: ComponentConfig/ProjectileFireInput
+  - Key: ComponentConfig/ProjectileSpawn
+    AssetAddress: ComponentConfig/ProjectileSpawn
   - Key: ManagerConfig/Sprite
     AssetAddress: ManagerConfig/Sprite
   - Key: ManagerConfig/Layer2D

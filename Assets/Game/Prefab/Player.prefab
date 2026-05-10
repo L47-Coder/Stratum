@@ -45,11 +45,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - EntryKey: BoxCollider2DComponent_default
-    InitOnStart: 1
-    ComponentType: BoxCollider2DComponent
-    Data:
-      rid: 8899497910235299843
   - EntryKey: SpriteRendererComponent_default
     InitOnStart: 1
     ComponentType: SpriteRendererComponent
@@ -59,44 +54,68 @@ MonoBehaviour:
     InitOnStart: 1
     ComponentType: LinearMoveToTargetComponent
     Data:
-      rid: 8899497881280446474
+      rid: 8899497928654061571
   - EntryKey: AxisMoveTargetInputComponent_default
     InitOnStart: 1
     ComponentType: AxisMoveTargetInputComponent
     Data:
-      rid: 8899497881280446478
+      rid: 8899497928654061570
+  - EntryKey: PointerMoveTargetInputComponent_default
+    InitOnStart: 1
+    ComponentType: PointerMoveTargetInputComponent
+    Data:
+      rid: 8899497928654061572
+  - EntryKey: ProjectileFireInputComponent_default
+    InitOnStart: 1
+    ComponentType: ProjectileFireInputComponent
+    Data:
+      rid: 8899497928654061574
+  - EntryKey: ProjectileSpawnComponent_default
+    InitOnStart: 1
+    ComponentType: ProjectileSpawnComponent
+    Data:
+      rid: 8899497928654061576
   references:
     version: 2
     RefIds:
-    - rid: 8899497881280446478
+    - rid: 8899497910235299845
+      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        Sprite: {fileID: 7482667652216324306, guid: 75f5f34dc1b5347e0b8351032682f224, type: 3}
+        Color: {r: 1, g: 1, b: 1, a: 1}
+        FlipX: 0
+        FlipY: 0
+        SortingLayerName: Default
+        SortingOrder: 0
+    - rid: 8899497928654061570
       type: {class: AxisMoveTargetInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         HorizontalAxis: Horizontal
         VerticalAxis: Vertical
         MoveTargetComponentKey: default
-    - rid: 8899497881280446474
+    - rid: 8899497928654061571
       type: {class: LinearMoveToTargetComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         MoveSpeed: 5
-    - rid: 8899497910235299843
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
+    - rid: 8899497928654061572
+      type: {class: PointerMoveTargetInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-        IsTrigger: 0
-        Offset: {x: 0, y: 0}
-        Size: {x: 1, y: 1}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
-    - rid: 8899497910235299845
-      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
+        WorldCamera: {fileID: 0}
+        MouseButton: 0
+        MoveTargetComponentKey: default
+    - rid: 8899497928654061574
+      type: {class: ProjectileFireInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-        Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
-        Color: {r: 1, g: 1, b: 1, a: 1}
-        FlipX: 0
-        FlipY: 0
-        SortingLayerName: Default
-        SortingOrder: 0
+        FireKey: 106
+        FireOffset: 0.5
+        ProjectileSpawnComponentKey: default
+    - rid: 8899497928654061576
+      type: {class: ProjectileSpawnComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        ProjectilePrefabAddress: Bullet

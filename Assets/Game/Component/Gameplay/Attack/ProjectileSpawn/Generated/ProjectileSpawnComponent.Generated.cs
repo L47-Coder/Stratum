@@ -4,9 +4,9 @@
 
 using Stratum;
 
-public sealed partial class ShootComponent : BaseComponent
+public sealed partial class ProjectileSpawnComponent : BaseComponent
 {
-    public ShootComponent(ShootComponentData componentData)
+    public ProjectileSpawnComponent(ProjectileSpawnComponentData componentData)
     {
         _ = _componentData;
         _componentData = componentData;

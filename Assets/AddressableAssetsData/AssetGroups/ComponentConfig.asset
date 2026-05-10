@@ -17,13 +17,13 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d5bfcacd3e7fb874cbce2c85965027af
   m_SerializeEntries:
-  - m_GUID: 08ee706cbc14b8743b621001a942dbf7
-    m_Address: ComponentConfig/PlayerShootInput
+  - m_GUID: 12320c92dd58b3045a1b6fbd59b3d6c3
+    m_Address: ComponentConfig/Rigidbody2D
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12320c92dd58b3045a1b6fbd59b3d6c3
-    m_Address: ComponentConfig/Rigidbody2D
+  - m_GUID: 2f5ce170881981843888d43e7266b836
+    m_Address: ComponentConfig/ProjectileSpawn
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -52,13 +52,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e1f2d10cd479d5d40b8a033ae7f0e7fb
-    m_Address: ComponentConfig/LinearMoveToTarget
+  - m_GUID: c560b3b54bb47a24f8156e3402310751
+    m_Address: ComponentConfig/ProjectileFireInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e3c4bd27e662e2444a28bf1359f0102b
-    m_Address: ComponentConfig/Shoot
+  - m_GUID: e1f2d10cd479d5d40b8a033ae7f0e7fb
+    m_Address: ComponentConfig/LinearMoveToTarget
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

@@ -8,12 +8,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Stratum;
 
-public sealed partial class ShootComponentConfig : BaseComponentConfig
+public sealed partial class ProjectileSpawnComponentConfig : BaseComponentConfig
 {
     [SerializeField]
-    private List<ShootComponentData> _configs = new();
+    private List<ProjectileSpawnComponentData> _configs = new();
 
-    public override Type ConfigItemType => typeof(ShootComponentData);
+    public override Type ConfigItemType => typeof(ProjectileSpawnComponentData);
     public override IList GetConfigList() => _configs;
 
     protected override Dictionary<string, BaseComponentData> GetComponentDataDict()
@@ -22,9 +22,9 @@ public sealed partial class ShootComponentConfig : BaseComponentConfig
         foreach (var c in _configs)
         {
             if (string.IsNullOrWhiteSpace(c.Key)) continue;
-            var k = $"ShootComponent_{c.Key.Trim()}";
+            var k = $"ProjectileSpawnComponent_{c.Key.Trim()}";
             if (!dict.TryAdd(k, c))
-                Debug.LogWarning($"[ShootComponentConfig] Duplicate key '{k}', first entry kept.");
+                Debug.LogWarning($"[ProjectileSpawnComponentConfig] Duplicate key '{k}', first entry kept.");
         }
         return dict;
     }

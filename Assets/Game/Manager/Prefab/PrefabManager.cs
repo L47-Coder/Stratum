@@ -68,6 +68,9 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
 
     private readonly List<PrefabData> _tickInstanceBuffer = new();
     private readonly List<string> _orderedKeyBuffer = new();
+    private readonly List<string> _loadPrefabEnableKeyBuffer = new();
+    private readonly List<string> _clearComponentsKeyBuffer = new();
+    private readonly List<string> _dispatchKeyBuffer = new();
     private readonly List<BaseComponent> _dispatchBuffer = new();
 
     private readonly IAssetManager _assetManager;
@@ -202,15 +205,15 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
         _activeInstances.Add(prefabData);
         prefabData.GameObject.SetActive(true);
 
-        _orderedKeyBuffer.Clear();
-        _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-        foreach (var typeKey in _orderedKeyBuffer)
+        _loadPrefabEnableKeyBuffer.Clear();
+        _loadPrefabEnableKeyBuffer.AddRange(prefabData.OrderedKeys);
+        foreach (var typeKey in _loadPrefabEnableKeyBuffer)
         {
             if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
             try { comp.InternalSetEnabled(true); }
             catch (Exception e) { Debug.LogException(e); }
         }
-        _orderedKeyBuffer.Clear();
+        _loadPrefabEnableKeyBuffer.Clear();
 
         return prefabHandle;
     }
@@ -282,11 +285,11 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
 
     private void ClearAllComponents(PrefabData prefabData)
     {
-        _orderedKeyBuffer.Clear();
-        _orderedKeyBuffer.AddRange(prefabData.OrderedKeys);
-        for (var i = _orderedKeyBuffer.Count - 1; i >= 0; i--)
+        _clearComponentsKeyBuffer.Clear();
+        _clearComponentsKeyBuffer.AddRange(prefabData.OrderedKeys);
+        for (var i = _clearComponentsKeyBuffer.Count - 1; i >= 0; i--)
         {
-            var typeKey = _orderedKeyBuffer[i];
+            var typeKey = _clearComponentsKeyBuffer[i];
             if (!prefabData.Components.TryGetValue(typeKey, out var comp)) continue;
             if (comp.IsEnabled)
             {
@@ -296,7 +299,7 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
             try { comp.InternalOnRemove(); }
             catch (Exception e) { Debug.LogException(e); }
         }
-        _orderedKeyBuffer.Clear();
+        _clearComponentsKeyBuffer.Clear();
         prefabData.Components.Clear();
         prefabData.OrderedKeys.Clear();
     }
@@ -512,11 +515,14 @@ internal sealed partial class PrefabManager : IPrefabManager, ITickable, IAsyncI
     private void FillDispatchBuffer(PrefabData data)
     {
         _dispatchBuffer.Clear();
-        foreach (var typeKey in data.OrderedKeys)
+        _dispatchKeyBuffer.Clear();
+        _dispatchKeyBuffer.AddRange(data.OrderedKeys);
+        foreach (var typeKey in _dispatchKeyBuffer)
         {
             if (data.Components.TryGetValue(typeKey, out var comp))
                 _dispatchBuffer.Add(comp);
         }
+        _dispatchKeyBuffer.Clear();
     }
 
     private void DispatchTriggerEnter(PrefabData data, Collider other) =>
