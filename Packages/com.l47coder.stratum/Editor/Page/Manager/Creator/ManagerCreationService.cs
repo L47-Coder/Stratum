@@ -88,7 +88,6 @@ namespace Stratum.Editor
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections;");
             sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using System.Linq;");
             sb.AppendLine("using UnityEngine;");
             sb.AppendLine("using Stratum;");
             sb.AppendLine();
@@ -100,9 +99,18 @@ namespace Stratum.Editor
             sb.AppendLine($"    public override Type ConfigItemType => typeof({plan.ManagerDataStructName});");
             sb.AppendLine($"    public override IList GetConfigList() => {GeneratedConfigListFieldName};");
             sb.AppendLine();
-            sb.AppendLine($"    protected override Dictionary<string, BaseManagerData> GetManagerDataDict() => {GeneratedConfigListFieldName}");
-            sb.AppendLine("        .Where(static c => !string.IsNullOrWhiteSpace(c.Key))");
-            sb.AppendLine("        .ToDictionary(static c => c.Key.Trim(), static c => (BaseManagerData)c, StringComparer.Ordinal);");
+            sb.AppendLine("    protected override Dictionary<string, BaseManagerData> GetManagerDataDict()");
+            sb.AppendLine("    {");
+            sb.AppendLine("        var dict = new Dictionary<string, BaseManagerData>(StringComparer.Ordinal);");
+            sb.AppendLine($"        foreach (var c in {GeneratedConfigListFieldName})");
+            sb.AppendLine("        {");
+            sb.AppendLine("            if (string.IsNullOrWhiteSpace(c.Key)) continue;");
+            sb.AppendLine("            var k = c.Key.Trim();");
+            sb.AppendLine("            if (!dict.TryAdd(k, c))");
+            sb.AppendLine($"                Debug.LogWarning($\"[{plan.ConfigClassName}] Duplicate key '{{k}}', first entry kept.\");");
+            sb.AppendLine("        }");
+            sb.AppendLine("        return dict;");
+            sb.AppendLine("    }");
             sb.AppendLine("}");
 
             EnsureFolder(Path.GetDirectoryName(plan.GeneratedConfigFilePath));

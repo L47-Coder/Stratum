@@ -75,7 +75,6 @@ namespace Stratum.Editor
             sb.AppendLine("using System;");
             sb.AppendLine("using System.Collections;");
             sb.AppendLine("using System.Collections.Generic;");
-            sb.AppendLine("using System.Linq;");
             sb.AppendLine("using UnityEngine;");
             sb.AppendLine("using Stratum;");
             sb.AppendLine();
@@ -87,9 +86,18 @@ namespace Stratum.Editor
             sb.AppendLine($"    public override Type ConfigItemType => typeof({dc});");
             sb.AppendLine($"    public override IList GetConfigList() => {f};");
             sb.AppendLine();
-            sb.AppendLine($"    protected override Dictionary<string, BaseComponentData> GetComponentDataDict() => {f}");
-            sb.AppendLine("        .Where(config => !string.IsNullOrWhiteSpace(config.Key))");
-            sb.AppendLine($"        .ToDictionary(config => $\"{cc}_{{config.Key.Trim()}}\", config => (BaseComponentData)config);");
+            sb.AppendLine("    protected override Dictionary<string, BaseComponentData> GetComponentDataDict()");
+            sb.AppendLine("    {");
+            sb.AppendLine($"        var dict = new Dictionary<string, BaseComponentData>(StringComparer.Ordinal);");
+            sb.AppendLine($"        foreach (var c in {f})");
+            sb.AppendLine("        {");
+            sb.AppendLine("            if (string.IsNullOrWhiteSpace(c.Key)) continue;");
+            sb.AppendLine($"            var k = $\"{cc}_{{c.Key.Trim()}}\";");
+            sb.AppendLine("            if (!dict.TryAdd(k, c))");
+            sb.AppendLine($"                Debug.LogWarning($\"[{cfg}] Duplicate key '{{k}}', first entry kept.\");");
+            sb.AppendLine("        }");
+            sb.AppendLine("        return dict;");
+            sb.AppendLine("    }");
             sb.AppendLine("}");
 
             EnsureFolder(Path.GetDirectoryName(plan.GeneratedConfigFilePath));

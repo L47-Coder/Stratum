@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Stratum;
 
@@ -17,7 +16,16 @@ public sealed partial class BoxCollider2DComponentConfig : BaseComponentConfig
     public override Type ConfigItemType => typeof(BoxCollider2DComponentData);
     public override IList GetConfigList() => _configs;
 
-    protected override Dictionary<string, BaseComponentData> GetComponentDataDict() => _configs
-        .Where(config => !string.IsNullOrWhiteSpace(config.Key))
-        .ToDictionary(config => $"BoxCollider2DComponent_{config.Key.Trim()}", config => (BaseComponentData)config);
+    protected override Dictionary<string, BaseComponentData> GetComponentDataDict()
+    {
+        var dict = new Dictionary<string, BaseComponentData>(StringComparer.Ordinal);
+        foreach (var c in _configs)
+        {
+            if (string.IsNullOrWhiteSpace(c.Key)) continue;
+            var k = $"BoxCollider2DComponent_{c.Key.Trim()}";
+            if (!dict.TryAdd(k, c))
+                Debug.LogWarning($"[BoxCollider2DComponentConfig] Duplicate key '{k}', first entry kept.");
+        }
+        return dict;
+    }
 }

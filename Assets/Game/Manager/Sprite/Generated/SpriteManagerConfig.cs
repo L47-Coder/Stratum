@@ -5,7 +5,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Stratum;
 
@@ -17,7 +16,16 @@ public sealed partial class SpriteManagerConfig : BaseManagerConfig
     public override Type ConfigItemType => typeof(SpriteManagerData);
     public override IList GetConfigList() => _configs;
 
-    protected override Dictionary<string, BaseManagerData> GetManagerDataDict() => _configs
-        .Where(static c => !string.IsNullOrWhiteSpace(c.Key))
-        .ToDictionary(static c => c.Key.Trim(), static c => (BaseManagerData)c, StringComparer.Ordinal);
+    protected override Dictionary<string, BaseManagerData> GetManagerDataDict()
+    {
+        var dict = new Dictionary<string, BaseManagerData>(StringComparer.Ordinal);
+        foreach (var c in _configs)
+        {
+            if (string.IsNullOrWhiteSpace(c.Key)) continue;
+            var k = c.Key.Trim();
+            if (!dict.TryAdd(k, c))
+                Debug.LogWarning($"[SpriteManagerConfig] Duplicate key '{k}', first entry kept.");
+        }
+        return dict;
+    }
 }
