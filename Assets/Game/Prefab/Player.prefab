@@ -50,50 +50,37 @@ MonoBehaviour:
     ComponentType: BoxCollider2DComponent
     Data:
       rid: 8899497910235299843
-  - EntryKey: MoveComponent_default
-    InitOnStart: 1
-    ComponentType: MoveComponent
-    Data:
-      rid: 8899497881280446485
   - EntryKey: SpriteRendererComponent_default
     InitOnStart: 1
     ComponentType: SpriteRendererComponent
     Data:
       rid: 8899497910235299845
-  - EntryKey: PlayerMoveTargetInputComponent_default
+  - EntryKey: LinearMoveToTargetComponent_default
     InitOnStart: 1
-    ComponentType: PlayerMoveTargetInputComponent
+    ComponentType: LinearMoveToTargetComponent
     Data:
       rid: 8899497881280446474
-  - EntryKey: BoxCollider2DComponent_default
+  - EntryKey: AxisMoveTargetInputComponent_default
     InitOnStart: 1
-    ComponentType: BoxCollider2DComponent
+    ComponentType: AxisMoveTargetInputComponent
     Data:
-      rid: 8899497910235299844
+      rid: 8899497881280446478
   references:
     version: 2
     RefIds:
-    - rid: 8899497881280446474
-      type: {class: PlayerMoveTargetInputComponentData, ns: , asm: Game.Components}
+    - rid: 8899497881280446478
+      type: {class: AxisMoveTargetInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-    - rid: 8899497881280446485
-      type: {class: MoveComponentData, ns: , asm: Game.Components}
+        HorizontalAxis: Horizontal
+        VerticalAxis: Vertical
+        MoveTargetComponentKey: default
+    - rid: 8899497881280446474
+      type: {class: LinearMoveToTargetComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         MoveSpeed: 5
-        TurnSpeed: 1800
     - rid: 8899497910235299843
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        IsTrigger: 0
-        Offset: {x: 0, y: 0}
-        Size: {x: 1, y: 1}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
-    - rid: 8899497910235299844
       type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
       data:
         Key: default
@@ -107,7 +94,7 @@ MonoBehaviour:
       type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-        Sprite: {fileID: 0}
+        Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
         Color: {r: 1, g: 1, b: 1, a: 1}
         FlipX: 0
         FlipY: 0

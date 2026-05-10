@@ -45,17 +45,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Components:
-  - EntryKey: MoveComponent_default
+  - EntryKey: LinearMoveToTargetComponent_default
     InitOnStart: 1
-    ComponentType: MoveComponent
+    ComponentType: LinearMoveToTargetComponent
     Data:
       rid: 8899497881280446475
   references:
     version: 2
     RefIds:
     - rid: 8899497881280446475
-      type: {class: MoveComponentData, ns: , asm: Game.Components}
+      type: {class: LinearMoveToTargetComponentData, ns: , asm: Game.Components}
       data:
         Key: 
         MoveSpeed: 20
-        TurnSpeed: 1800

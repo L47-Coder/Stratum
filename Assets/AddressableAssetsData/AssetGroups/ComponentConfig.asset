@@ -27,13 +27,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 18cb24910752a224fa5a9e7991318b22
-    m_Address: ComponentConfig/Move
+  - m_GUID: 91a43d4036191e74682dff49cf998f1d
+    m_Address: ComponentConfig/PointerMoveTargetInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a02e7e452cd6c6848969ad3606d0652d
-    m_Address: ComponentConfig/PlayerMoveTargetInput
+  - m_GUID: a37abbda75a987641aaa6d68e1a24a7a
+    m_Address: ComponentConfig/AxisMoveTargetInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -44,6 +44,16 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: b25120976469f3043845b99fbcc49c03
     m_Address: ComponentConfig/BoxCollider2D
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b760770c4b7eb1b408df82e789858eaf
+    m_Address: ComponentConfig/LinearMoveAlongDirection
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e1f2d10cd479d5d40b8a033ae7f0e7fb
+    m_Address: ComponentConfig/LinearMoveToTarget
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
