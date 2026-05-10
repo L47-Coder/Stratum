@@ -1,4 +1,4 @@
-﻿using Stratum;
+using Stratum;
 using UnityEngine;
 
 public sealed partial class Rigidbody2DComponentData

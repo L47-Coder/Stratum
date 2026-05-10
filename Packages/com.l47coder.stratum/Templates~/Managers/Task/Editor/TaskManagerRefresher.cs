@@ -1,6 +1,6 @@
-﻿using UnityEditor;
 using Stratum;
 using Stratum.Editor;
+using UnityEditor;
 
 internal static class TaskManagerRefresher
 {
@@ -13,8 +13,6 @@ internal static class TaskManagerRefresher
         if (cfg == null) return;
 
         var list = (System.Collections.Generic.List<TaskManagerData>)cfg.GetConfigList();
-
-        // TODO: implement the custom refresh logic here.
 
         EditorUtility.SetDirty(cfg);
         AssetDatabase.SaveAssets();

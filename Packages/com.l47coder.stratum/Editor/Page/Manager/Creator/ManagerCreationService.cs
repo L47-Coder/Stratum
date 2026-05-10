@@ -189,8 +189,6 @@ namespace Stratum.Editor
             sb.AppendLine();
             sb.AppendLine($"        var list = (System.Collections.Generic.List<{plan.ManagerDataStructName}>)cfg.GetConfigList();");
             sb.AppendLine();
-            sb.AppendLine("        // TODO: implement the custom refresh logic here.");
-            sb.AppendLine();
             sb.AppendLine("        EditorUtility.SetDirty(cfg);");
             sb.AppendLine("        AssetDatabase.SaveAssets();");
             sb.AppendLine("    }");

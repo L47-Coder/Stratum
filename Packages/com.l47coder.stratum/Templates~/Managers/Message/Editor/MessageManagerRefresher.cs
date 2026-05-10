@@ -1,6 +1,6 @@
-﻿using UnityEditor;
 using Stratum;
 using Stratum.Editor;
+using UnityEditor;
 
 internal static class MessageManagerRefresher
 {
@@ -13,8 +13,6 @@ internal static class MessageManagerRefresher
         if (cfg == null) return;
 
         var list = (System.Collections.Generic.List<MessageManagerData>)cfg.GetConfigList();
-
-        // TODO: implement the custom refresh logic here.
 
         EditorUtility.SetDirty(cfg);
         AssetDatabase.SaveAssets();

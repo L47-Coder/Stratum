@@ -16,3 +16,6 @@ MonoBehaviour:
   - Key: default
     MoveSpeed: 5
     TurnSpeed: 360
+  - Key: default
+    MoveSpeed: 5
+    TurnSpeed: 360

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Stratum.Editor;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
-using Stratum.Editor;
 
 internal static class PrefabManagerRefresher
 {

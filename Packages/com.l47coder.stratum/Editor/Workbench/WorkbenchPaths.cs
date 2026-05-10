@@ -1,4 +1,4 @@
-﻿namespace Stratum.Editor
+namespace Stratum.Editor
 {
     internal static class WorkbenchPaths
     {

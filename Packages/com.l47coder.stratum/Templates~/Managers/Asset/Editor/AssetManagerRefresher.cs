@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using Stratum.Editor;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
-using Stratum.Editor;
 
 internal static class AssetManagerRefresher
 {
