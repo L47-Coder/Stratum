@@ -1,0 +1,14 @@
+{
+    "name": "StratumWorkbenchExamples.Editor",
+    "rootNamespace": "StratumWorkbenchExamples",
+    "references": ["Stratum", "Stratum.Editor"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

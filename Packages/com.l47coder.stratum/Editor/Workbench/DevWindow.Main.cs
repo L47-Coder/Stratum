@@ -62,7 +62,7 @@ namespace Stratum.Editor
         [SerializeField] private string _persistedGroupTitle;
         [SerializeField] private string _persistedTabTitle;
 
-        [MenuItem("Tools/Dev Workbench/Main")]
+        [MenuItem("Tools/Stratum/Dev Workbench")]
         private static void OpenMenuItem() => Open();
 
         private void OnEnable()
