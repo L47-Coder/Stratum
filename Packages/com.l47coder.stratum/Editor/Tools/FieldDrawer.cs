@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor;
@@ -42,7 +43,14 @@ namespace Stratum.Editor
                 return false;
             }
 
-            if (type.IsEnum && !UseNativeEnumPopup(type))
+            if (type.IsEnum && type.IsDefined(typeof(FlagsAttribute), false))
+            {
+                var en = value is Enum ev ? ev : (Enum)Enum.ToObject(type, 0);
+                DrawFlagsEnumDropdown(rect, type, en, opts);
+                return false;
+            }
+
+            if (type.IsEnum)
             {
                 var en = value is Enum ev ? ev : (Enum)Enum.ToObject(type, 0);
                 DrawEnumDropdown(rect, type, en, opts);
@@ -65,8 +73,6 @@ namespace Stratum.Editor
                     : EditorGUI.FloatField(rect, value is float fv2 ? fv2 : 0f);
             else if (type == typeof(bool))
                 newValue = DrawToggle(rect, value is bool bv && bv);
-            else if (type.IsEnum)
-                newValue = EditorGUI.EnumPopup(rect, (Enum)value);
             else if (type == typeof(AnimationCurve))
                 newValue = EditorGUI.CurveField(rect, value as AnimationCurve ?? new AnimationCurve());
             else if (type == typeof(Gradient))
@@ -111,8 +117,71 @@ namespace Stratum.Editor
             type == typeof(Vector2Int) || type == typeof(Vector3Int) || type == typeof(Quaternion) ||
             type == typeof(LayerMask);
 
-        private static bool UseNativeEnumPopup(Type enumType) =>
-            enumType.IsDefined(typeof(FlagsAttribute), false);
+        private static IEnumerable<(string Name, long Value)> GetAtomicFlagParts(Type enumType)
+        {
+            var names = Enum.GetNames(enumType);
+            var values = Enum.GetValues(enumType);
+            for (var i = 0; i < names.Length; i++)
+            {
+                var val = Convert.ToInt64(values.GetValue(i));
+                if (val == 0) continue;
+                if ((val & (val - 1)) != 0) continue;
+                yield return (names[i], val);
+            }
+        }
+
+        private static void DrawFlagsEnumDropdown(Rect rect, Type enumType, Enum current, in Options opts)
+        {
+            var parts = GetAtomicFlagParts(enumType).OrderBy(p => p.Value).ToArray();
+            if (parts.Length == 0)
+            {
+                EditorGUI.LabelField(rect, current.ToString(), opts.UnsupportedLabelStyle ?? EditorStyles.miniLabel);
+                return;
+            }
+
+            var labels = parts.Select(p => ObjectNames.NicifyVariableName(p.Name)).ToArray();
+            var longCurrent = Convert.ToInt64(current);
+            var selectedLabels = new List<string>();
+            foreach (var p in parts)
+            {
+                if ((longCurrent & p.Value) == p.Value)
+                    selectedLabels.Add(ObjectNames.NicifyVariableName(p.Name));
+            }
+
+            const string sep = ", ";
+            var curJoined = string.Join(sep, selectedLabels);
+            var buttonText = selectedLabels.Count == 0 ? "(未选择)" : curJoined;
+
+            if (!GUI.Button(rect, buttonText, DropdownButtonStyle)) return;
+
+            GUI.FocusControl(null);
+            var onAsync = opts.OnAsyncWrite;
+            var popup = new DropdownPopup
+            {
+                Multi = true,
+                Separator = sep,
+                Search = true,
+            };
+            popup.OnConfirmed(finalString =>
+            {
+                var selected = new HashSet<string>(
+                    string.IsNullOrEmpty(finalString)
+                        ? Array.Empty<string>()
+                        : finalString.Split(new[] { sep }, StringSplitOptions.RemoveEmptyEntries)
+                            .Select(s => s.Trim()).Where(s => s.Length > 0),
+                    StringComparer.Ordinal);
+
+                long result = 0;
+                for (var i = 0; i < labels.Length; i++)
+                {
+                    if (selected.Contains(labels[i]))
+                        result |= parts[i].Value;
+                }
+
+                onAsync?.Invoke(Enum.ToObject(enumType, result));
+            });
+            popup.Show(rect, labels, curJoined);
+        }
 
         private static void DrawStringDropdown(Rect rect, FieldInfo field, object value, in Options opts)
         {

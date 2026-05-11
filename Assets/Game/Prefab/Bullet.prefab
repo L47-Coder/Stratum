@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 1}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -50,16 +50,21 @@ MonoBehaviour:
     ComponentType: SpriteRendererComponent
     Data:
       rid: 8899497928654061578
-  - EntryKey: LinearMoveAlongDirectionComponent_default
-    InitOnStart: 1
-    ComponentType: LinearMoveAlongDirectionComponent
-    Data:
-      rid: 8899497928654061573
   - EntryKey: LifetimeComponent_default
     InitOnStart: 1
     ComponentType: LifetimeComponent
     Data:
       rid: 8899497928654061579
+  - EntryKey: LinearMoveAlongDirectionComponent_default
+    InitOnStart: 1
+    ComponentType: LinearMoveAlongDirectionComponent
+    Data:
+      rid: 8899497928654061573
+  - EntryKey: BoxCollider2DComponent_default
+    InitOnStart: 1
+    ComponentType: BoxCollider2DComponent
+    Data:
+      rid: 8899497947844313088
   references:
     version: 2
     RefIds:
@@ -68,12 +73,13 @@ MonoBehaviour:
       data:
         Key: default
         MoveSpeed: 5
+        MoveDirection: {x: 0, y: 0}
     - rid: 8899497928654061578
       type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         Sprite: {fileID: -9095717837082945937, guid: bd3cb4af8406d4436a2ae8c2aafe1f8d, type: 3}
-        Color: {r: 1, g: 1, b: 1, a: 1}
+        Color: {r: 0, g: 0.49034643, b: 1, a: 1}
         FlipX: 0
         FlipY: 0
         SortingLayerName: Default
@@ -83,3 +89,13 @@ MonoBehaviour:
       data:
         Key: default
         LifeTime: 3000
+    - rid: 8899497947844313088
+      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        IsTrigger: 1
+        Offset: {x: 0, y: 0}
+        Size: {x: 0.8, y: 1.8}
+        EdgeRadius: 0
+        UsedByEffector: 0
+        UsedByComposite: 0

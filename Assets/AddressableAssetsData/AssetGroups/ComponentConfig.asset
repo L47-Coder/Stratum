@@ -17,6 +17,11 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d5bfcacd3e7fb874cbce2c85965027af
   m_SerializeEntries:
+  - m_GUID: 02272bc60cbf46649be8116e29cc3be4
+    m_Address: ComponentConfig/Health
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 12320c92dd58b3045a1b6fbd59b3d6c3
     m_Address: ComponentConfig/Rigidbody2D
     m_ReadOnly: 0
@@ -59,6 +64,11 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c560b3b54bb47a24f8156e3402310751
     m_Address: ComponentConfig/ProjectileFireInput
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 82ce374cdf8743639749c0a06849db46
+    m_Address: ComponentConfig/StimulusToBehaviorTranslator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

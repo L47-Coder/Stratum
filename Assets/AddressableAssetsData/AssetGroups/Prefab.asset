@@ -18,7 +18,7 @@ MonoBehaviour:
   m_GUID: 149e757a2e19d9b45b1954b17b908b01
   m_SerializeEntries:
   - m_GUID: 4376dcff54579a5479cd9de95aaf3cc4
-    m_Address: Prefab/Ground
+    m_Address: Prefab/Enemy
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

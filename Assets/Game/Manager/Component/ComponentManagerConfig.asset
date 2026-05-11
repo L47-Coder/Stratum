@@ -29,7 +29,11 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/PointerMoveTargetInput
   - Key: ComponentConfig/ProjectileFireInput
     ComponentConfigAddress: ComponentConfig/ProjectileFireInput
+  - Key: ComponentConfig/StimulusToBehaviorTranslator
+    ComponentConfigAddress: ComponentConfig/StimulusToBehaviorTranslator
   - Key: ComponentConfig/ProjectileSpawn
     ComponentConfigAddress: ComponentConfig/ProjectileSpawn
   - Key: ComponentConfig/Lifetime
     ComponentConfigAddress: ComponentConfig/Lifetime
+  - Key: ComponentConfig/Health
+    ComponentConfigAddress: ComponentConfig/Health

@@ -31,8 +31,6 @@ MonoBehaviour:
     AssetAddress: ComponentConfig/Rigidbody2D
   - Key: Prefab/Player
     AssetAddress: Prefab/Player
-  - Key: Prefab/Ground
-    AssetAddress: Prefab/Ground
   - Key: Prefab/Bullet
     AssetAddress: Prefab/Bullet
   - Key: ComponentConfig/LinearMoveToTarget
@@ -59,3 +57,9 @@ MonoBehaviour:
     AssetAddress: ManagerConfig/Task
   - Key: ComponentConfig/Lifetime
     AssetAddress: ComponentConfig/Lifetime
+  - Key: Prefab/Enemy
+    AssetAddress: Prefab/Enemy
+  - Key: ComponentConfig/Health
+    AssetAddress: ComponentConfig/Health
+  - Key: ComponentConfig/StimulusToBehaviorTranslator
+    AssetAddress: ComponentConfig/StimulusToBehaviorTranslator

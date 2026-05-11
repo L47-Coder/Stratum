@@ -70,6 +70,11 @@ MonoBehaviour:
     ComponentType: ProjectileFireInputComponent
     Data:
       rid: 8899497928654061574
+  - EntryKey: StimulusToBehaviorTranslatorComponent_default
+    InitOnStart: 1
+    ComponentType: StimulusToBehaviorTranslatorComponent
+    Data:
+      rid: 8899497928654061575
   - EntryKey: ProjectileSpawnComponent_default
     InitOnStart: 1
     ComponentType: ProjectileSpawnComponent
@@ -94,7 +99,7 @@ MonoBehaviour:
         Key: default
         HorizontalAxis: Horizontal
         VerticalAxis: Vertical
-        MoveTargetComponentKey: default
+        StimulusChannel: default
     - rid: 8899497928654061571
       type: {class: LinearMoveToTargetComponentData, ns: , asm: Game.Components}
       data:
@@ -106,14 +111,24 @@ MonoBehaviour:
         Key: default
         WorldCamera: {fileID: 0}
         MouseButton: 0
-        MoveTargetComponentKey: default
+        StimulusChannel: default
     - rid: 8899497928654061574
       type: {class: ProjectileFireInputComponentData, ns: , asm: Game.Components}
       data:
         Key: default
         FireKey: 106
-        FireOffset: 0.5
+        StimulusChannel: default
+    - rid: 8899497928654061575
+      type: {class: StimulusToBehaviorTranslatorComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        AxisStimulusChannel: default
+        PointerStimulusChannel: default
+        ButtonStimulusChannel: default
+        AxisDeadZoneSqr: 1e-06
+        MoveTargetComponentKey: default
         ProjectileSpawnComponentKey: default
+        FireOffset: 0.5
     - rid: 8899497928654061576
       type: {class: ProjectileSpawnComponentData, ns: , asm: Game.Components}
       data:

@@ -6,17 +6,17 @@ public sealed partial class PointerMoveTargetInputComponentData
     public string Key;
     public Camera WorldCamera;
     public int MouseButton = 0;
-    public string MoveTargetComponentKey = "default";
+    public string StimulusChannel = "default";
 }
 
 public sealed partial class PointerMoveTargetInputComponent
 {
     private readonly PointerMoveTargetInputComponentData _componentData;
-    [Inject] private readonly IPrefabManager _prefabManager;
+    [Inject] private readonly IEventManager _eventManager;
 
     protected override void OnUpdate()
     {
-        if (GameObject == null || _prefabManager == null) return;
+        if (GameObject == null || _eventManager == null) return;
         if (!Input.GetMouseButtonDown(_componentData.MouseButton)) return;
 
         Camera cam = _componentData.WorldCamera != null ? _componentData.WorldCamera : Camera.main;
@@ -24,13 +24,8 @@ public sealed partial class PointerMoveTargetInputComponent
 
         Vector3 world = cam.ScreenToWorldPoint(Input.mousePosition);
         world.z = GameObject.transform.position.z;
-        var targetPos = (Vector2)world;
+        var worldPosition = (Vector2)world;
 
-        string moveKey = _componentData.MoveTargetComponentKey;
-        if (_prefabManager.TryGetHandle(GameObject, out var handle))
-        {
-            _prefabManager.SafeCallComponent<LinearMoveToTargetComponent>(handle, moveKey, linearMove =>
-                linearMove.SetMoveTarget(targetPos));
-        }
+        _eventManager.Publish(new PointerStimulusEvent(GameObject, _componentData.StimulusChannel, worldPosition, _componentData.MouseButton));
     }
 }

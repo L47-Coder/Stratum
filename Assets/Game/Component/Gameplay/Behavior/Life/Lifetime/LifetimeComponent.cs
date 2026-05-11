@@ -30,8 +30,7 @@ public sealed partial class LifetimeComponent
 
     protected override void OnRemove()
     {
-        if (_taskManager != null)
-            _taskManager.StopTask(_taskHandle);
+        _taskManager?.StopTask(_taskHandle);
         _taskHandle = null;
     }
 }

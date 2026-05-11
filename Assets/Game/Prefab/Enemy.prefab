@@ -27,7 +27,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -50,6 +50,21 @@ MonoBehaviour:
     ComponentType: SpriteRendererComponent
     Data:
       rid: 8899497881280446488
+  - EntryKey: BoxCollider2DComponent_default
+    InitOnStart: 1
+    ComponentType: BoxCollider2DComponent
+    Data:
+      rid: 8899497947844313089
+  - EntryKey: Rigidbody2DComponent_default
+    InitOnStart: 1
+    ComponentType: Rigidbody2DComponent
+    Data:
+      rid: 8899497947844313090
+  - EntryKey: HealthComponent_default
+    InitOnStart: 1
+    ComponentType: HealthComponent
+    Data:
+      rid: 8899497947844313093
   references:
     version: 2
     RefIds:
@@ -57,9 +72,39 @@ MonoBehaviour:
       type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
       data:
         Key: default
-        Sprite: {fileID: 0}
-        Color: {r: 1, g: 1, b: 1, a: 1}
+        Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
+        Color: {r: 1, g: 0, b: 0, a: 1}
         FlipX: 0
         FlipY: 0
         SortingLayerName: Default
         SortingOrder: 0
+    - rid: 8899497947844313089
+      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        IsTrigger: 1
+        Offset: {x: 0, y: 0}
+        Size: {x: 1, y: 1}
+        EdgeRadius: 0
+        UsedByEffector: 0
+        UsedByComposite: 0
+    - rid: 8899497947844313090
+      type: {class: Rigidbody2DComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        BodyType: 0
+        Simulated: 1
+        UseAutoMass: 0
+        Mass: 1
+        Drag: 0
+        AngularDrag: 0.05
+        GravityScale: 1
+        CollisionDetectionMode: 1
+        SleepMode: 0
+        Interpolation: 0
+        Constraints: 7
+    - rid: 8899497947844313093
+      type: {class: HealthComponentData, ns: , asm: Game.Components}
+      data:
+        Key: default
+        MaxHealth: 100

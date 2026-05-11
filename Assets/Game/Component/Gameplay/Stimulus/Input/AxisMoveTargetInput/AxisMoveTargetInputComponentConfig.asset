@@ -16,4 +16,4 @@ MonoBehaviour:
   - Key: default
     HorizontalAxis: Horizontal
     VerticalAxis: Vertical
-    MoveTargetComponentKey: default
+    StimulusChannel: default
