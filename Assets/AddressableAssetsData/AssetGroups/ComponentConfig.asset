@@ -27,8 +27,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2d627d31e95185e45bcc246bbf08bee3
+    m_Address: ComponentConfig/AxisInput
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2f5ce170881981843888d43e7266b836
     m_Address: ComponentConfig/ProjectileSpawn
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 72bb0f0bc3f03d24ea5ddd5ba0398523
+    m_Address: ComponentConfig/MouseInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -37,13 +47,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 91a43d4036191e74682dff49cf998f1d
-    m_Address: ComponentConfig/PointerMoveTargetInput
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a37abbda75a987641aaa6d68e1a24a7a
-    m_Address: ComponentConfig/AxisMoveTargetInput
+  - m_GUID: 82ce374cdf8743639749c0a06849db46
+    m_Address: ComponentConfig/StimulusToBehaviorTranslator
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -62,13 +67,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c560b3b54bb47a24f8156e3402310751
-    m_Address: ComponentConfig/ProjectileFireInput
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82ce374cdf8743639749c0a06849db46
-    m_Address: ComponentConfig/StimulusToBehaviorTranslator
+  - m_GUID: c62d4bd21484e964da605565246dd91b
+    m_Address: ComponentConfig/KeyboardInput
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

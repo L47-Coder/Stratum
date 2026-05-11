@@ -1,27 +1,39 @@
-﻿using UnityEngine;
-using VContainer;
+﻿using System;
+using UnityEngine;
 
 public sealed partial class ProjectileFireInputComponentData
 {
     public string Key;
     public KeyCode FireKey = KeyCode.J;
-    public string StimulusChannel = "default";
 }
 
 public sealed partial class ProjectileFireInputComponent
 {
     private readonly ProjectileFireInputComponentData _componentData;
-    [Inject] private readonly IEventManager _eventManager;
+    private event Action FireDown;
+    private event Action FireHeld;
+    private event Action FireUp;
+
+    public void OnFireDown(Action action) => FireDown += action;
+    public void OffFireDown(Action action) => FireDown -= action;
+    public void OnFireHeld(Action action) => FireHeld += action;
+    public void OffFireHeld(Action action) => FireHeld -= action;
+    public void OnFireUp(Action action) => FireUp += action;
+    public void OffFireUp(Action action) => FireUp -= action;
 
     protected override void OnUpdate()
     {
-        if (GameObject == null || _eventManager == null) return;
+        if (GameObject == null) return;
 
-        bool isPressed = Input.GetKey(_componentData.FireKey);
-        bool isDown = Input.GetKeyDown(_componentData.FireKey);
-        bool isUp = Input.GetKeyUp(_componentData.FireKey);
-        if (!isPressed && !isDown && !isUp) return;
+        if (Input.GetKeyDown(_componentData.FireKey)) FireDown?.Invoke();
+        if (Input.GetKey(_componentData.FireKey)) FireHeld?.Invoke();
+        if (Input.GetKeyUp(_componentData.FireKey)) FireUp?.Invoke();
+    }
 
-        _eventManager.Publish(new ButtonStimulusEvent(GameObject, _componentData.StimulusChannel, isPressed, isDown, isUp));
+    protected override void OnRemove()
+    {
+        FireDown = null;
+        FireHeld = null;
+        FireUp = null;
     }
 }

@@ -6,7 +6,6 @@ public sealed partial class ProjectileSpawnComponentData
 {
     public string Key;
     public string ProjectilePrefabAddress = "Bullet";
-    public float SpawnsPerSecond = 5f;
 }
 
 public sealed partial class ProjectileSpawnComponent
@@ -15,7 +14,6 @@ public sealed partial class ProjectileSpawnComponent
     [Inject] private readonly IPrefabManager _prefabManager;
     [Inject] private readonly ITaskManager _taskManager;
     private readonly List<ITaskHandle> _spawnTasks = new();
-    private float _lastSpawnTime = float.NegativeInfinity;
 
     public bool Spawn(Vector2 startPosition, float angle)
     {
@@ -24,17 +22,6 @@ public sealed partial class ProjectileSpawnComponent
         string prefabKey = _componentData.ProjectilePrefabAddress;
         if (string.IsNullOrWhiteSpace(prefabKey)) return false;
 
-        float rate = _componentData.SpawnsPerSecond;
-        if (rate > 0f)
-        {
-            float minInterval = 1f / rate;
-            if (Time.time - _lastSpawnTime < minInterval)
-                return false;
-        }
-
-        _lastSpawnTime = Time.time;
-
-        bool completed = false;
         ITaskHandle taskHandle = null;
         taskHandle = _taskManager.CreateTask().ActionAsync(async token =>
         {
@@ -50,22 +37,17 @@ public sealed partial class ProjectileSpawnComponent
                 }
 
                 Transform t = handle.GameObject.transform;
-                Vector3 spawnPosition = new(startPosition.x, startPosition.y, t.position.z);
-                Quaternion spawnRotation = Quaternion.Euler(0f, 0f, angle);
-                t.SetPositionAndRotation(spawnPosition, spawnRotation);
-                _prefabManager.SafeCallComponent<LinearMoveAlongDirectionComponent>(handle, "default", move => move.SetMoveDirection((Vector2)t.up));
+                t.SetPositionAndRotation(
+                    new Vector3(startPosition.x, startPosition.y, t.position.z),
+                    Quaternion.Euler(0f, 0f, angle));
             }
             finally
             {
-                completed = true;
-                if (taskHandle != null)
-                    _spawnTasks.Remove(taskHandle);
+                _spawnTasks.Remove(taskHandle);
             }
         }).Run();
 
-        if (!completed)
-            _spawnTasks.Add(taskHandle);
-
+        _spawnTasks.Add(taskHandle);
         return true;
     }
 

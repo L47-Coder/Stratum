@@ -15,4 +15,3 @@ MonoBehaviour:
   _configs:
   - Key: default
     ProjectilePrefabAddress: Bullet
-    SpawnsPerSecond: 10
