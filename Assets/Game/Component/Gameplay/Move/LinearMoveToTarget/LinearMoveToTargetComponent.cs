@@ -14,9 +14,18 @@ public sealed partial class LinearMoveToTargetComponent
     private readonly LinearMoveToTargetComponentData _componentData;
     private Vector2? _targetPos;
 
-    public void SetMoveTarget(Vector2 pos) => _targetPos = pos;
+    private static bool IsFinite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
+    private static bool IsFinite(Vector2 value) => IsFinite(value.x) && IsFinite(value.y);
+    private static float SanitizeMoveSpeed(float moveSpeed) => IsFinite(moveSpeed) ? Mathf.Max(0f, moveSpeed) : 0f;
+
+    public void SetMoveTarget(Vector2 pos)
+    {
+        _targetPos = IsFinite(pos) ? pos : default;
+    }
     public void StopMove() => _targetPos = null;
-    public void SetMoveSpeed(float moveSpeed) => _componentData.MoveSpeed = moveSpeed;
+    public void SetMoveSpeed(float moveSpeed) => _componentData.MoveSpeed = SanitizeMoveSpeed(moveSpeed);
+
+    protected override void OnAdd() => _componentData.MoveSpeed = SanitizeMoveSpeed(_componentData.MoveSpeed);
 
     protected override void OnUpdate()
     {
@@ -34,7 +43,7 @@ public sealed partial class LinearMoveToTargetComponent
             return;
         }
 
-        float step = _componentData.MoveSpeed * Time.deltaTime;
+        float step = SanitizeMoveSpeed(_componentData.MoveSpeed) * Time.deltaTime;
         Vector2 next = Vector2.MoveTowards(current, target, step);
         t.position = new Vector3(next.x, next.y, p.z);
 
