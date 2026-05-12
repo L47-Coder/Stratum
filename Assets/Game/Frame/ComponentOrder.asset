@@ -49,3 +49,15 @@ MonoBehaviour:
   - Name: MouseInputComponent
     AssemblyQualifiedName: MouseInputComponent, Game.Components, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
+  - Name: FireStimulusTranslatorComponent
+    AssemblyQualifiedName: FireStimulusTranslatorComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - Name: MoveStimulusTranslatorComponent
+    AssemblyQualifiedName: MoveStimulusTranslatorComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - Name: ProjectileFireInputComponent
+    AssemblyQualifiedName: ProjectileFireInputComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  - Name: PointerMoveTargetInputComponent
+    AssemblyQualifiedName: PointerMoveTargetInputComponent, Game.Components, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null

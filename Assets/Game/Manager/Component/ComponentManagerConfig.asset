@@ -23,12 +23,6 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/LinearMoveToTarget
   - Key: ComponentConfig/LinearMoveAlongDirection
     ComponentConfigAddress: ComponentConfig/LinearMoveAlongDirection
-  - Key: ComponentConfig/AxisMoveTargetInput
-    ComponentConfigAddress: ComponentConfig/AxisMoveTargetInput
-  - Key: ComponentConfig/PointerMoveTargetInput
-    ComponentConfigAddress: ComponentConfig/PointerMoveTargetInput
-  - Key: ComponentConfig/ProjectileFireInput
-    ComponentConfigAddress: ComponentConfig/ProjectileFireInput
   - Key: ComponentConfig/StimulusToBehaviorTranslator
     ComponentConfigAddress: ComponentConfig/StimulusToBehaviorTranslator
   - Key: ComponentConfig/ProjectileSpawn
@@ -37,3 +31,9 @@ MonoBehaviour:
     ComponentConfigAddress: ComponentConfig/Lifetime
   - Key: ComponentConfig/Health
     ComponentConfigAddress: ComponentConfig/Health
+  - Key: ComponentConfig/AxisInput
+    ComponentConfigAddress: ComponentConfig/AxisInput
+  - Key: ComponentConfig/MouseInput
+    ComponentConfigAddress: ComponentConfig/MouseInput
+  - Key: ComponentConfig/KeyboardInput
+    ComponentConfigAddress: ComponentConfig/KeyboardInput
