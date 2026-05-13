@@ -6,8 +6,11 @@ using Stratum;
 
 public interface IComponentManager
 {
-    public T CreateComponent<T>(string key) where T : BaseComponent;
-    public BaseComponent CreateComponent(string typeKey);
+    T AddComponent<T>(IEntityHandle handle, string key) where T : BaseComponent;
+    bool RemoveComponent<T>(IEntityHandle handle, string key) where T : BaseComponent;
+    bool TryGetComponent<T>(IEntityHandle handle, string key, out T component) where T : BaseComponent;
+    void SafeCallComponent<T>(IEntityHandle handle, string key, Action<T> func) where T : BaseComponent;
+    bool SetComponentEnabled<T>(IEntityHandle handle, string key, bool enabled);
 }
 
 internal sealed partial class ComponentManagerData

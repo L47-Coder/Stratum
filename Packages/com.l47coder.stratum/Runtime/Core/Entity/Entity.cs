@@ -4,12 +4,33 @@ using UnityEngine;
 
 namespace Stratum
 {
-    public sealed class Entity : MonoBehaviour
+    public sealed class ComponentModule : MonoBehaviour
+    {
+        //初始组件
+
+        //当前组件
+    }
+
+    public sealed class ColliderModule : MonoBehaviour
+    {
+        
+    }
+
+    public interface IEntity
+    {
+        GameObject GameObject { get; }
+        T GetOrAddModule<T>() where T : MonoBehaviour;
+    }
+
+
+    internal sealed class Entity : MonoBehaviour, IEntity
     {
         internal List<EntityComponentEntry> Components = new();
         internal Dictionary<Type, List<Component>> PoolAll = new();
         internal Dictionary<Type, Stack<Component>> PoolIdle = new();
         internal IEntityHandle EntityHandle; //由对象池写入
+
+        public GameObject GameObject => gameObject;
 
         internal event Action<IEntityHandle, Collider> TriggerEnter;
         internal event Action<IEntityHandle, Collider> TriggerExit;
@@ -38,5 +59,11 @@ namespace Stratum
         private void OnCollisionEnter2D(Collision2D c) => CollisionEnter2D?.Invoke(EntityHandle, c);
         private void OnCollisionExit2D(Collision2D c) => CollisionExit2D?.Invoke(EntityHandle, c);
         private void OnCollisionStay2D(Collision2D c) => CollisionStay2D?.Invoke(EntityHandle, c);
+
+        public T GetOrAddModule<T>() where T : MonoBehaviour
+        {
+            if(gameObject.TryGetComponent<T>(out var module)) return module;
+            return gameObject.AddComponent<T>();
+        }
     }
 }
