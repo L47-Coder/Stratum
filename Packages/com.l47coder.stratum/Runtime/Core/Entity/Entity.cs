@@ -4,38 +4,39 @@ using UnityEngine;
 
 namespace Stratum
 {
-    internal sealed class Entity : MonoBehaviour
+    public sealed class Entity : MonoBehaviour
     {
-        public List<EntityComponentEntry> Components = new();
-        public Dictionary<Type, List<Component>> PoolAll = new();
-        public Dictionary<Type, Stack<Component>> PoolIdle = new();
+        internal List<EntityComponentEntry> Components = new();
+        internal Dictionary<Type, List<Component>> PoolAll = new();
+        internal Dictionary<Type, Stack<Component>> PoolIdle = new();
+        internal IEntityHandle EntityHandle; //由对象池写入
 
-        public event Action<GameObject, Collider> TriggerEnter;
-        public event Action<GameObject, Collider> TriggerExit;
-        public event Action<GameObject, Collider> TriggerStay;
-        public event Action<GameObject, Collision> CollisionEnter;
-        public event Action<GameObject, Collision> CollisionExit;
-        public event Action<GameObject, Collision> CollisionStay;
+        internal event Action<IEntityHandle, Collider> TriggerEnter;
+        internal event Action<IEntityHandle, Collider> TriggerExit;
+        internal event Action<IEntityHandle, Collider> TriggerStay;
+        internal event Action<IEntityHandle, Collision> CollisionEnter;
+        internal event Action<IEntityHandle, Collision> CollisionExit;
+        internal event Action<IEntityHandle, Collision> CollisionStay;
 
-        public event Action<GameObject, Collider2D> TriggerEnter2D;
-        public event Action<GameObject, Collider2D> TriggerExit2D;
-        public event Action<GameObject, Collider2D> TriggerStay2D;
-        public event Action<GameObject, Collision2D> CollisionEnter2D;
-        public event Action<GameObject, Collision2D> CollisionExit2D;
-        public event Action<GameObject, Collision2D> CollisionStay2D;
+        internal event Action<IEntityHandle, Collider2D> TriggerEnter2D;
+        internal event Action<IEntityHandle, Collider2D> TriggerExit2D;
+        internal event Action<IEntityHandle, Collider2D> TriggerStay2D;
+        internal event Action<IEntityHandle, Collision2D> CollisionEnter2D;
+        internal event Action<IEntityHandle, Collision2D> CollisionExit2D;
+        internal event Action<IEntityHandle, Collision2D> CollisionStay2D;
 
-        private void OnTriggerEnter(Collider other) => TriggerEnter?.Invoke(gameObject, other);
-        private void OnTriggerExit(Collider other) => TriggerExit?.Invoke(gameObject, other);
-        private void OnTriggerStay(Collider other) => TriggerStay?.Invoke(gameObject, other);
-        private void OnCollisionEnter(Collision c) => CollisionEnter?.Invoke(gameObject, c);
-        private void OnCollisionExit(Collision c) => CollisionExit?.Invoke(gameObject, c);
-        private void OnCollisionStay(Collision c) => CollisionStay?.Invoke(gameObject, c);
+        private void OnTriggerEnter(Collider other) => TriggerEnter?.Invoke(EntityHandle, other);
+        private void OnTriggerExit(Collider other) => TriggerExit?.Invoke(EntityHandle, other);
+        private void OnTriggerStay(Collider other) => TriggerStay?.Invoke(EntityHandle, other);
+        private void OnCollisionEnter(Collision c) => CollisionEnter?.Invoke(EntityHandle, c);
+        private void OnCollisionExit(Collision c) => CollisionExit?.Invoke(EntityHandle, c);
+        private void OnCollisionStay(Collision c) => CollisionStay?.Invoke(EntityHandle, c);
 
-        private void OnTriggerEnter2D(Collider2D other) => TriggerEnter2D?.Invoke(gameObject, other);
-        private void OnTriggerExit2D(Collider2D other) => TriggerExit2D?.Invoke(gameObject, other);
-        private void OnTriggerStay2D(Collider2D other) => TriggerStay2D?.Invoke(gameObject, other);
-        private void OnCollisionEnter2D(Collision2D c) => CollisionEnter2D?.Invoke(gameObject, c);
-        private void OnCollisionExit2D(Collision2D c) => CollisionExit2D?.Invoke(gameObject, c);
-        private void OnCollisionStay2D(Collision2D c) => CollisionStay2D?.Invoke(gameObject, c);
+        private void OnTriggerEnter2D(Collider2D other) => TriggerEnter2D?.Invoke(EntityHandle, other);
+        private void OnTriggerExit2D(Collider2D other) => TriggerExit2D?.Invoke(EntityHandle, other);
+        private void OnTriggerStay2D(Collider2D other) => TriggerStay2D?.Invoke(EntityHandle, other);
+        private void OnCollisionEnter2D(Collision2D c) => CollisionEnter2D?.Invoke(EntityHandle, c);
+        private void OnCollisionExit2D(Collision2D c) => CollisionExit2D?.Invoke(EntityHandle, c);
+        private void OnCollisionStay2D(Collision2D c) => CollisionStay2D?.Invoke(EntityHandle, c);
     }
 }

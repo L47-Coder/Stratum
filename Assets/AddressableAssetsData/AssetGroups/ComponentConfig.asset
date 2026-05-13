@@ -16,67 +16,7 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: d5bfcacd3e7fb874cbce2c85965027af
-  m_SerializeEntries:
-  - m_GUID: 02272bc60cbf46649be8116e29cc3be4
-    m_Address: ComponentConfig/Health
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 12320c92dd58b3045a1b6fbd59b3d6c3
-    m_Address: ComponentConfig/Rigidbody2D
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2d627d31e95185e45bcc246bbf08bee3
-    m_Address: ComponentConfig/AxisInput
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2f5ce170881981843888d43e7266b836
-    m_Address: ComponentConfig/ProjectileSpawn
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 72bb0f0bc3f03d24ea5ddd5ba0398523
-    m_Address: ComponentConfig/MouseInput
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 769892b555148ba49877b3d2806d381d
-    m_Address: ComponentConfig/Lifetime
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 82ce374cdf8743639749c0a06849db46
-    m_Address: ComponentConfig/StimulusToBehaviorTranslator
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b1ca3bb50b0fe664ab57da773117bdbf
-    m_Address: ComponentConfig/SpriteRenderer
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b25120976469f3043845b99fbcc49c03
-    m_Address: ComponentConfig/BoxCollider2D
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b760770c4b7eb1b408df82e789858eaf
-    m_Address: ComponentConfig/LinearMoveAlongDirection
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c62d4bd21484e964da605565246dd91b
-    m_Address: ComponentConfig/KeyboardInput
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e1f2d10cd479d5d40b8a033ae7f0e7fb
-    m_Address: ComponentConfig/LinearMoveToTarget
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
+  m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5fe843652288d4f46a173890d3481f05, type: 2}
   m_SchemaSet:
