@@ -9,12 +9,7 @@ using VContainer.Unity;
 
 namespace Stratum
 {
-    public interface IAsyncInitManager
-    {
-        UniTask InitAsync(CancellationToken token);
-    }
-
-    internal class GameBootstrap : IAsyncStartable
+    internal sealed class GameBootstrap : IAsyncStartable
     {
         private readonly IObjectResolver _container;
 

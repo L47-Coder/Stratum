@@ -44,58 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f32edc864a52c4fa2bb38a4303d51b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Components:
-  - EntryKey: SpriteRendererComponent_default
-    InitOnStart: 1
-    ComponentType: SpriteRendererComponent
-    Data:
-      rid: 8899497928654061578
-  - EntryKey: LifetimeComponent_default
-    InitOnStart: 1
-    ComponentType: LifetimeComponent
-    Data:
-      rid: 8899497928654061579
-  - EntryKey: LinearMoveAlongDirectionComponent_default
-    InitOnStart: 1
-    ComponentType: LinearMoveAlongDirectionComponent
-    Data:
-      rid: 8899497928654061573
-  - EntryKey: BoxCollider2DComponent_default
-    InitOnStart: 1
-    ComponentType: BoxCollider2DComponent
-    Data:
-      rid: 8899497947844313088
+  Components: []
   references:
     version: 2
-    RefIds:
-    - rid: 8899497928654061573
-      type: {class: LinearMoveAlongDirectionComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        MoveSpeed: 5
-        MoveDirection: {x: 0, y: 0}
-    - rid: 8899497928654061578
-      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        Sprite: {fileID: -9095717837082945937, guid: bd3cb4af8406d4436a2ae8c2aafe1f8d, type: 3}
-        Color: {r: 0, g: 0.49034643, b: 1, a: 1}
-        FlipX: 0
-        FlipY: 0
-        SortingLayerName: Default
-        SortingOrder: 0
-    - rid: 8899497928654061579
-      type: {class: LifetimeComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        LifeTime: 3000
-    - rid: 8899497947844313088
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        IsTrigger: 1
-        Offset: {x: 0, y: 0}
-        Size: {x: 0.8, y: 1.8}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
+    RefIds: []

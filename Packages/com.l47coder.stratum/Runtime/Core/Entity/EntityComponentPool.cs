@@ -15,13 +15,13 @@ namespace Stratum
 
             var type = typeof(T);
 
-            if (entity.InPool.TryGetValue(type, out var pool) && pool.Count > 0)
-                return (T)pool.Pop();
+            if (entity.PoolIdle.TryGetValue(type, out var idle) && idle.Count > 0)
+                return (T)idle.Pop();
 
             var fresh = go.AddComponent<T>();
 
-            if (!entity.All.TryGetValue(type, out var all))
-                entity.All[type] = all = new List<Component>();
+            if (!entity.PoolAll.TryGetValue(type, out var all))
+                entity.PoolAll[type] = all = new List<Component>();
             all.Add(fresh);
 
             return fresh;
@@ -33,9 +33,9 @@ namespace Stratum
             if (!component.gameObject.TryGetComponent<Entity>(out var entity)) return;
 
             var type = typeof(T);
-            if (!entity.InPool.TryGetValue(type, out var pool))
-                entity.InPool[type] = pool = new Stack<Component>();
-            pool.Push(component);
+            if (!entity.PoolIdle.TryGetValue(type, out var idle))
+                entity.PoolIdle[type] = idle = new Stack<Component>();
+            idle.Push(component);
         }
     }
 }

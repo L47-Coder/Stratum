@@ -1,25 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Collections;
 using UnityEngine;
 
 namespace Stratum
 {
-    public abstract class BaseComponentConfig : ScriptableObject
-    {
-        public abstract Type ConfigItemType { get; }
-        public abstract IList GetConfigList();
-
-        protected abstract Dictionary<string, BaseComponentData> GetComponentDataDict();
-        internal Dictionary<string, BaseComponentData> ExportComponentDataDict() => GetComponentDataDict();
-    }
-
-    public abstract class BaseComponentData
-    {
-        protected abstract BaseComponent CreateComponent();
-        internal BaseComponent InternalCreateComponent() => CreateComponent();
-    }
-
     public abstract class BaseComponent
     {
         public GameObject GameObject { get; private set; }

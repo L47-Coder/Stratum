@@ -44,67 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6f32edc864a52c4fa2bb38a4303d51b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Components:
-  - EntryKey: SpriteRendererComponent_default
-    InitOnStart: 1
-    ComponentType: SpriteRendererComponent
-    Data:
-      rid: 8899497881280446488
-  - EntryKey: BoxCollider2DComponent_default
-    InitOnStart: 1
-    ComponentType: BoxCollider2DComponent
-    Data:
-      rid: 8899497947844313089
-  - EntryKey: Rigidbody2DComponent_default
-    InitOnStart: 1
-    ComponentType: Rigidbody2DComponent
-    Data:
-      rid: 8899497947844313090
-  - EntryKey: HealthComponent_default
-    InitOnStart: 1
-    ComponentType: HealthComponent
-    Data:
-      rid: 8899497947844313093
+  Components: []
   references:
     version: 2
-    RefIds:
-    - rid: 8899497881280446488
-      type: {class: SpriteRendererComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        Sprite: {fileID: -2413806693520163455, guid: ebe73ca9363db456bacf42c025bb4847, type: 3}
-        Color: {r: 1, g: 0, b: 0, a: 1}
-        FlipX: 0
-        FlipY: 0
-        SortingLayerName: Default
-        SortingOrder: 0
-    - rid: 8899497947844313089
-      type: {class: BoxCollider2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        IsTrigger: 1
-        Offset: {x: 0, y: 0}
-        Size: {x: 1, y: 1}
-        EdgeRadius: 0
-        UsedByEffector: 0
-        UsedByComposite: 0
-    - rid: 8899497947844313090
-      type: {class: Rigidbody2DComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        BodyType: 0
-        Simulated: 1
-        UseAutoMass: 0
-        Mass: 1
-        Drag: 0
-        AngularDrag: 0.05
-        GravityScale: 1
-        CollisionDetectionMode: 1
-        SleepMode: 0
-        Interpolation: 0
-        Constraints: 7
-    - rid: 8899497947844313093
-      type: {class: HealthComponentData, ns: , asm: Game.Components}
-      data:
-        Key: default
-        MaxHealth: 100
+    RefIds: []
