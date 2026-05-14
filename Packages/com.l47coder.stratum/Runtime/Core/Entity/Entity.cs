@@ -4,66 +4,66 @@ using UnityEngine;
 
 namespace Stratum
 {
-    public sealed class ComponentModule : MonoBehaviour
-    {
-        //初始组件
-
-        //当前组件
-    }
-
-    public sealed class ColliderModule : MonoBehaviour
-    {
-        
-    }
+    [DisallowMultipleComponent]
+    public abstract class BaseModule { }
 
     public interface IEntity
     {
         GameObject GameObject { get; }
-        T GetOrAddModule<T>() where T : MonoBehaviour;
+        Transform Transform { get; }
+        T GetOrAddModule<T>() where T : BaseModule, new();
+        bool TryGetModule<T>(out T module) where T : BaseModule;
+        bool RemoveModule<T>() where T : BaseModule;
+        IReadOnlyCollection<BaseModule> GetAllModules();
+        void RemoveAllModules();
     }
 
-
-    internal sealed class Entity : MonoBehaviour, IEntity
+    public sealed class Entity : MonoBehaviour, IEntity
     {
-        internal List<EntityComponentEntry> Components = new();
-        internal Dictionary<Type, List<Component>> PoolAll = new();
-        internal Dictionary<Type, Stack<Component>> PoolIdle = new();
-        internal IEntityHandle EntityHandle; //由对象池写入
-
+        private readonly Dictionary<Type, BaseModule> _modules = new();
         public GameObject GameObject => gameObject;
+        public Transform Transform => transform;
 
-        internal event Action<IEntityHandle, Collider> TriggerEnter;
-        internal event Action<IEntityHandle, Collider> TriggerExit;
-        internal event Action<IEntityHandle, Collider> TriggerStay;
-        internal event Action<IEntityHandle, Collision> CollisionEnter;
-        internal event Action<IEntityHandle, Collision> CollisionExit;
-        internal event Action<IEntityHandle, Collision> CollisionStay;
-
-        internal event Action<IEntityHandle, Collider2D> TriggerEnter2D;
-        internal event Action<IEntityHandle, Collider2D> TriggerExit2D;
-        internal event Action<IEntityHandle, Collider2D> TriggerStay2D;
-        internal event Action<IEntityHandle, Collision2D> CollisionEnter2D;
-        internal event Action<IEntityHandle, Collision2D> CollisionExit2D;
-        internal event Action<IEntityHandle, Collision2D> CollisionStay2D;
-
-        private void OnTriggerEnter(Collider other) => TriggerEnter?.Invoke(EntityHandle, other);
-        private void OnTriggerExit(Collider other) => TriggerExit?.Invoke(EntityHandle, other);
-        private void OnTriggerStay(Collider other) => TriggerStay?.Invoke(EntityHandle, other);
-        private void OnCollisionEnter(Collision c) => CollisionEnter?.Invoke(EntityHandle, c);
-        private void OnCollisionExit(Collision c) => CollisionExit?.Invoke(EntityHandle, c);
-        private void OnCollisionStay(Collision c) => CollisionStay?.Invoke(EntityHandle, c);
-
-        private void OnTriggerEnter2D(Collider2D other) => TriggerEnter2D?.Invoke(EntityHandle, other);
-        private void OnTriggerExit2D(Collider2D other) => TriggerExit2D?.Invoke(EntityHandle, other);
-        private void OnTriggerStay2D(Collider2D other) => TriggerStay2D?.Invoke(EntityHandle, other);
-        private void OnCollisionEnter2D(Collision2D c) => CollisionEnter2D?.Invoke(EntityHandle, c);
-        private void OnCollisionExit2D(Collision2D c) => CollisionExit2D?.Invoke(EntityHandle, c);
-        private void OnCollisionStay2D(Collision2D c) => CollisionStay2D?.Invoke(EntityHandle, c);
-
-        public T GetOrAddModule<T>() where T : MonoBehaviour
+        public T GetOrAddModule<T>() where T : BaseModule, new()
         {
-            if(gameObject.TryGetComponent<T>(out var module)) return module;
-            return gameObject.AddComponent<T>();
+            var type = typeof(T);
+            if (_modules.TryGetValue(type, out var existing))
+            {
+                if (existing != null) return (T)existing;
+                _modules.Remove(type);
+            }
+            var added = new T();
+            _modules[type] = added;
+            return added;
+        }
+
+        public bool TryGetModule<T>(out T module) where T : BaseModule
+        {
+            if (_modules.TryGetValue(typeof(T), out var existing) && existing != null)
+            {
+                module = (T)existing;
+                return true;
+            }
+            module = null;
+            return false;
+        }
+
+        public bool RemoveModule<T>() where T : BaseModule
+        {
+            var type = typeof(T);
+            if (!_modules.TryGetValue(type, out var module)) return false;
+            _modules.Remove(type);
+            if (module != null) Destroy(module);
+            return true;
+        }
+
+        public IReadOnlyCollection<BaseModule> GetAllModules() => _modules.Values;
+
+        public void RemoveAllModules()
+        {
+            foreach (var module in _modules.Values)
+                if (module != null) Destroy(module);
+            _modules.Clear();
         }
     }
 }

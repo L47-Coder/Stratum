@@ -6,6 +6,5 @@ namespace Stratum
     {
         public GameObject GameObject { get; internal set; }
         public Transform Transform { get; internal set; }
-        public Entity Entity { get; internal set; }
     }
 }
