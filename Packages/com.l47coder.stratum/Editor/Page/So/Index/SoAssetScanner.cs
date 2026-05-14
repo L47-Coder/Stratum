@@ -30,15 +30,11 @@ namespace Stratum.Editor
                 var name = Path.GetFileNameWithoutExtension(assetPath);
                 var expected = SoAddressConvention.AddressOf(expectedType, name);
                 var actual = ResolveActualAddress(settings, assetPath);
-                var status = string.Equals(actual, expected, StringComparison.Ordinal)
-                    ? SoRowStatus.Ok
-                    : SoRowStatus.NotAddressable;
 
                 rows.Add(new SoRow
                 {
                     Name = name,
                     Address = string.IsNullOrEmpty(actual) ? expected : actual,
-                    Status = status,
                     Target = so,
                     AssetPath = assetPath,
                 });

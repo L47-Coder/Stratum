@@ -5,8 +5,8 @@ namespace Stratum.Editor
 {
     internal static class SoAddressConvention
     {
-        public const string AddressPrefix = "SO/";
-        public const string GroupName = "ScriptableObjects";
+        public const string AddressPrefix = "ScriptableObject/";
+        public const string GroupName = "ScriptableObject";
 
         public static string AddressOf(Type soType, string assetName)
         {

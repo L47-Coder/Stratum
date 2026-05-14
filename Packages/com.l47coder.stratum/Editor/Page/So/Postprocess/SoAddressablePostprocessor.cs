@@ -46,7 +46,7 @@ namespace Stratum.Editor
             if (!assetPath.EndsWith(".asset", StringComparison.OrdinalIgnoreCase)) return;
 
             var so = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
-            if (so is not Stratum.BaseSo) return;
+            if (so == null) return;
 
             var address = SoAddressConvention.AddressOfAsset(so.GetType(), assetPath);
             if (string.IsNullOrEmpty(address)) return;

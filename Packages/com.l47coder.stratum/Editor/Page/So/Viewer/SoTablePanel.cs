@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -46,7 +47,7 @@ namespace Stratum.Editor
 
             _table.CanAdd = true;
             _table.CanRemove = true;
-            _table.CanReorder = false;
+            _table.CanReorder = true;
             _table.CanDragOut = false;
             _table.CanReceiveDrop = false;
             _table.KeyField = nameof(SoRow.Name);
@@ -79,6 +80,40 @@ namespace Stratum.Editor
 
                 SoDetailWindow.CloseAssetByPath(row.AssetPath);
                 SoCreationService.DeleteAsset(row.AssetPath);
+                EditorApplication.delayCall += Rescan;
+            });
+
+            _table.OnRowEdit(i =>
+            {
+                if (i < 0 || i >= _rows.Count) return;
+                var row = _rows[i];
+                if (row?.AssetPath == null) return;
+
+                var currentName = Path.GetFileNameWithoutExtension(row.AssetPath);
+                var newName = (row.Name ?? string.Empty).Trim();
+
+                if (!string.IsNullOrEmpty(newName) && newName != currentName)
+                {
+                    var error = AssetDatabase.RenameAsset(row.AssetPath, newName);
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        var dir = row.AssetPath[..row.AssetPath.LastIndexOf('/')];
+                        row.AssetPath = $"{dir}/{newName}.asset";
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"[SoTablePanel] Rename failed: {error}");
+                        row.Name = currentName;
+                    }
+                }
+                else if (string.IsNullOrEmpty(newName))
+                {
+                    row.Name = currentName;
+                }
+
+                if (!string.IsNullOrEmpty(row.Address))
+                    AddressablesHelper.EnsureEntry(row.AssetPath, row.Address, SoAddressConvention.GroupName);
+
                 EditorApplication.delayCall += Rescan;
             });
 

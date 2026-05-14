@@ -36,9 +36,9 @@ namespace Stratum.Editor
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
 
             var sb = new StringBuilder();
-            sb.AppendLine("using Stratum;");
+            sb.AppendLine("using UnityEngine;");
             sb.AppendLine();
-            sb.AppendLine($"public class {plan.SoClassName} : BaseSo");
+            sb.AppendLine($"public class {plan.SoClassName} : ScriptableObject");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("}");

@@ -67,8 +67,14 @@ namespace Stratum.Editor
         private static AddressableAssetGroup EnsureGroup(AddressableAssetSettings settings, string groupName)
         {
             if (string.IsNullOrEmpty(groupName)) return settings.DefaultGroup;
-            return settings.groups.Find(g => g != null && g.Name == groupName)
-                ?? settings.CreateGroup(groupName, false, false, true, null);
+
+            var existing = settings.groups.Find(g => g != null && g.Name == groupName);
+            if (existing != null) return existing;
+
+            var group = settings.CreateGroup(groupName, false, false, true, null);
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.GroupAdded, group, true);
+            AssetDatabase.SaveAssets();
+            return group;
         }
 
         private static AddressableAssetSettings Settings()

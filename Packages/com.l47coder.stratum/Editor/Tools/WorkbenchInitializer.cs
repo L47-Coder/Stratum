@@ -22,6 +22,7 @@ namespace Stratum.Editor
                 AssetTransporter.Transfer(WorkbenchPaths.GameSkeletonTemplateFolder, WorkbenchPaths.GameRoot);
                 AddressablesHelper.EnsureEntry(WorkbenchPaths.ManagerOrder, ManagerOrderAddress, FrameGroupName);
                 AddressablesHelper.EnsureGroup(ManagerConfigGroupName);
+                AddressablesHelper.EnsureGroup(SoAddressConvention.GroupName);
             }
             catch (Exception ex)
             {

@@ -1,5 +1,5 @@
 {
-    "name": "Game.So",
+    "name": "Game.ScriptableObject",
     "rootNamespace": "",
     "references": [
         "Stratum",
