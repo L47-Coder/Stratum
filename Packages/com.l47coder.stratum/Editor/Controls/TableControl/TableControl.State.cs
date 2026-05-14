@@ -31,6 +31,9 @@ namespace Stratum.Editor
 
         private static GUIStyle _headerCellLabelStyleCache;
         private static GUIStyle _bodyIndexLabelStyleCache;
+        private static GUIStyle _rowIconButtonStyleCache;
+        private static GUIStyle _rowTextButtonStyleCache;
+        private static GUIStyle _rowButtonHeaderStyleCache;
 
         private static bool _rowIndexUpdateHooked;
 
@@ -58,6 +61,7 @@ namespace Stratum.Editor
         private Action<int> _onRowRemove;
         private Action<int, int> _onRowMove;
         private Action<int> _onButtonClick;
+        private Action<int, int> _onRowButtonClick;
         private Action<int> _onRowDragOut;
         private Action<int> _onRowReceiveDrop;
         private Action<int, string, Rect> _onRowExpandField;
@@ -111,6 +115,36 @@ namespace Stratum.Editor
 
         private static GUIStyle BodyIndexLabelStyle =>
             _bodyIndexLabelStyleCache ??= new GUIStyle(EditorStyles.miniLabel) { alignment = TextAnchor.MiddleCenter };
+
+        private static GUIStyle RowIconButtonStyle =>
+            _rowIconButtonStyleCache ??= new GUIStyle(GUI.skin.button)
+            {
+                padding = new RectOffset(0, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0),
+                alignment = TextAnchor.MiddleCenter,
+                imagePosition = ImagePosition.ImageOnly,
+                fixedWidth = 0f,
+                fixedHeight = 0f,
+            };
+
+        private static GUIStyle RowTextButtonStyle =>
+            _rowTextButtonStyleCache ??= new GUIStyle(GUI.skin.button)
+            {
+                padding = new RectOffset(0, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0),
+                alignment = TextAnchor.MiddleCenter,
+                fixedWidth = 0f,
+                fixedHeight = 0f,
+            };
+
+        private static GUIStyle RowButtonHeaderStyle =>
+            _rowButtonHeaderStyleCache ??= new GUIStyle(EditorStyles.miniLabel)
+            {
+                alignment = TextAnchor.MiddleCenter,
+                imagePosition = ImagePosition.ImageOnly,
+                padding = new RectOffset(0, 0, 0, 0),
+                margin = new RectOffset(0, 0, 0, 0),
+            };
 
         private static Color HeaderCellBackground =>
             EditorGUIUtility.isProSkin

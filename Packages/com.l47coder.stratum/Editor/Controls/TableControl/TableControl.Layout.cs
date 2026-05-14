@@ -8,7 +8,7 @@ namespace Stratum.Editor
         private TableLayout BuildLayout(float viewWidth)
         {
             var indexWidth = IndexColumnWidth + CellPadding * 2f;
-            var actionsWidth = (CanAdd || CanRemove) ? RowButtonWidth + CellPadding * 2f : 0f;
+            var actionsWidth = ComputeActionsWidth();
             var fixedTotal = indexWidth + actionsWidth;
             var availableForData = Mathf.Max(10f, viewWidth - fixedTotal);
 
@@ -70,6 +70,18 @@ namespace Stratum.Editor
         }
 
         private static float ComputeRowHeight() => EditorGUIUtility.singleLineHeight + CellPadding * 2f;
+
+        private static float ActionCellWidth => RowButtonWidth + CellPadding * 2f;
+
+        private int RowButtonCount => RowButtons?.Count ?? 0;
+
+        private bool HasAddRemoveCell => CanAdd || CanRemove;
+
+        private float ComputeActionsWidth()
+        {
+            var cellCount = RowButtonCount + (HasAddRemoveCell ? 1 : 0);
+            return cellCount * ActionCellWidth;
+        }
 
         private static void PaintCellFrame(Rect outer, Color fill, Color grid)
         {

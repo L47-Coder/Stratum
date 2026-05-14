@@ -51,6 +51,8 @@ namespace Stratum.Editor
             _table.CanReceiveDrop = false;
             _table.KeyField = nameof(SoRow.Name);
 
+            _table.RowButtons.Add(new GUIContent(EditorGUIUtility.IconContent("d_editicon.sml")) { tooltip = "Open" });
+
             _table.OnRowAdd(addedIndex =>
             {
                 if (_soType == null || string.IsNullOrEmpty(_leafFolder)) return;
@@ -80,10 +82,10 @@ namespace Stratum.Editor
                 EditorApplication.delayCall += Rescan;
             });
 
-            _table.OnRowSelect(i =>
+            _table.OnRowButtonClick((rowIndex, _) =>
             {
-                if (i < 0 || i >= _rows.Count) return;
-                var target = _rows[i]?.Target;
+                if (rowIndex < 0 || rowIndex >= _rows.Count) return;
+                var target = _rows[rowIndex]?.Target;
                 if (target != null) SoDetailWindow.OpenAsset(target);
             });
         }
@@ -99,7 +101,7 @@ namespace Stratum.Editor
         private void OnProjectChanged()
         {
             if (string.IsNullOrEmpty(_leafFolder) || _soType == null) return;
-            Rescan();
+            EditorApplication.delayCall += Rescan;
         }
     }
 }

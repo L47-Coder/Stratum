@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -20,6 +19,7 @@ namespace Stratum.Editor
         public bool MarkDuplicates { get; set; } = true;
         public string KeyField { get; set; } = "Key";
         public List<GUIContent> ToolbarButtons { get; set; } = new();
+        public List<GUIContent> RowButtons { get; set; } = new();
 
         public void OnRowAdd(Action<int> callback) => _onRowAdd = callback;
         public void OnRowRemove(Action<int> callback) => _onRowRemove = callback;
@@ -29,6 +29,7 @@ namespace Stratum.Editor
         public void OnRowDragOut(Action<int> callback) => _onRowDragOut = callback;
         public void OnRowReceiveDrop(Action<int> callback) => _onRowReceiveDrop = callback;
         public void OnButtonClick(Action<int> callback) => _onButtonClick = callback;
+        public void OnRowButtonClick(Action<int, int> callback) => _onRowButtonClick = callback;
         public void OnRowExpandField(Action<int, string, Rect> callback) => _onRowExpandField = callback;
 
         public bool SelectRow(int index) => SelectRowCore(index);
