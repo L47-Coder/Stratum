@@ -14,10 +14,10 @@ namespace Stratum.Editor
 
         private static readonly int s_reorderControlHint = "ListViewReorderControl".GetHashCode();
 
-        private string _renameLabel = "Rename";
-        private string _deleteLabel = "Delete";
-        private string _createLabel = "Create";
-        private string _searchPlaceholder = "Search...";
+        private readonly string _renameLabel = "Rename";
+        private readonly string _deleteLabel = "Delete";
+        private readonly string _createLabel = "Create";
+        private readonly string _searchPlaceholder = "Search...";
 
         private int _selectedIndex = -1;
         private Vector2 _scrollPos;

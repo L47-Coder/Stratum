@@ -31,30 +31,125 @@ namespace Stratum.Editor
 
         public void OnFirstEnter(Action<string> onSelected)
         {
-            _treeView.ExcludePatterns = new() { "**/Generated", "**/Editor", "**/*.InternalsVisibleTo.cs", "**/*.asmdef" };
-            _treeView.HiddenExtensions = new() { ".cs", ".asset" };
+            _treeView.ExcludePatterns = new() { "**/Generated", "**/*.asmdef", "**/*.asset" };
             _treeView.OnNodeSelect(onSelected);
         }
 
         public void OnGUI(Rect rect) => _treeView.Draw(rect, WorkbenchPaths.ManagerRoot);
     }
 
+    internal sealed class ManagerCreatorPanel
+    {
+        private const float HPad = 6f;
+        private const float VPad = 8f;
+
+        private readonly ManagerCreatorState _state = new();
+        private Vector2 _scroll;
+
+        public void Retarget(string parentFolderAssetPath) =>
+            _state.SetParentFolder(parentFolderAssetPath);
+
+        public void OnGUI(Rect rect)
+        {
+            EditorGUI.DrawRect(rect, CreatorPageDraw.BgColor);
+
+            var content = new Rect(
+                rect.x + HPad, rect.y + VPad,
+                rect.width - HPad * 2f, rect.height - VPad * 2f);
+
+            GUILayout.BeginArea(content);
+            var prevLW = EditorGUIUtility.labelWidth;
+            EditorGUIUtility.labelWidth = CreatorPageDraw.LabelWidth;
+            _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
+            try
+            {
+                DrawInputSection();
+
+                if (_state.HasPreview)
+                {
+                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
+                    CreatorPageDraw.DrawPreviewCard("Type names",   _state.GetNamePreviewItems());
+                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
+                    CreatorPageDraw.DrawPreviewCard("Output paths", _state.GetPathPreviewItems());
+                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
+                    CreatorPageDraw.DrawPreviewCard("Addressables", _state.GetAddressablePreviewItems());
+                    GUILayout.Space(CreatorPageDraw.SectionSpacing + 2f);
+                    CreatorPageDraw.DrawLegendRow();
+                }
+
+                GUILayout.Space(CreatorPageDraw.SectionSpacing);
+                DrawCreateButton();
+            }
+            finally
+            {
+                EditorGUILayout.EndScrollView();
+                EditorGUIUtility.labelWidth = prevLW;
+                GUILayout.EndArea();
+            }
+        }
+
+        private void DrawInputSection()
+        {
+            CreatorPageDraw.BeginCard();
+            CreatorPageDraw.DrawHeader("New Manager");
+
+            var newName = CreatorPageDraw.DrawEditableField(
+                "Manager name", _state.InputManagerName, _state.GetInputStatus());
+            if (newName != _state.InputManagerName)
+                _state.SetInputManagerName(newName);
+
+            if (!string.IsNullOrEmpty(_state.ErrorMessage))
+            {
+                GUILayout.Space(8f);
+                EditorGUILayout.HelpBox(_state.ErrorMessage, MessageType.Warning);
+            }
+
+            CreatorPageDraw.EndCard();
+        }
+
+        private void DrawCreateButton()
+        {
+            var prevBg = GUI.backgroundColor;
+            if (_state.IsValid) GUI.backgroundColor = CreatorPageDraw.AccentBlue;
+
+            using (new EditorGUI.DisabledScope(!_state.IsValid))
+            {
+                if (GUILayout.Button("Create Manager", GUILayout.Height(CreatorPageDraw.CreateButtonHeight)))
+                {
+                    ManagerCreationService.CreateManager(_state);
+                    _state.Reset();
+                    _scroll = Vector2.zero;
+                    GUI.FocusControl(null);
+                }
+            }
+
+            GUI.backgroundColor = prevBg;
+        }
+    }
+
     internal sealed class ManagerRightPanel
     {
         private readonly TextControl _csTextView = new();
+        private readonly ManagerCreatorPanel _creatorPanel = new();
         private string _currentPath;
 
         private string _cachedCsPath;
         private string _cachedCsText;
 
         private string _cachedAssetPath;
-        private BaseManagerConfig _cachedAsset;
+        private IManagerConfig _cachedAsset;
         private object _cachedList;
         private MethodInfo _cachedDrawMethod;
         private TableControl _tableView;
-        private MonoScript _cachedRefresherScript;
 
-        public void SetPath(string path) => _currentPath = path;
+        public void SetPath(string path)
+        {
+            var normalized = path?.Replace('\\', '/').TrimEnd('/') ?? string.Empty;
+            _currentPath = normalized;
+
+            if (IsBranchFolder(normalized))
+                _creatorPanel.Retarget(normalized);
+        }
 
         public void OnGUI(Rect rect)
         {
@@ -64,11 +159,23 @@ namespace Stratum.Editor
                 return;
             }
 
-            if (Directory.Exists(_currentPath)) { DrawFolder(rect, _currentPath); return; }
+            if (Directory.Exists(_currentPath))
+            {
+                if (IsLeafFolder(_currentPath))
+                {
+                    var asset = FindAssetInFolder(_currentPath);
+                    if (!string.IsNullOrEmpty(asset)) { DrawAssetFile(rect, asset); return; }
+                    GUI.Label(rect, "No config asset found.", EditorStyles.centeredGreyMiniLabel);
+                    return;
+                }
+
+                _creatorPanel.OnGUI(rect);
+                return;
+            }
 
             switch (Path.GetExtension(_currentPath).ToLowerInvariant())
             {
-                case ".cs": DrawCsFile(rect, _currentPath); break;
+                case ".cs":    DrawCsFile(rect, _currentPath);    break;
                 case ".asset": DrawAssetFile(rect, _currentPath); break;
                 default:
                     GUI.Label(rect, "Unsupported file type.", EditorStyles.centeredGreyMiniLabel);
@@ -76,11 +183,14 @@ namespace Stratum.Editor
             }
         }
 
-        private static void DrawFolder(Rect rect, string path)
-        {
-            var inner = new Rect(rect.x + 8f, rect.y + 8f, rect.width - 16f, rect.height - 16f);
-            GUI.Label(inner, path, EditorStyles.wordWrappedLabel);
-        }
+        private const string LeafMarkerFileName = "_leaf.json";
+
+        private static bool IsLeafFolder(string folderPath) =>
+            Directory.Exists(folderPath) &&
+            File.Exists(Path.Combine(folderPath, LeafMarkerFileName));
+
+        private static bool IsBranchFolder(string folderPath) =>
+            Directory.Exists(folderPath) && !IsLeafFolder(folderPath);
 
         private void DrawCsFile(Rect rect, string path)
         {
@@ -92,27 +202,36 @@ namespace Stratum.Editor
             _csTextView.Draw(rect, _cachedCsText);
         }
 
+        private static string FindAssetInFolder(string folderPath)
+        {
+            if (!Directory.Exists(folderPath)) return null;
+            foreach (var f in Directory.GetFiles(folderPath, "*.asset", SearchOption.TopDirectoryOnly))
+                return f.Replace('\\', '/');
+            return null;
+        }
+
         private void DrawAssetFile(Rect rect, string path)
         {
             if (_cachedAssetPath != path)
             {
                 _cachedAssetPath = path;
-                _cachedAsset = AssetDatabase.LoadAssetAtPath<BaseManagerConfig>(path);
+                _cachedAsset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path) as IManagerConfig;
                 _cachedList = null;
                 _cachedDrawMethod = null;
                 _tableView = null;
-                _cachedRefresherScript = null;
 
                 if (_cachedAsset != null)
                 {
-                    _cachedList = _cachedAsset.GetConfigList();
-                    var elemType = _cachedAsset.ConfigItemType;
-                    if (_cachedList != null && elemType != null)
+                    var raw = _cachedAsset.RawDataList;
+                    var elemType = raw?.GetType().IsGenericType == true
+                        ? raw.GetType().GetGenericArguments()[0]
+                        : null;
+                    if (raw != null && elemType != null)
                     {
+                        _cachedList = raw;
                         _tableView = new TableControl();
                         _cachedDrawMethod = typeof(TableControl).GetMethod(nameof(TableControl.Draw))
                             .MakeGenericMethod(elemType);
-                        ResolveRefresherScript(path);
                     }
                 }
             }
@@ -125,22 +244,7 @@ namespace Stratum.Editor
 
             _cachedDrawMethod.Invoke(_tableView, new object[] { rect, _cachedList });
 
-            if (GUI.changed) EditorUtility.SetDirty(_cachedAsset);
-        }
-
-        private void ResolveRefresherScript(string assetPath)
-        {
-            var managerName = ManagerAddressConvention.ManagerNameOf(_cachedAsset.GetType());
-            if (string.IsNullOrEmpty(managerName)) return;
-            _cachedRefresherScript = ManagerRefresherLocator.FindRefresherScript(managerName, assetPath);
-        }
-
-        private void OpenRefresherScript()
-        {
-            if (_cachedRefresherScript != null)
-                AssetDatabase.OpenAsset(_cachedRefresherScript);
-            else
-                Debug.LogWarning("[ManagerViewerPage] Refresher script was not found.");
+            if (GUI.changed && _cachedAsset is UnityEngine.Object so) EditorUtility.SetDirty(so);
         }
     }
 }

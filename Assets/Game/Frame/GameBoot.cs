@@ -1,6 +1,7 @@
-﻿using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using Stratum;
 using UnityEngine;
+using VContainer;
 
 public class GameBoot : MonoBehaviour, IGameBoot
 {

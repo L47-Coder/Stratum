@@ -17,7 +17,7 @@ namespace Stratum
             {
                 var type = ResolveManagerType(entry);
                 if (type == null) continue;
-                builder.Register(type, Lifetime.Singleton).As<BaseManager>().AsImplementedInterfaces();
+                builder.Register(type, Lifetime.Singleton).As<IManager>().AsImplementedInterfaces();
             }
             builder.RegisterEntryPoint<GameBootstrap>();
         }
@@ -34,11 +34,11 @@ namespace Stratum
                 UnityEngine.Debug.LogWarning($"[Stratum] Manager '{entry.Name}': AQN stale, re-open Workbench to resync.");
             }
 
-            var asmName = typeof(BaseManager).Assembly.GetName().Name;
+            var asmName = typeof(IManager).Assembly.GetName().Name;
             var matches = AppDomain.CurrentDomain.GetAssemblies()
                 .Where(a => Array.Exists(a.GetReferencedAssemblies(), r => string.Equals(r.Name, asmName, StringComparison.Ordinal)))
                 .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
-                .Where(t => !t.IsAbstract && typeof(BaseManager).IsAssignableFrom(t) && string.Equals(t.Name, entry.Name, StringComparison.Ordinal))
+                .Where(t => !t.IsAbstract && typeof(IManager).IsAssignableFrom(t) && string.Equals(t.Name, entry.Name, StringComparison.Ordinal))
                 .ToList();
 
             if (matches.Count == 0)

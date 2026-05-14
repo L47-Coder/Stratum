@@ -11,7 +11,6 @@ namespace Stratum.Editor
         private const float RowButtonWidth = 24f;
         private const float CellPadding = 4f;
         private const float GridThickness = 1f;
-        private const float DefaultFallbackMinWidth = 80f;
         private const float FieldExpandableMinWidth = 180f;
 
         private const float RowMoveSmoothTime = 0.1f;

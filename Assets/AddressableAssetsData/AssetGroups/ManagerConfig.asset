@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: ManagerConfig
   m_Data:
     m_SerializedData: []
-  m_GUID: 7b76ffd06dfce6d48a180807c54ebdec
+  m_GUID: e0145a12979d2ce4b954f55c56988125
   m_SerializeEntries: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5fe843652288d4f46a173890d3481f05, type: 2}

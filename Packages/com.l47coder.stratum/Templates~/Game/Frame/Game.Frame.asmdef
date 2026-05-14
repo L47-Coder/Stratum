@@ -4,7 +4,6 @@
     "references": [
         "Stratum",
         "Game.Managers",
-        "Game.Components",
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",

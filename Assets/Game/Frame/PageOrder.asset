@@ -19,6 +19,8 @@ MonoBehaviour:
   - Title: Manager
     Tabs:
     - Viewer
-    - Creator
     - Order
     - Installer
+  - Title: ScriptableObject
+    Tabs:
+    - Viewer

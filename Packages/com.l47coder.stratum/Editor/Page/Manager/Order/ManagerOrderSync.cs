@@ -18,7 +18,7 @@ namespace Stratum.Editor
         {
             if (config == null) return;
 
-            var liveTypes = TypeCache.GetTypesDerivedFrom<BaseManager>()
+            var liveTypes = TypeCache.GetTypesDerivedFrom<IManager>()
                 .Where(t => !t.IsAbstract)
                 .ToDictionary(t => t.Name, t => t, StringComparer.Ordinal);
 

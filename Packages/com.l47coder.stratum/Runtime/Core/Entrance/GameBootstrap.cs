@@ -17,8 +17,8 @@ namespace Stratum
 
         public async UniTask StartAsync(CancellationToken token)
         {
-            var managers = _container.Resolve<IReadOnlyList<BaseManager>>();
-            foreach (var manager in managers) await manager.InternalSetManagerDataDict();
+            var managers = _container.Resolve<IReadOnlyList<IManager>>();
+            foreach (var manager in managers) await manager.SetManagerDataDict();
             foreach (var manager in managers)
                 if (manager is IAsyncInitManager init) await init.InitAsync(token);
 

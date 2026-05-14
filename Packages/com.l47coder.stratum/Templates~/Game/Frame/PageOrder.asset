@@ -16,21 +16,10 @@ MonoBehaviour:
   - Title: Framework
     Tabs:
     - Sync
-  - Title: Addressable
-    Tabs:
-    - Viewer
   - Title: Manager
     Tabs:
     - Viewer
     - Creator
     - Order
     - Installer
-  - Title: Component
-    Tabs:
-    - Viewer
-    - Creator
-    - Order
-    - Installer
-  - Title: Prefab
-    Tabs:
-    - Viewer
+  
