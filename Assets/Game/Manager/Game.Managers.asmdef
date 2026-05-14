@@ -1,4 +1,4 @@
-﻿{
+{
     "name": "Game.Managers",
     "rootNamespace": "",
     "references": [
@@ -7,7 +7,6 @@
         "UniTask.Addressables",
         "Unity.Addressables",
         "Unity.ResourceManager",
-        "Unity.ugui",
         "VContainer"
     ],
     "includePlatforms": [],

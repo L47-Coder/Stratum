@@ -34,7 +34,6 @@ namespace Stratum.Editor
                 ? group.Pages.FirstOrDefault(p => p.TabTitle == tabTitle) ?? group.Pages[0]
                 : group.Pages[0];
             _instance.SelectPage(page);
-            AddressableViewerPage.FinishPendingGroupSelection(page as AddressableViewerPage);
         }
     }
 }

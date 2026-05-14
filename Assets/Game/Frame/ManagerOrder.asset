@@ -12,28 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4d01a9b8f92cf4549a96cb7e6b0ff560, type: 3}
   m_Name: ManagerOrder
   m_EditorClassIdentifier: 
-  _entries:
-  - Name: AssetManager
-    AssemblyQualifiedName: AssetManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: ComponentManager
-    AssemblyQualifiedName: ComponentManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: PrefabManager
-    AssemblyQualifiedName: PrefabManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: EventManager
-    AssemblyQualifiedName: EventManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: MessageManager
-    AssemblyQualifiedName: MessageManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: TaskManager
-    AssemblyQualifiedName: TaskManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: SpriteManager
-    AssemblyQualifiedName: SpriteManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  - Name: Layer2DManager
-    AssemblyQualifiedName: Layer2DManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+  _entries: []
