@@ -11,7 +11,6 @@ namespace Stratum.Editor
 
         public const string SessionSoClassNameKey = "SoCreator.SoClassName";
         public const string SessionAssetPathKey = "SoCreator.AssetPath";
-        public const string SessionAssetAddressKey = "SoCreator.AssetAddress";
 
         private static readonly Regex ValidNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
         private const string ClassSuffix = "SO";
@@ -27,7 +26,6 @@ namespace Stratum.Editor
         public string ScriptFilePath { get; private set; } = string.Empty;
         public string LeafMarkerPath { get; private set; } = string.Empty;
         public string FirstAssetFilePath { get; private set; } = string.Empty;
-        public string FirstAssetAddress { get; private set; } = string.Empty;
 
         private string _parentFolderAssetPath = RootAssetPath;
         private bool _scriptExists;
@@ -37,7 +35,6 @@ namespace Stratum.Editor
 
         private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
         private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
-        private PreviewItem[] _addressablePreviewItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
@@ -76,13 +73,12 @@ namespace Stratum.Editor
 
         public PreviewItem[] GetNamePreviewItems() => _namePreviewItems;
         public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
-        public PreviewItem[] GetAddressablePreviewItems() => _addressablePreviewItems;
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
         public SoCreationPlan BuildPlan() => new(
             LogicalName, SoClassName,
             EntityFolderPath, ScriptFilePath, LeafMarkerPath,
-            FirstAssetFilePath, FirstAssetAddress,
+            FirstAssetFilePath,
             ShouldCreateScript());
 
         private void ApplyInput(string input, string parentAssetPath)
@@ -124,7 +120,6 @@ namespace Stratum.Editor
             LeafMarkerPath = $"{EntityFolderPath}/_leaf.json";
             var firstAssetName = $"New{LogicalName}";
             FirstAssetFilePath = $"{EntityFolderPath}/{firstAssetName}.asset";
-            FirstAssetAddress = $"{SoAddressConvention.AddressPrefix}{SoClassName}/{firstAssetName}";
 
             RefreshPreviewCache();
         }
@@ -156,7 +151,6 @@ namespace Stratum.Editor
             ScriptFilePath = string.Empty;
             LeafMarkerPath = string.Empty;
             FirstAssetFilePath = string.Empty;
-            FirstAssetAddress = string.Empty;
 
             _scriptExists = false;
             _classExists = false;
@@ -165,7 +159,6 @@ namespace Stratum.Editor
 
             _namePreviewItems = Array.Empty<PreviewItem>();
             _pathPreviewItems = Array.Empty<PreviewItem>();
-            _addressablePreviewItems = Array.Empty<PreviewItem>();
         }
 
         private bool ShouldCreateScript() => !_scriptExists && !_classExists;
@@ -200,12 +193,6 @@ namespace Stratum.Editor
                 new PreviewItem("Folder",      EntityFolderPath,   folderStatus),
                 new PreviewItem("Script file", ScriptFilePath,     scriptStatus),
                 new PreviewItem("First asset", FirstAssetFilePath, assetStatus),
-            };
-
-            _addressablePreviewItems = new[]
-            {
-                new PreviewItem("Addressable group",   SoAddressConvention.GroupName, assetStatus),
-                new PreviewItem("Addressable address", FirstAssetAddress,             assetStatus),
             };
         }
 
@@ -242,13 +229,12 @@ namespace Stratum.Editor
         public readonly string ScriptFilePath;
         public readonly string LeafMarkerPath;
         public readonly string FirstAssetFilePath;
-        public readonly string FirstAssetAddress;
         public readonly bool ShouldCreateScript;
 
         public SoCreationPlan(
             string logicalName, string soClassName,
             string entityFolderPath, string scriptFilePath, string leafMarkerPath,
-            string firstAssetFilePath, string firstAssetAddress,
+            string firstAssetFilePath,
             bool shouldCreateScript)
         {
             LogicalName = logicalName;
@@ -257,7 +243,6 @@ namespace Stratum.Editor
             ScriptFilePath = scriptFilePath;
             LeafMarkerPath = leafMarkerPath;
             FirstAssetFilePath = firstAssetFilePath;
-            FirstAssetAddress = firstAssetAddress;
             ShouldCreateScript = shouldCreateScript;
         }
     }

@@ -69,7 +69,7 @@ namespace Stratum.Editor
 
                 var confirmed = EditorUtility.DisplayDialog(
                     "Delete ScriptableObject",
-                    $"Delete this asset?\n\n{row.AssetPath}\n\nThis will also remove its Addressable entry.",
+                    $"Delete this asset?\n\n{row.AssetPath}",
                     "Delete", "Cancel");
 
                 if (!confirmed)
@@ -110,9 +110,6 @@ namespace Stratum.Editor
                 {
                     row.Name = currentName;
                 }
-
-                if (!string.IsNullOrEmpty(row.Address))
-                    AddressablesHelper.EnsureEntry(row.AssetPath, row.Address, SoAddressConvention.GroupName);
 
                 EditorApplication.delayCall += Rescan;
             });

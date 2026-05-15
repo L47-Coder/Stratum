@@ -5,11 +5,8 @@ namespace Stratum.Editor
 {
     internal sealed class SoRow
     {
-        [Field(Title = "Name", Width = 200f)]
+        [Field(Title = "Name")]
         public string Name;
-
-        [Field(Title = "Address", Width = 260f)]
-        public string Address;
 
         [Field(Hide = true)]
         public ScriptableObject Target;

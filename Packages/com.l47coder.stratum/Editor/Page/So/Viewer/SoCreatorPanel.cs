@@ -36,8 +36,6 @@ namespace Stratum.Editor
                     CreatorPageDraw.DrawPreviewCard("Type names",   _state.GetNamePreviewItems());
                     GUILayout.Space(CreatorPageDraw.SectionSpacing);
                     CreatorPageDraw.DrawPreviewCard("Output paths", _state.GetPathPreviewItems());
-                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
-                    CreatorPageDraw.DrawPreviewCard("Addressables", _state.GetAddressablePreviewItems());
                     GUILayout.Space(CreatorPageDraw.SectionSpacing + 2f);
                     CreatorPageDraw.DrawLegendRow();
                 }

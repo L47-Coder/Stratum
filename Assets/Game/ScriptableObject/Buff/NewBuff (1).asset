@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae9be7f4a6d9c7a4e9f3208379a1ffda, type: 3}
+  m_Name: NewBuff (1)
+  m_EditorClassIdentifier: 
+  addcount: 0
+  addtime: 0
+  addspeed: 0
+  addattack: 0
+  adddefense: 0
+  addmagic: 0
+  addresistance: 0
+  addluck: 0
+  addcrit: 0
+  addcritdamage: 0
+  addcritchance: 0

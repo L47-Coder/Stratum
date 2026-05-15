@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -19,22 +18,15 @@ namespace Stratum.Editor
             var abs = Path.GetFullPath(Path.Combine(Application.dataPath, "..", folder));
             if (!Directory.Exists(abs)) return rows;
 
-            var settings = AddressableAssetSettingsDefaultObject.Settings;
-
             foreach (var file in Directory.EnumerateFiles(abs, "*.asset", SearchOption.TopDirectoryOnly))
             {
                 var assetPath = $"{folder}/{Path.GetFileName(file)}";
                 var so = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
                 if (so == null || !expectedType.IsInstanceOfType(so)) continue;
 
-                var name = Path.GetFileNameWithoutExtension(assetPath);
-                var expected = SoAddressConvention.AddressOf(expectedType, name);
-                var actual = ResolveActualAddress(settings, assetPath);
-
                 rows.Add(new SoRow
                 {
-                    Name = name,
-                    Address = string.IsNullOrEmpty(actual) ? expected : actual,
+                    Name = Path.GetFileNameWithoutExtension(assetPath),
                     Target = so,
                     AssetPath = assetPath,
                 });
@@ -42,15 +34,6 @@ namespace Stratum.Editor
 
             rows.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
             return rows;
-        }
-
-        private static string ResolveActualAddress(UnityEditor.AddressableAssets.Settings.AddressableAssetSettings settings, string assetPath)
-        {
-            if (settings == null) return null;
-            var guid = AssetDatabase.AssetPathToGUID(assetPath);
-            if (string.IsNullOrEmpty(guid)) return null;
-            var entry = settings.FindAssetEntry(guid);
-            return entry?.address;
         }
 
         public static string ComputeUniqueAssetName(string folderAssetPath, string baseName)

@@ -24,7 +24,7 @@ namespace Stratum.Editor
             AssetDatabase.Refresh();
 
             if (typeAvailable)
-                EnsureAssetAndAddressable(plan.SoClassName, plan.FirstAssetFilePath, plan.FirstAssetAddress);
+                EnsureAsset(plan.SoClassName, plan.FirstAssetFilePath);
             else
                 SoPostCompileAssetService.ScheduleAssetCreation(plan);
 
@@ -55,7 +55,7 @@ namespace Stratum.Editor
             if (!File.Exists(abs)) File.WriteAllText(abs, string.Empty);
         }
 
-        internal static bool EnsureAssetAndAddressable(string soClassName, string assetPath, string assetAddress)
+        internal static bool EnsureAsset(string soClassName, string assetPath)
         {
             if (!SoTypeIndex.TryFindClass(soClassName, out var soType))
             {
@@ -72,9 +72,8 @@ namespace Stratum.Editor
                 AssetDatabase.SaveAssets();
             }
 
-            AddressablesHelper.EnsureEntry(assetPath, assetAddress, SoAddressConvention.GroupName);
             SoTypeIndex.Invalidate();
-            Debug.Log($"[SoCreationService] {soClassName} ready at {assetPath} (address: {assetAddress}).");
+            Debug.Log($"[SoCreationService] {soClassName} ready at {assetPath}.");
             return true;
         }
 
@@ -92,8 +91,6 @@ namespace Stratum.Editor
             AssetDatabase.CreateAsset(asset, assetPath);
             AssetDatabase.SaveAssets();
 
-            var address = SoAddressConvention.AddressOf(soType, uniqueName);
-            AddressablesHelper.EnsureEntry(assetPath, address, SoAddressConvention.GroupName);
             createdAssetPath = assetPath;
             return true;
         }
@@ -101,7 +98,6 @@ namespace Stratum.Editor
         public static bool DeleteAsset(string assetPath)
         {
             if (string.IsNullOrEmpty(assetPath)) return false;
-            AddressablesHelper.RemoveEntry(assetPath);
             return AssetDatabase.DeleteAsset(assetPath);
         }
 
@@ -138,24 +134,21 @@ namespace Stratum.Editor
         {
             var soClassName = SessionState.GetString(SoCreatorState.SessionSoClassNameKey, string.Empty);
             var assetPath = SessionState.GetString(SoCreatorState.SessionAssetPathKey, string.Empty);
-            var assetAddress = SessionState.GetString(SoCreatorState.SessionAssetAddressKey, string.Empty);
 
-            if (string.IsNullOrEmpty(soClassName) || string.IsNullOrEmpty(assetPath) || string.IsNullOrEmpty(assetAddress))
+            if (string.IsNullOrEmpty(soClassName) || string.IsNullOrEmpty(assetPath))
                 return;
 
             SessionState.EraseString(SoCreatorState.SessionSoClassNameKey);
             SessionState.EraseString(SoCreatorState.SessionAssetPathKey);
-            SessionState.EraseString(SoCreatorState.SessionAssetAddressKey);
 
             EditorApplication.delayCall += () =>
-                SoCreationService.EnsureAssetAndAddressable(soClassName, assetPath, assetAddress);
+                SoCreationService.EnsureAsset(soClassName, assetPath);
         }
 
         public static void ScheduleAssetCreation(SoCreationPlan plan)
         {
             SessionState.SetString(SoCreatorState.SessionSoClassNameKey, plan.SoClassName);
             SessionState.SetString(SoCreatorState.SessionAssetPathKey, plan.FirstAssetFilePath);
-            SessionState.SetString(SoCreatorState.SessionAssetAddressKey, plan.FirstAssetAddress);
         }
     }
 }
