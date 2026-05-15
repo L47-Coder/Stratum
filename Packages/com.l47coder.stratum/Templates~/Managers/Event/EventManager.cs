@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,12 +23,6 @@ internal sealed class EventHandle : IEventHandle
     public string Key { get; }
 
     public EventHandle(string key) => Key = key;
-}
-
-internal sealed partial class EventManagerData
-{
-    [Field(Readonly = true, Width = 300)]
-    public string Key;
 }
 
 internal sealed partial class EventManager : IEventManager

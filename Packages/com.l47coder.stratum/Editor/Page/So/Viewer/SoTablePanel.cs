@@ -47,12 +47,10 @@ namespace Stratum.Editor
 
             _table.CanAdd = true;
             _table.CanRemove = true;
-            _table.CanReorder = true;
+            _table.CanReorder = false;
             _table.CanDragOut = false;
             _table.CanReceiveDrop = false;
             _table.KeyField = nameof(SoRow.Name);
-
-            _table.RowButtons.Add(new GUIContent(EditorGUIUtility.IconContent("d_editicon.sml")) { tooltip = "Open" });
 
             _table.OnRowAdd(addedIndex =>
             {
@@ -78,7 +76,6 @@ namespace Stratum.Editor
                     return;
                 }
 
-                SoDetailWindow.CloseAssetByPath(row.AssetPath);
                 SoCreationService.DeleteAsset(row.AssetPath);
                 EditorApplication.delayCall += Rescan;
             });
@@ -114,11 +111,13 @@ namespace Stratum.Editor
                 EditorApplication.delayCall += Rescan;
             });
 
-            _table.OnRowButtonClick((rowIndex, _) =>
+            _table.OnRowSelect(i =>
             {
-                if (rowIndex < 0 || rowIndex >= _rows.Count) return;
-                var target = _rows[rowIndex]?.Target;
-                if (target != null) SoDetailWindow.OpenAsset(target);
+                if (i < 0 || i >= _rows.Count) return;
+                var target = _rows[i]?.Target;
+                if (target == null) return;
+                Selection.activeObject = target;
+                EditorGUIUtility.PingObject(target);
             });
         }
 

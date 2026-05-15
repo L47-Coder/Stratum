@@ -17,8 +17,23 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: d42c29cf4dcf1f7408bb086b004b5584
   m_SerializeEntries:
+  - m_GUID: 238da6c8205689742ac562f24cbff6ef
+    m_Address: ManagerConfig/Asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: ae29ecbf844d6f64aa236426b441446d
     m_Address: ManagerConfig/Event
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b73ed8e967f2ef34db5cfa39faf4dbaf
+    m_Address: ManagerConfig/Task
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: bafe3251f40333e4e83af526e3be0b48
+    m_Address: ManagerConfig/Message
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

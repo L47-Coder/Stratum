@@ -7,12 +7,6 @@
       "recommended": true
     },
     {
-      "id": "Component",
-      "displayName": "Component Manager",
-      "description": "Loads component configs and creates BaseComponent instances by type key.",
-      "recommended": true
-    },
-    {
       "id": "Event",
       "displayName": "Event Manager",
       "description": "Publishes synchronous and asynchronous typed events with subscription handles.",
@@ -22,18 +16,6 @@
       "id": "Message",
       "displayName": "Message Manager",
       "description": "Registers message handlers and dispatches synchronous or asynchronous message calls.",
-      "recommended": true
-    },
-    {
-      "id": "Prefab",
-      "displayName": "Prefab Manager",
-      "description": "Pools prefab instances and coordinates component lifecycle dispatch.",
-      "recommended": true
-    },
-    {
-      "id": "Sprite",
-      "displayName": "Sprite Manager",
-      "description": "Loads sprites through Asset Manager and tracks SpriteHandle lifetimes.",
       "recommended": true
     },
     {

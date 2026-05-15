@@ -2,6 +2,6 @@ namespace Stratum
 {
     public abstract class BaseManagerData
     {
-        public string Key;
+        public abstract string GetKey();
     }
 }

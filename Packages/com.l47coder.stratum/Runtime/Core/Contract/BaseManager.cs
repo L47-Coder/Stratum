@@ -23,9 +23,9 @@ namespace Stratum
             _dataDict.Clear();
             foreach (var d in config.DataList)
             {
-                if (d == null || string.IsNullOrWhiteSpace(d.Key)) continue;
-                if (!_dataDict.TryAdd(d.Key, d))
-                    Debug.LogWarning($"[{GetType().Name}] Duplicate key '{d.Key}'.");
+                if (d == null || string.IsNullOrWhiteSpace(d.GetKey())) continue;
+                if (!_dataDict.TryAdd(d.GetKey(), d))
+                    Debug.LogWarning($"[{GetType().Name}] Duplicate key '{d.GetKey()}'.");
             }
         }
     }

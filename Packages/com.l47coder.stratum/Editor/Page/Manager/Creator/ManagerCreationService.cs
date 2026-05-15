@@ -70,25 +70,29 @@ namespace Stratum.Editor
             sbManager.AppendLine("}");
             File.WriteAllText(plan.ManagerTargetFilePath, sbManager.ToString(), Encoding.UTF8);
 
-            // TManagerConfig.cs — config partial with [EditorSync]
+            // TManagerConfig.cs — editor-only config partial with [EditorSync]
             var sbConfig = new StringBuilder();
+            sbConfig.AppendLine("#if UNITY_EDITOR");
             sbConfig.AppendLine("using Stratum;");
             sbConfig.AppendLine();
             sbConfig.AppendLine($"internal sealed partial class {plan.ConfigClassName}");
             sbConfig.AppendLine("{");
             sbConfig.AppendLine("    [EditorSync]");
-            sbConfig.AppendLine("    public void Sync()");
+            sbConfig.AppendLine("    private void EditorSync()");
             sbConfig.AppendLine("    {");
             sbConfig.AppendLine();
             sbConfig.AppendLine("    }");
             sbConfig.AppendLine("}");
+            sbConfig.AppendLine("#endif");
             File.WriteAllText(plan.ConfigHandWrittenFilePath, sbConfig.ToString(), Encoding.UTF8);
 
             // TManagerData.cs — data partial
             var sbData = new StringBuilder();
+            sbData.AppendLine("using Stratum;");
+            sbData.AppendLine();
             sbData.AppendLine($"internal sealed partial class {plan.ManagerDataStructName}");
             sbData.AppendLine("{");
-            sbData.AppendLine();
+            sbData.AppendLine("    public string Key;");
             sbData.AppendLine("}");
             File.WriteAllText(plan.DataHandWrittenFilePath, sbData.ToString(), Encoding.UTF8);
         }
@@ -103,7 +107,10 @@ namespace Stratum.Editor
             sb.AppendLine("using Stratum;");
             sb.AppendLine();
             sb.AppendLine("[Serializable]");
-            sb.AppendLine($"internal partial class {plan.ManagerDataStructName} : BaseManagerData {{ }}");
+            sb.AppendLine($"internal partial class {plan.ManagerDataStructName} : BaseManagerData");
+            sb.AppendLine("{");
+            sb.AppendLine("    public override string GetKey() => Key;");
+            sb.AppendLine("}");
 
             File.WriteAllText(plan.GeneratedDataFilePath, sb.ToString(), Encoding.UTF8);
         }
