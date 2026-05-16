@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c948a0f13b89bb342ae6cb77c414d4c7, type: 3}
-  m_Name: TaskManagerConfig
+  m_Script: {fileID: 11500000, guid: 5834b5087d578d24c926ce20cd31e6d6, type: 3}
+  m_Name: ManagerConfig_ContentUpdateGroupSchema
   m_EditorClassIdentifier: 
-  _dataList: []
+  m_Group: {fileID: 11400000, guid: b3d2715f7c158bd4aa889515cfe37f6f, type: 2}
+  m_StaticContent: 0

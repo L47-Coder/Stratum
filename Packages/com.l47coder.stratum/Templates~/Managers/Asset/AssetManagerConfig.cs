@@ -1,9 +1,9 @@
 ﻿#if UNITY_EDITOR
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Stratum;
 using UnityEditor;
-using UnityEditor.AddressableAssets;
 
 internal sealed partial class AssetManagerConfig
 {
@@ -47,22 +47,39 @@ internal sealed partial class AssetManagerConfig
     private static Dictionary<string, string> CollectTargets()
     {
         var result = new Dictionary<string, string>(StringComparer.Ordinal);
-        var settings = AddressableAssetSettingsDefaultObject.Settings;
-        if (settings == null) return result;
-
-        foreach (var group in settings.groups)
+        foreach (var group in EnumerateProperty(GetAddressableSettings(), "groups"))
         {
             if (group == null) continue;
-            if (ExcludedGroupNames.Contains(group.Name)) continue;
+            var groupName = GetStringProperty(group, "Name");
+            if (ExcludedGroupNames.Contains(groupName)) continue;
 
-            foreach (var entry in group.entries)
+            foreach (var entry in EnumerateProperty(group, "entries"))
             {
                 if (entry == null) continue;
-                if (string.IsNullOrWhiteSpace(entry.address)) continue;
-                result[entry.address] = entry.address;
+                var address = GetStringProperty(entry, "address");
+                if (string.IsNullOrWhiteSpace(address)) continue;
+                result[address] = address;
             }
         }
         return result;
     }
+
+    private static object GetAddressableSettings()
+    {
+        var type = Type.GetType("UnityEditor.AddressableAssets.AddressableAssetSettingsDefaultObject, Unity.Addressables.Editor");
+        return type?.GetProperty("Settings")?.GetValue(null);
+    }
+
+    private static IEnumerable EnumerateProperty(object target, string propertyName)
+    {
+        if (target == null) yield break;
+        if (target.GetType().GetProperty(propertyName)?.GetValue(target) is not IEnumerable values) yield break;
+
+        foreach (var value in values)
+            yield return value;
+    }
+
+    private static string GetStringProperty(object target, string propertyName) =>
+        target?.GetType().GetProperty(propertyName)?.GetValue(target) as string;
 }
 #endif

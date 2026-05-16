@@ -30,7 +30,6 @@ public interface IMessageManager
 internal sealed partial class MessageManager : IMessageManager
 {
     private readonly object _lock = new();
-    private readonly Dictionary<string, MessageManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Delegate> _callbacks = new(StringComparer.Ordinal);
     private readonly Dictionary<string, CancellationTokenSource> _groupSources = new(StringComparer.Ordinal);
 

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: Frame
   m_Data:
     m_SerializedData: []
-  m_GUID: b068a612661d0164b862b99b311d5600
+  m_GUID: 59d1087ca02cbcc4da1d577b988bf0f0
   m_SerializeEntries:
   - m_GUID: ebbc3e8e7de2bc14ab26afb08e05e57c
     m_Address: Frame/ManagerOrder
@@ -25,4 +25,6 @@ MonoBehaviour:
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: 5fe843652288d4f46a173890d3481f05, type: 2}
   m_SchemaSet:
-    m_Schemas: []
+    m_Schemas:
+    - {fileID: 11400000, guid: 99bae0c6cc2c7754887e19e6a85da869, type: 2}
+    - {fileID: 11400000, guid: 5003d089d843d554f9af36fcf5e12374, type: 2}

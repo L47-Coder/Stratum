@@ -31,7 +31,6 @@ internal sealed class AssetHandle<T> : IAssetHandle<T> where T : class
 
 internal sealed partial class AssetManager : IAssetManager
 {
-    private readonly Dictionary<string, AssetManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<string, AssetCache> _assetCaches = new(StringComparer.Ordinal);
 
     private sealed class AssetCache

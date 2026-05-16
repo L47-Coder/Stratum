@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -13,18 +14,18 @@ namespace Stratum
         where TConfig : BaseManagerConfig<TData>
         where TData : BaseManagerData
     {
-        protected readonly Dictionary<string, TData> _dataDict = new();
+        protected readonly Dictionary<string, TData> _managerDataDict = new(StringComparer.Ordinal);
 
         public virtual string AddressPath => $"ManagerConfig/{GetType().Name.Replace("Manager", "")}";
 
         public async UniTask SetManagerDataDict()
         {
             var config = await FrameworkLoader.LoadAsync<TConfig>(AddressPath);
-            _dataDict.Clear();
+            _managerDataDict.Clear();
             foreach (var d in config.DataList)
             {
                 if (d == null || string.IsNullOrWhiteSpace(d.GetKey())) continue;
-                if (!_dataDict.TryAdd(d.GetKey(), d))
+                if (!_managerDataDict.TryAdd(d.GetKey(), d))
                     Debug.LogWarning($"[{GetType().Name}] Duplicate key '{d.GetKey()}'.");
             }
         }

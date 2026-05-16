@@ -1,12 +1,21 @@
+using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AddressableAssets;
 using UnityEditor.AddressableAssets.Settings;
+using UnityEditor.AddressableAssets.Settings.GroupSchemas;
 using UnityEngine;
 
 namespace Stratum.Editor
 {
     internal static class AddressablesHelper
     {
+        private static readonly Type[] DefaultGroupSchemaTypes =
+        {
+            typeof(BundledAssetGroupSchema),
+            typeof(ContentUpdateGroupSchema),
+        };
+
         public static void EnsureEntry(string assetPath, string address, string groupName = null)
         {
             var settings = Settings();
@@ -69,12 +78,64 @@ namespace Stratum.Editor
             if (string.IsNullOrEmpty(groupName)) return settings.DefaultGroup;
 
             var existing = settings.groups.Find(g => g != null && g.Name == groupName);
-            if (existing != null) return existing;
+            if (existing != null)
+            {
+                EnsureGroupSchemas(settings, existing);
+                return existing;
+            }
 
-            var group = settings.CreateGroup(groupName, false, false, true, null);
+            var schemasToCopy = GetSchemasToCopy(settings, null);
+            var group = settings.CreateGroup(
+                groupName,
+                false,
+                false,
+                true,
+                schemasToCopy.Count > 0 ? schemasToCopy : null,
+                schemasToCopy.Count == 0 ? DefaultGroupSchemaTypes : Array.Empty<Type>());
+            EnsureGroupSchemas(settings, group);
             settings.SetDirty(AddressableAssetSettings.ModificationEvent.GroupAdded, group, true);
             AssetDatabase.SaveAssets();
             return group;
+        }
+
+        private static bool EnsureGroupSchemas(AddressableAssetSettings settings, AddressableAssetGroup group)
+        {
+            if (settings == null || group == null) return false;
+
+            var changed = false;
+            foreach (var schema in GetSchemasToCopy(settings, group))
+            {
+                if (schema == null || group.GetSchema(schema.GetType()) != null) continue;
+                group.AddSchema(schema, false);
+                changed = true;
+            }
+
+            foreach (var schemaType in DefaultGroupSchemaTypes)
+            {
+                if (group.GetSchema(schemaType) != null) continue;
+                group.AddSchema(schemaType, false);
+                changed = true;
+            }
+
+            if (!changed) return false;
+
+            settings.SetDirty(AddressableAssetSettings.ModificationEvent.GroupSchemaAdded, group, true);
+            AssetDatabase.SaveAssets();
+            return true;
+        }
+
+        private static List<AddressableAssetGroupSchema> GetSchemasToCopy(AddressableAssetSettings settings, AddressableAssetGroup target)
+        {
+            var result = new List<AddressableAssetGroupSchema>();
+            var source = settings?.DefaultGroup;
+            if (source == null || source == target || source.Schemas == null) return result;
+
+            foreach (var schema in source.Schemas)
+            {
+                if (schema != null) result.Add(schema);
+            }
+
+            return result;
         }
 
         private static AddressableAssetSettings Settings()

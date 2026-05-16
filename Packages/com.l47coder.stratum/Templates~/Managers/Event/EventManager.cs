@@ -28,7 +28,6 @@ internal sealed class EventHandle : IEventHandle
 internal sealed partial class EventManager : IEventManager
 {
     private readonly object _lock = new();
-    private readonly Dictionary<string, EventManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<Type, Dictionary<string, Delegate>> _callbacks = new();
     private readonly Dictionary<string, Type> _keyToType = new(StringComparer.Ordinal);
     private readonly Dictionary<string, CancellationTokenSource> _groupSources = new(StringComparer.Ordinal);

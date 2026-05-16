@@ -6,7 +6,6 @@
         "UniTask",
         "UniTask.Addressables",
         "Unity.Addressables",
-        "Unity.Addressables.Editor",
         "Unity.ResourceManager",
         "VContainer"
     ],

@@ -388,7 +388,6 @@ internal sealed class TaskBuilder : ITaskBuilder
 
 internal sealed partial class TaskManager : ITaskManager
 {
-    private readonly Dictionary<string, TaskManagerData> _managerDataDict = new(StringComparer.Ordinal);
     private readonly Dictionary<string, CancellationTokenSource> _taskTokenSources = new(StringComparer.Ordinal);
 
     public ITaskBuilder CreateTask()

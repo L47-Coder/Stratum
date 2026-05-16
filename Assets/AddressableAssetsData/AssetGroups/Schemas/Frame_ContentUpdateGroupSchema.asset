@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7af93d0d4ac3f194ca7fe0b8b242de59, type: 3}
-  m_Name: EventManagerConfig
+  m_Script: {fileID: 11500000, guid: 5834b5087d578d24c926ce20cd31e6d6, type: 3}
+  m_Name: Frame_ContentUpdateGroupSchema
   m_EditorClassIdentifier: 
-  _dataList: []
+  m_Group: {fileID: 11400000, guid: 217678df5fe9f834393c752cb8db5ca9, type: 2}
+  m_StaticContent: 0
