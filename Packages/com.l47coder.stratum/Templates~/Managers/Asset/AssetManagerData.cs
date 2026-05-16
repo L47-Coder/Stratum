@@ -1,4 +1,4 @@
-﻿using Stratum;
+using Stratum;
 
 internal sealed partial class AssetManagerData
 {

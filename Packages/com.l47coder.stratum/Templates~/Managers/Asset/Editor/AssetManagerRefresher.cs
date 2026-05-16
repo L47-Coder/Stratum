@@ -1,35 +1,39 @@
-﻿#if UNITY_EDITOR
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Stratum;
 using UnityEditor;
 
-internal sealed partial class AssetManagerConfig
+internal static class AssetManagerRefresher
 {
+    private const string ConfigAssetPath = "Assets/Game/Manager/Asset/AssetManagerConfig.asset";
     private static readonly HashSet<string> ExcludedGroupNames = new(StringComparer.OrdinalIgnoreCase)
     {
         "Built In Data",
     };
 
     [EditorSync]
-    private void EditorSync()
+    public static void Run()
     {
-        var targets = CollectTargets();
+        var cfg = AssetDatabase.LoadAssetAtPath<AssetManagerConfig>(ConfigAssetPath);
+        if (cfg == null) return;
 
-        for (var i = DataList.Count - 1; i >= 0; i--)
+        var targets = CollectTargets();
+        var list = cfg.DataList;
+
+        for (var i = list.Count - 1; i >= 0; i--)
         {
-            var item = DataList[i];
+            var item = list[i];
             if (item == null || string.IsNullOrWhiteSpace(item.Key))
             {
-                DataList.RemoveAt(i);
+                list.RemoveAt(i);
                 continue;
             }
 
             var key = item.Key.Trim();
             if (!targets.TryGetValue(key, out var address))
             {
-                DataList.RemoveAt(i);
+                list.RemoveAt(i);
                 continue;
             }
 
@@ -38,9 +42,9 @@ internal sealed partial class AssetManagerConfig
         }
 
         foreach (var kv in targets)
-            DataList.Add(new AssetManagerData { Key = kv.Key, AssetAddress = kv.Value });
+            list.Add(new AssetManagerData { Key = kv.Key, AssetAddress = kv.Value });
 
-        EditorUtility.SetDirty(this);
+        EditorUtility.SetDirty(cfg);
         AssetDatabase.SaveAssets();
     }
 
@@ -82,4 +86,3 @@ internal sealed partial class AssetManagerConfig
     private static string GetStringProperty(object target, string propertyName) =>
         target?.GetType().GetProperty(propertyName)?.GetValue(target) as string;
 }
-#endif

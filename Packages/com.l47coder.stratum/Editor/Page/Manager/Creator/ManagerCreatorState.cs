@@ -30,12 +30,14 @@ namespace Stratum.Editor
         public string ConfigClassName { get; private set; } = string.Empty;
         public string ManagerDataStructName { get; private set; } = string.Empty;
         public string ManagerTargetFilePath { get; private set; } = string.Empty;
-        public string ConfigHandWrittenFilePath { get; private set; } = string.Empty;
-        public string DataHandWrittenFilePath { get; private set; } = string.Empty;
+        public string DataTargetFilePath { get; private set; } = string.Empty;
         public string GeneratedFolderPath { get; private set; } = string.Empty;
         public string GeneratedDataFilePath { get; private set; } = string.Empty;
         public string GeneratedConfigFilePath { get; private set; } = string.Empty;
         public string GeneratedManagerPartialFilePath { get; private set; } = string.Empty;
+        public string EditorFolderPath { get; private set; } = string.Empty;
+        public string EditorRefresherFilePath { get; private set; } = string.Empty;
+        public string EditorAsmRefFilePath { get; private set; } = string.Empty;
         public string AssetTargetFilePath { get; private set; } = string.Empty;
         public string AddressableAddressName { get; private set; } = string.Empty;
 
@@ -45,6 +47,7 @@ namespace Stratum.Editor
         private bool _managerFileExists;
         private bool _managerClassExists;
         private bool _generatedFolderExists;
+        private bool _editorFolderExists;
         private bool _assetExists;
 
         private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
@@ -96,8 +99,9 @@ namespace Stratum.Editor
         public ManagerCreationPlan BuildPlan() => new(
             InputManagerName,
             ManagerInterfaceName, ManagerClassName, ConfigClassName, ManagerDataStructName,
-            EntityFolderPath, ManagerTargetFilePath, ConfigHandWrittenFilePath, DataHandWrittenFilePath,
+            EntityFolderPath, ManagerTargetFilePath, DataTargetFilePath,
             GeneratedFolderPath, GeneratedDataFilePath, GeneratedConfigFilePath, GeneratedManagerPartialFilePath,
+            EditorFolderPath, EditorRefresherFilePath, EditorAsmRefFilePath,
             AssetTargetFilePath, AddressableAddressName,
             ShouldCreateManagerFile());
 
@@ -135,12 +139,14 @@ namespace Stratum.Editor
 
             var entityFolder = $"{_parentFolderAssetPath}/{InputManagerName}";
             ManagerTargetFilePath = $"{entityFolder}/{ManagerClassName}.cs";
-            ConfigHandWrittenFilePath = $"{entityFolder}/{ConfigClassName}.cs";
-            DataHandWrittenFilePath = $"{entityFolder}/{ManagerDataStructName}.cs";
+            DataTargetFilePath = $"{entityFolder}/{ManagerDataStructName}.cs";
             GeneratedFolderPath = $"{entityFolder}/{GeneratedFolderName}";
             GeneratedDataFilePath = $"{GeneratedFolderPath}/{ManagerDataStructName}.Generated.cs";
-            GeneratedConfigFilePath = $"{GeneratedFolderPath}/{ConfigClassName}.Generated.cs";
+            GeneratedConfigFilePath = $"{GeneratedFolderPath}/{ConfigClassName}.cs";
             GeneratedManagerPartialFilePath = $"{GeneratedFolderPath}/{ManagerClassName}.Generated.cs";
+            EditorFolderPath = $"{entityFolder}/Editor";
+            EditorRefresherFilePath = $"{EditorFolderPath}/{ManagerClassName}Refresher.cs";
+            EditorAsmRefFilePath = $"{EditorFolderPath}/Game.Editor.asmref";
             AssetTargetFilePath = $"{entityFolder}/{ConfigClassName}.asset";
             AddressableAddressName = ManagerAddressConvention.AddressOf(InputManagerName);
 
@@ -173,12 +179,14 @@ namespace Stratum.Editor
             ConfigClassName = string.Empty;
             ManagerDataStructName = string.Empty;
             ManagerTargetFilePath = string.Empty;
-            ConfigHandWrittenFilePath = string.Empty;
-            DataHandWrittenFilePath = string.Empty;
+            DataTargetFilePath = string.Empty;
             GeneratedFolderPath = string.Empty;
             GeneratedDataFilePath = string.Empty;
             GeneratedConfigFilePath = string.Empty;
             GeneratedManagerPartialFilePath = string.Empty;
+            EditorFolderPath = string.Empty;
+            EditorRefresherFilePath = string.Empty;
+            EditorAsmRefFilePath = string.Empty;
             AssetTargetFilePath = string.Empty;
             AddressableAddressName = string.Empty;
             _existingManagerFilePath = string.Empty;
@@ -186,6 +194,7 @@ namespace Stratum.Editor
             _managerFileExists = false;
             _managerClassExists = false;
             _generatedFolderExists = false;
+            _editorFolderExists = false;
             _assetExists = false;
             _namePreviewItems = Array.Empty<PreviewItem>();
             _pathPreviewItems = Array.Empty<PreviewItem>();
@@ -200,6 +209,9 @@ namespace Stratum.Editor
         private PreviewStatus GetGeneratedCodeStatus() =>
             string.IsNullOrEmpty(GeneratedFolderPath) ? PreviewStatus.Neutral : _generatedFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
 
+        private PreviewStatus GetEditorCodeStatus() =>
+            string.IsNullOrEmpty(EditorFolderPath) ? PreviewStatus.Neutral : _editorFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
+
         private PreviewStatus GetAssetStatus() =>
             string.IsNullOrEmpty(AssetTargetFilePath) ? PreviewStatus.Neutral : _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
 
@@ -209,6 +221,7 @@ namespace Stratum.Editor
 
             var managerStatus = GetManagerCodeStatus();
             var generatedStatus = GetGeneratedCodeStatus();
+            var editorStatus = GetEditorCodeStatus();
             var assetStatus = GetAssetStatus();
 
             _namePreviewItems = new[]
@@ -222,7 +235,9 @@ namespace Stratum.Editor
             _pathPreviewItems = new[]
             {
                 new PreviewItem("Manager script",   _managerFileExists ? _existingManagerFilePath : ManagerTargetFilePath, managerStatus),
+                new PreviewItem("Data script",      DataTargetFilePath, managerStatus),
                 new PreviewItem("Generated folder", GeneratedFolderPath, generatedStatus),
+                new PreviewItem("Editor folder",    EditorFolderPath,    editorStatus),
                 new PreviewItem("Asset file",       _assetExists ? _existingAssetPath : AssetTargetFilePath,               assetStatus),
             };
 
@@ -239,6 +254,7 @@ namespace Stratum.Editor
                 ManagerAssetIndex.FindManagerScript(Path.GetFileName(ManagerTargetFilePath)));
 
             _generatedFolderExists = !string.IsNullOrEmpty(GeneratedFolderPath) && FolderExists(GeneratedFolderPath);
+            _editorFolderExists = !string.IsNullOrEmpty(EditorFolderPath) && FolderExists(EditorFolderPath);
 
             _existingAssetPath = ResolveExisting(AssetTargetFilePath,
                 ManagerAssetIndex.FindManagerAsset(Path.GetFileName(AssetTargetFilePath)));
@@ -306,12 +322,14 @@ namespace Stratum.Editor
         public readonly string ManagerDataStructName;
         public readonly string EntityFolderPath;
         public readonly string ManagerTargetFilePath;
-        public readonly string ConfigHandWrittenFilePath;
-        public readonly string DataHandWrittenFilePath;
+        public readonly string DataTargetFilePath;
         public readonly string GeneratedFolderPath;
         public readonly string GeneratedDataFilePath;
         public readonly string GeneratedConfigFilePath;
         public readonly string GeneratedManagerPartialFilePath;
+        public readonly string EditorFolderPath;
+        public readonly string EditorRefresherFilePath;
+        public readonly string EditorAsmRefFilePath;
         public readonly string AssetFilePath;
         public readonly string AddressableAddressName;
         public readonly bool ShouldCreateManagerFile;
@@ -319,8 +337,9 @@ namespace Stratum.Editor
         public ManagerCreationPlan(
             string managerName,
             string managerInterfaceName, string managerClassName, string configClassName, string managerDataStructName,
-            string entityFolderPath, string managerTargetFilePath, string configHandWrittenFilePath, string dataHandWrittenFilePath,
+            string entityFolderPath, string managerTargetFilePath, string dataTargetFilePath,
             string generatedFolderPath, string generatedDataFilePath, string generatedConfigFilePath, string generatedManagerPartialFilePath,
+            string editorFolderPath, string editorRefresherFilePath, string editorAsmRefFilePath,
             string assetFilePath, string addressableAddressName,
             bool shouldCreateManagerFile)
         {
@@ -331,12 +350,14 @@ namespace Stratum.Editor
             ManagerDataStructName = managerDataStructName;
             EntityFolderPath = entityFolderPath;
             ManagerTargetFilePath = managerTargetFilePath;
-            ConfigHandWrittenFilePath = configHandWrittenFilePath;
-            DataHandWrittenFilePath = dataHandWrittenFilePath;
+            DataTargetFilePath = dataTargetFilePath;
             GeneratedFolderPath = generatedFolderPath;
             GeneratedDataFilePath = generatedDataFilePath;
             GeneratedConfigFilePath = generatedConfigFilePath;
             GeneratedManagerPartialFilePath = generatedManagerPartialFilePath;
+            EditorFolderPath = editorFolderPath;
+            EditorRefresherFilePath = editorRefresherFilePath;
+            EditorAsmRefFilePath = editorAsmRefFilePath;
             AssetFilePath = assetFilePath;
             AddressableAddressName = addressableAddressName;
             ShouldCreateManagerFile = shouldCreateManagerFile;

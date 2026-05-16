@@ -1,0 +1,28 @@
+{
+    "name": "Game.Editor",
+    "rootNamespace": "",
+    "references": [
+        "Stratum",
+        "Stratum.Editor",
+        "Game.Managers",
+        "Game.Frame",
+        "Game.ScriptableObject",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.Addressables.Editor",
+        "Unity.ResourceManager",
+        "VContainer"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
