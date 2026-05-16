@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEditor;
@@ -31,7 +32,7 @@ namespace Stratum.Editor
 
         public void OnFirstEnter(Action<string> onSelected)
         {
-            _treeView.ExcludePatterns = new() { "**/Generated", "**/*.asmdef", "**/*.asset" };
+            _treeView.ExcludePatterns = new() { "**/Generated", "**/Editor", "**/*.asmdef", "**/*.asmref", "**/*.InternalsVisibleTo", "**/*.asset" };
             _treeView.OnNodeSelect(onSelected);
         }
 
@@ -230,6 +231,11 @@ namespace Stratum.Editor
                     {
                         _cachedList = raw;
                         _tableView = new TableControl();
+                        _tableView.ToolbarButtons = new List<GUIContent> { CreateOpenRefresherButtonContent() };
+                        _tableView.OnButtonClick(i =>
+                        {
+                            if (i == 0) OpenRefresherScript(_cachedAssetPath);
+                        });
                         _cachedDrawMethod = typeof(TableControl).GetMethod(nameof(TableControl.Draw))
                             .MakeGenericMethod(elemType);
                     }
@@ -245,6 +251,71 @@ namespace Stratum.Editor
             _cachedDrawMethod.Invoke(_tableView, new object[] { rect, _cachedList });
 
             if (GUI.changed && _cachedAsset is UnityEngine.Object so) EditorUtility.SetDirty(so);
+        }
+
+        private static GUIContent CreateOpenRefresherButtonContent()
+        {
+            var content = new GUIContent(EditorGUIUtility.IconContent("cs Script Icon"));
+            content.tooltip = "Open refresher script";
+            return content;
+        }
+
+        private static void OpenRefresherScript(string assetPath)
+        {
+            var path = FindRefresherScript(assetPath);
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogWarning($"[ManagerViewer] Refresher script not found for {assetPath}.");
+                return;
+            }
+
+            var script = AssetDatabase.LoadAssetAtPath<MonoScript>(path);
+            if (script == null)
+            {
+                Debug.LogWarning($"[ManagerViewer] Failed to load refresher script: {path}");
+                return;
+            }
+
+            Selection.activeObject = script;
+            EditorGUIUtility.PingObject(script);
+            AssetDatabase.OpenAsset(script);
+        }
+
+        private static string FindRefresherScript(string assetPath)
+        {
+            if (string.IsNullOrEmpty(assetPath)) return null;
+
+            var folder = Path.GetDirectoryName(assetPath)?.Replace('\\', '/');
+            if (string.IsNullOrEmpty(folder)) return null;
+
+            var configName = Path.GetFileNameWithoutExtension(assetPath);
+            var preferredName = configName.EndsWith("Config", StringComparison.Ordinal)
+                ? configName[..^"Config".Length] + "Refresher.cs"
+                : configName + "Refresher.cs";
+
+            var preferredPath = $"{folder}/Editor/{preferredName}";
+            if (File.Exists(ToFullPath(preferredPath)))
+                return preferredPath;
+
+            var editorAbs = ToFullPath($"{folder}/Editor");
+            if (!Directory.Exists(editorAbs)) return null;
+
+            foreach (var file in Directory.GetFiles(editorAbs, "*Refresher.cs", SearchOption.TopDirectoryOnly))
+                return ToAssetPath(file);
+
+            return null;
+        }
+
+        private static string ToFullPath(string assetPath) =>
+            Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath));
+
+        private static string ToAssetPath(string fullPath)
+        {
+            var root = Path.GetFullPath(Path.Combine(Application.dataPath, "..")).Replace('\\', '/').TrimEnd('/') + "/";
+            var normalized = Path.GetFullPath(fullPath).Replace('\\', '/');
+            return normalized.StartsWith(root, StringComparison.OrdinalIgnoreCase)
+                ? normalized[root.Length..]
+                : normalized;
         }
     }
 }
