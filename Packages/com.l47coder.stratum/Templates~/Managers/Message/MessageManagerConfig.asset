@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a181d2798c6d02f4d904df0ff3d55c9f, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e9c8a308418ed3408780280d5b24886, type: 3}
   m_Name: MessageManagerConfig
   m_EditorClassIdentifier: 
   _dataList: []

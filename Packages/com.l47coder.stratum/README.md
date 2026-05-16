@@ -6,7 +6,7 @@ It combines `ScriptableObject` data, Addressables, UniTask and VContainer with
 editor tooling for Manager scaffolding, Manager order, config tables and
 ScriptableObject asset folders.
 
-Status: **0.5.0**. The package is usable, but the public API is still
+Status: **0.5.1**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
@@ -74,7 +74,7 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.0
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.1
 ```
 
 ## Quick Start

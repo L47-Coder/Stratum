@@ -1,4 +1,4 @@
-internal sealed partial class TaskManagerData
+﻿internal sealed partial class TaskManagerData
 {
     public string Key;
 }

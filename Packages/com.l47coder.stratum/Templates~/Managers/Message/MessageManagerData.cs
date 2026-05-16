@@ -1,4 +1,4 @@
-internal sealed partial class MessageManagerData
+﻿internal sealed partial class MessageManagerData
 {
     public string Key;
 }

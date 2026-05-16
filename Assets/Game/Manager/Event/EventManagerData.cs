@@ -1,4 +1,4 @@
-internal sealed partial class EventManagerData
+﻿internal sealed partial class EventManagerData
 {
     public string Key;
 }

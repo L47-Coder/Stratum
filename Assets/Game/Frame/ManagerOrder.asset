@@ -13,15 +13,15 @@ MonoBehaviour:
   m_Name: ManagerOrder
   m_EditorClassIdentifier: 
   _entries:
-  - Name: MessageManager
-    AssemblyQualifiedName: MessageManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
   - Name: AssetManager
     AssemblyQualifiedName: AssetManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  - Name: EventManager
+    AssemblyQualifiedName: EventManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
   - Name: TaskManager
     AssemblyQualifiedName: TaskManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
-  - Name: EventManager
-    AssemblyQualifiedName: EventManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
+  - Name: MessageManager
+    AssemblyQualifiedName: MessageManager, Game.Managers, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null

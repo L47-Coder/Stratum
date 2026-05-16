@@ -9,17 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e16352d84abb6c43bfb048464c76471, type: 3}
+  m_Script: {fileID: 11500000, guid: c8f90af49390f2e4387b1291aa8bccc5, type: 3}
   m_Name: AssetManagerConfig
   m_EditorClassIdentifier: 
-  _dataList:
-  - Key: ManagerConfig/Asset
-    AssetAddress: ManagerConfig/Asset
-  - Key: ManagerConfig/Event
-    AssetAddress: ManagerConfig/Event
-  - Key: ManagerConfig/Task
-    AssetAddress: ManagerConfig/Task
-  - Key: ManagerConfig/Message
-    AssetAddress: ManagerConfig/Message
-  - Key: Frame/ManagerOrder
-    AssetAddress: Frame/ManagerOrder
+  _dataList: []

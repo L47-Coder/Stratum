@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Stratum;
 using UnityEngine;
 
 public interface IEventHandle { }
@@ -21,7 +20,6 @@ public interface IEventManager
 internal sealed class EventHandle : IEventHandle
 {
     public string Key { get; }
-
     public EventHandle(string key) => Key = key;
 }
 
@@ -53,19 +51,22 @@ internal sealed partial class EventManager : IEventManager
         if (callbacks.Length == 0) return;
 
         var groupId = Guid.NewGuid().ToString("N");
-        using var groupSource = new CancellationTokenSource();
+        var groupSource = new CancellationTokenSource();
         AddGroupSource(groupId, groupSource);
+        var cleanupNow = true;
 
         try
         {
             var publishTask = UniTask.WhenAll(callbacks
                 .Select(callback => InvokeAsync(callback, message, groupSource.Token))
-                .ToArray());
+                .ToArray()).Preserve();
 
-            if (await UniTask.WhenAny(publishTask, UniTask.Delay(timeoutMs)) == 1)
+            if (timeoutMs > 0 && await UniTask.WhenAny(publishTask, UniTask.Delay(timeoutMs)) == 1)
             {
                 Debug.LogWarning($"异步事件处理超时 ({timeoutMs}ms)");
                 groupSource.Cancel();
+                cleanupNow = false;
+                CleanupPublishAsync(groupId, groupSource, publishTask).Forget();
                 return;
             }
 
@@ -73,7 +74,11 @@ internal sealed partial class EventManager : IEventManager
         }
         finally
         {
-            RemoveGroupSource(groupId);
+            if (cleanupNow)
+            {
+                RemoveGroupSource(groupId);
+                groupSource.Dispose();
+            }
         }
     }
 
@@ -122,7 +127,7 @@ internal sealed partial class EventManager : IEventManager
         }
 
         foreach (var groupSource in groupSources)
-            groupSource.Cancel();
+            CancelGroupSource(groupSource);
     }
 
     private EventHandle AddCallback(Type type, Delegate callback)
@@ -166,6 +171,29 @@ internal sealed partial class EventManager : IEventManager
     {
         lock (_lock)
             _groupSources.Remove(groupId);
+    }
+
+    private async UniTask CleanupPublishAsync(string groupId, CancellationTokenSource groupSource, UniTask publishTask)
+    {
+        try
+        {
+            await publishTask;
+        }
+        finally
+        {
+            RemoveGroupSource(groupId);
+            groupSource.Dispose();
+        }
+    }
+
+    private static void CancelGroupSource(CancellationTokenSource groupSource)
+    {
+        try
+        {
+            if (!groupSource.IsCancellationRequested)
+                groupSource.Cancel();
+        }
+        catch (ObjectDisposedException) { }
     }
 
     private static async UniTask InvokeAsync<T>(Func<T, CancellationToken, UniTask> callback, T message, CancellationToken token)

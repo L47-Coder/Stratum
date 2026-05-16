@@ -9,6 +9,33 @@ This changelog was reset for the renovated `0.5.0` package. Earlier preview
 history is intentionally omitted because the runtime and Workbench architecture
 were substantially rebuilt.
 
+## [0.5.1] - 2026-05-16
+
+### Changed
+
+- Refreshed the built-in Manager templates from the dogfooded
+  `Assets/Game/Manager` implementation, including root assembly definition
+  files, generated partials, editor refreshers, config assets and leaf markers.
+- Updated `AssetManager` to expose direct address-based loading through
+  `LoadAsync<T>(address)` and global release through `ReleaseAllAsync()`.
+
+### Fixed
+
+- Fixed VContainer Manager registration so implementations are not registered
+  twice as `IManager` when `.AsImplementedInterfaces()` already includes the
+  base Manager contract.
+- Hardened `AssetManager` against cache collisions for the same address loaded
+  as different types, stale failed-load cache entries and release-all races
+  while pending loads complete.
+- Hardened `EventManager` async publish timeout handling so preserved publish
+  tasks can be awaited safely and cancellation token sources are not disposed
+  while callbacks may still observe them.
+- Hardened `MessageManager` cancellation cleanup against already-disposed
+  cancellation token sources.
+- Hardened `TaskManager` against re-running the same builder, collection
+  mutation during stop-all and async node cancellation source disposal before
+  the async operation has actually completed.
+
 ## [0.5.0] - 2026-05-16
 
 First public release candidate for the redesigned Stratum package.

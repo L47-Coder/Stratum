@@ -64,7 +64,7 @@ The `?path=` segment is required because this repository is a full Unity
 project and the package lives in a subfolder. To install a tagged release:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.0
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.1
 ```
 
 ## Requirements

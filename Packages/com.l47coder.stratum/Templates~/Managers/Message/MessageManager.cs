@@ -2,29 +2,28 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Stratum;
 using UnityEngine;
 
 public interface IMessageManager
 {
-    public void Send(string id);
-    public void Send<TParam>(string id, TParam parameter);
-    public TResult Send<TResult>(string id);
-    public TResult Send<TParam, TResult>(string id, TParam parameter);
-    public UniTask SendAsync(string id);
-    public UniTask SendAsync<TParam>(string id, TParam parameter);
-    public UniTask<TResult> SendAsync<TResult>(string id);
-    public UniTask<TResult> SendAsync<TParam, TResult>(string id, TParam parameter);
-    public void Receive(string id, Action callback);
-    public void Receive<TParam>(string id, Action<TParam> callback);
-    public void Receive<TResult>(string id, Func<TResult> callback);
-    public void Receive<TParam, TResult>(string id, Func<TParam, TResult> callback);
-    public void ReceiveAsync(string id, Func<CancellationToken, UniTask> callback);
-    public void ReceiveAsync<TParam>(string id, Func<TParam, CancellationToken, UniTask> callback);
-    public void ReceiveAsync<TResult>(string id, Func<CancellationToken, UniTask<TResult>> callback);
-    public void ReceiveAsync<TParam, TResult>(string id, Func<TParam, CancellationToken, UniTask<TResult>> callback);
-    public bool Unreceive(string id);
-    public void UnreceiveAll();
+    void Send(string id);
+    void Send<TParam>(string id, TParam parameter);
+    TResult Send<TResult>(string id);
+    TResult Send<TParam, TResult>(string id, TParam parameter);
+    UniTask SendAsync(string id);
+    UniTask SendAsync<TParam>(string id, TParam parameter);
+    UniTask<TResult> SendAsync<TResult>(string id);
+    UniTask<TResult> SendAsync<TParam, TResult>(string id, TParam parameter);
+    void Receive(string id, Action callback);
+    void Receive<TParam>(string id, Action<TParam> callback);
+    void Receive<TResult>(string id, Func<TResult> callback);
+    void Receive<TParam, TResult>(string id, Func<TParam, TResult> callback);
+    void ReceiveAsync(string id, Func<CancellationToken, UniTask> callback);
+    void ReceiveAsync<TParam>(string id, Func<TParam, CancellationToken, UniTask> callback);
+    void ReceiveAsync<TResult>(string id, Func<CancellationToken, UniTask<TResult>> callback);
+    void ReceiveAsync<TParam, TResult>(string id, Func<TParam, CancellationToken, UniTask<TResult>> callback);
+    bool Unreceive(string id);
+    void UnreceiveAll();
 }
 
 internal sealed partial class MessageManager : IMessageManager
@@ -117,7 +116,7 @@ internal sealed partial class MessageManager : IMessageManager
         }
 
         foreach (var groupSource in groupSources)
-            groupSource.Cancel();
+            CancelGroupSource(groupSource);
     }
 
     private void AddCallback(string id, Delegate callback)
@@ -235,5 +234,15 @@ internal sealed partial class MessageManager : IMessageManager
     {
         lock (_lock)
             _groupSources.Remove(groupId);
+    }
+
+    private static void CancelGroupSource(CancellationTokenSource groupSource)
+    {
+        try
+        {
+            if (!groupSource.IsCancellationRequested)
+                groupSource.Cancel();
+        }
+        catch (ObjectDisposedException) { }
     }
 }

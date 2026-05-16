@@ -12,14 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8f90af49390f2e4387b1291aa8bccc5, type: 3}
   m_Name: AssetManagerConfig
   m_EditorClassIdentifier: 
-  _dataList:
-  - Key: Frame/ManagerOrder
-    AssetAddress: Frame/ManagerOrder
-  - Key: ManagerConfig/Asset
-    AssetAddress: ManagerConfig/Asset
-  - Key: ManagerConfig/Event
-    AssetAddress: ManagerConfig/Event
-  - Key: ManagerConfig/Task
-    AssetAddress: ManagerConfig/Task
-  - Key: ManagerConfig/Message
-    AssetAddress: ManagerConfig/Message
+  _dataList: []

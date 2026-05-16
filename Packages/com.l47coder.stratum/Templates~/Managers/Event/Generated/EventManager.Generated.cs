@@ -1,4 +1,4 @@
-using Stratum;
+﻿using Stratum;
 using UnityEngine.Scripting;
 
 [Preserve]

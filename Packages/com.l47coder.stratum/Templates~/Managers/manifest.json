@@ -3,7 +3,7 @@
     {
       "id": "Asset",
       "displayName": "Asset Manager",
-      "description": "Loads and tracks assets through Addressables, managing AssetHandle lifetimes and reference counts.",
+      "description": "Loads assets through Addressables by address and releases cached handles in one pass.",
       "recommended": true
     },
     {

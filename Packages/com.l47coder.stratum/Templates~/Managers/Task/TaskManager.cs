@@ -2,22 +2,21 @@
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
-using Stratum;
 using UnityEngine;
 
 public interface ITaskHandle { }
 
 public interface ITaskBuilder
 {
-    public ITaskBuilder SetLife(Func<bool> lifeCondition = null, int lifeTime = 0, int lifeFrames = 0);
-    public ITaskBuilder Loop(int iterationCount = 0);
-    public ITaskBuilder End();
-    public ITaskBuilder Action(Action action);
-    public ITaskBuilder ActionAsync(Func<CancellationToken, UniTask> asyncFunc);
-    public ITaskBuilder WaitCondition(Func<bool> condition);
-    public ITaskBuilder WaitTime(int milliseconds);
-    public ITaskBuilder WaitFrames(int frames);
-    public ITaskHandle Run();
+    ITaskBuilder SetLife(Func<bool> lifeCondition = null, int lifeTime = 0, int lifeFrames = 0);
+    ITaskBuilder Loop(int iterationCount = 0);
+    ITaskBuilder End();
+    ITaskBuilder Action(Action action);
+    ITaskBuilder ActionAsync(Func<CancellationToken, UniTask> asyncFunc);
+    ITaskBuilder WaitCondition(Func<bool> condition);
+    ITaskBuilder WaitTime(int milliseconds);
+    ITaskBuilder WaitFrames(int frames);
+    ITaskHandle Run();
 }
 
 public interface ITaskManager
@@ -40,6 +39,7 @@ internal sealed class TaskBuilder : ITaskBuilder
     private readonly CancellationToken _cancellationToken;
     private TaskNode _rootNode;
     private TaskNode _currentNode;
+    private bool _hasRun;
 
     public TaskBuilder(TaskManager taskManager, TaskHandle taskHandle, CancellationToken cancellationToken)
     {
@@ -163,7 +163,12 @@ internal sealed class TaskBuilder : ITaskBuilder
                     try { await _asyncFunc(_cancellationTokenSource.Token); }
                     catch (OperationCanceledException) { }
                     catch (Exception ex) { Debug.LogError($"AsyncActionTaskNode 执行出错: {ex.Message}"); }
-                    finally { _isCompleted = true; }
+                    finally
+                    {
+                        _isCompleted = true;
+                        if (_cancellationTokenSource != null && _cancellationTokenSource.IsCancellationRequested)
+                            DisposeCancellationTokenSource();
+                    }
                 });
             }
 
@@ -181,6 +186,12 @@ internal sealed class TaskBuilder : ITaskBuilder
             if (_cancellationTokenSource == null) return;
             if (!_cancellationTokenSource.IsCancellationRequested)
                 _cancellationTokenSource.Cancel();
+            if (_isCompleted)
+                DisposeCancellationTokenSource();
+        }
+
+        private void DisposeCancellationTokenSource()
+        {
             _cancellationTokenSource.Dispose();
             _cancellationTokenSource = null;
             _isStarted = false;
@@ -371,6 +382,11 @@ internal sealed class TaskBuilder : ITaskBuilder
 
     public ITaskHandle Run()
     {
+        if (_hasRun)
+            throw new InvalidOperationException("Task has already been run.");
+
+        _hasRun = true;
+
         UniTask.Void(async () =>
         {
             try
@@ -379,7 +395,11 @@ internal sealed class TaskBuilder : ITaskBuilder
                     await UniTask.NextFrame(_cancellationToken);
             }
             catch (OperationCanceledException) { }
-            finally { _taskManager.StopTask(_taskHandle); }
+            finally
+            {
+                _rootNode.ResetState();
+                _taskManager.StopTask(_taskHandle);
+            }
         });
 
         return _taskHandle;
@@ -405,19 +425,32 @@ internal sealed partial class TaskManager : ITaskManager
         if (handle is not TaskHandle taskHandle) return;
         if (!_taskTokenSources.TryGetValue(taskHandle.Key, out var tokenSource)) return;
 
-        tokenSource.Cancel();
-        tokenSource.Dispose();
         _taskTokenSources.Remove(taskHandle.Key);
+        CancelAndDispose(tokenSource);
     }
 
     public void StopAllTasks()
     {
-        foreach (var tokenSource in _taskTokenSources.Values)
-        {
-            tokenSource.Cancel();
-            tokenSource.Dispose();
-        }
+        var tokenSources = new List<CancellationTokenSource>(_taskTokenSources.Values);
 
         _taskTokenSources.Clear();
+
+        foreach (var tokenSource in tokenSources)
+            CancelAndDispose(tokenSource);
+    }
+
+    private static void CancelAndDispose(CancellationTokenSource tokenSource)
+    {
+        try
+        {
+            if (!tokenSource.IsCancellationRequested)
+                tokenSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+            return;
+        }
+
+        tokenSource.Dispose();
     }
 }

@@ -17,7 +17,7 @@ namespace Stratum
             {
                 var type = ResolveManagerType(entry);
                 if (type == null) continue;
-                builder.Register(type, Lifetime.Singleton).As<IManager>().AsImplementedInterfaces();
+                builder.Register(type, Lifetime.Singleton).AsImplementedInterfaces();
             }
             builder.RegisterEntryPoint<GameBootstrap>();
         }
