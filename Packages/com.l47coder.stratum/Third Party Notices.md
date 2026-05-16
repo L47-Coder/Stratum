@@ -1,8 +1,9 @@
 # Third Party Notices
 
 This package depends on the following third-party packages. Each dependency is
-distributed under its own license and is **not** bundled into this repository
-&mdash; it is pulled in at install time by the Unity Package Manager.
+distributed under its own license and is **not** bundled into this repository.
+Dependencies are resolved by the Unity Package Manager from Unity's registry
+or from Git URLs configured in the host project's `Packages/manifest.json`.
 
 | Dependency | Version | License | Source |
 | ---------- | ------- | ------- | ------ |
@@ -15,7 +16,7 @@ distributed under its own license and is **not** bundled into this repository
 MIT only requires preservation of the MIT copyright notice when source or
 binary of an MIT-licensed work is redistributed. This package does **not**
 vendor any third-party source; the dependencies above are declared via UPM and
-resolved from their original upstream registries. This file is provided as a
+resolved from their original upstream projects. This file is provided as a
 courtesy so that downstream users can find each dependency's upstream project
 and license text in one place.
 

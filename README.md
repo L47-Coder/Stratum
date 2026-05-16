@@ -4,96 +4,95 @@
 [![Unity 2022.3](https://img.shields.io/badge/Unity-2022.3%20LTS-black.svg?logo=unity)](https://unity.com/releases/editor/whats-new/2022.3.60)
 [![Package](https://img.shields.io/badge/UPM-com.l47coder.stratum-1a7ad4.svg)](./Packages/com.l47coder.stratum)
 
-This repository hosts the source of the **Stratum** Unity package
-(`com.l47coder.stratum`) together with a minimal Unity host project that
-is used for developing and dogfooding the package.
+This repository contains the **Stratum** Unity package
+(`com.l47coder.stratum`) and a minimal Unity host project used to develop and
+dogfood the package.
 
-- **Package source** — [`Packages/com.l47coder.stratum/`](./Packages/com.l47coder.stratum)
-- **Package README** — [`Packages/com.l47coder.stratum/README.md`](./Packages/com.l47coder.stratum/README.md)
-- **Changelog** — [`CHANGELOG.md`](./Packages/com.l47coder.stratum/CHANGELOG.md)
-- **License** — [MIT](./LICENSE)
+- Package source: [Packages/com.l47coder.stratum/](./Packages/com.l47coder.stratum)
+- Package README: [Packages/com.l47coder.stratum/README.md](./Packages/com.l47coder.stratum/README.md)
+- Changelog: [Packages/com.l47coder.stratum/CHANGELOG.md](./Packages/com.l47coder.stratum/CHANGELOG.md)
+- License: [MIT](./LICENSE)
 
-Stratum is a Unity **Manager / Component** framework powered by
-`ScriptableObject` + `Addressables`, shipped with an in-editor **Dev Workbench**
-panel (`Tools → Dev Workbench`) that provides one-click creation and visual
-management of Managers, Components, Addressable groups and the framework-wide
-Sync step.
+Stratum is a Manager and ScriptableObject workflow package for Unity. It
+provides Addressables-backed Manager bootstrapping, VContainer registration,
+config tables and an IMGUI Dev Workbench at `Tools > Stratum > Dev Workbench`.
 
-## Repository layout
+## Repository Layout
 
-```
+```text
 .
-├── Assets/                              # Minimal host project (Unity 2022.3.60f1)
-│   ├── Game/                            # Auto-provisioned on first workbench launch
-│   │   ├── Frame/                       #   Game.Frame.asmdef, GameBoot.cs, order SOs
-│   │   ├── Manager/                     #   Game.Managers.asmdef + on-demand templates
-│   │   └── Component/                   #   Game.Components.asmdef
-│   └── Scenes/SampleScene.unity
-├── Packages/
-│   ├── com.l47coder.stratum/            # The package source (embedded)
-│   └── manifest.json                    # Host project dependencies
-├── ProjectSettings/                     # Unity project settings
-├── .editorconfig
-├── .gitattributes
-├── .gitignore
-├── CONTRIBUTING.md
-├── LICENSE
-└── README.md                            # (this file)
++-- Assets/                              # Unity host project
+|   +-- Game/                            # Generated/dogfooded Stratum host layout
+|   |   +-- Editor/
+|   |   +-- Frame/
+|   |   +-- Manager/
+|   |   +-- ScriptableObject/
+|   +-- Scenes/
+|   +-- StratumWorkbenchExamples/        # Local examples for editor controls
++-- Packages/
+|   +-- com.l47coder.stratum/            # The embedded UPM package
+|   +-- manifest.json                    # Host project dependencies
++-- ProjectSettings/
++-- CONTRIBUTING.md
++-- LICENSE
++-- README.md
 ```
 
-Because the package is kept as an **embedded** package (not a git submodule),
-cloning this repository and opening it in Unity gives you a working editor
-install — any change you make under `Packages/com.l47coder.stratum/` is
-picked up live.
+Because the package is embedded, cloning this repository and opening it in
+Unity gives you a live package development environment. Changes under
+`Packages/com.l47coder.stratum/` are compiled by the host project directly.
 
-## Install the package in your own project
+## Install In Another Project
 
-Open `Window → Package Manager`, click `+ → Add package from git URL…` and
-paste:
+Install from Git URL in Unity Package Manager:
 
-```
-https://github.com/L47-Coder/unity-stratum.git?path=Packages/com.l47coder.stratum
+```text
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum
 ```
 
-Or edit your project's `Packages/manifest.json` directly:
+Or add it to `Packages/manifest.json`:
 
 ```json
 {
   "dependencies": {
-    "com.l47coder.stratum": "https://github.com/L47-Coder/unity-stratum.git?path=Packages/com.l47coder.stratum"
+    "com.l47coder.stratum": "https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum"
   }
 }
 ```
 
-The `?path=` segment is required because this repository is an entire Unity
-project — without it, UPM would try to treat the repo root as the package.
+The `?path=` segment is required because this repository is a full Unity
+project and the package lives in a subfolder. To install a tagged release:
 
-See the package README for full usage details, quick-start and host-project
-layout conventions.
+```text
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.0
+```
 
 ## Requirements
 
-- Unity **2022.3 LTS** or newer (developed against `2022.3.60f1`)
-- UPM dependencies resolved automatically by `package.json`:
-  - `com.unity.addressables` 1.22.3
-  - `com.cysharp.unitask` 2.5.10
-  - `jp.hadashikick.vcontainer` 1.17.0
+- Unity **2022.3 LTS** or newer. The current host project uses
+  `2022.3.60f1c1`.
+- Addressables `1.22.3`.
+- UniTask `2.5.10`.
+- VContainer `1.17.0`.
+
+The host project's manifest shows the dependency setup used during
+development, including Git URLs for UniTask and VContainer.
 
 ## Development
 
-Clone and open the repository as a regular Unity project:
-
 ```bash
-git clone https://github.com/L47-Coder/unity-stratum.git
+git clone https://github.com/L47-Coder/Stratum.git
+cd Stratum
 ```
 
-Then open the folder in **Unity 2022.3 LTS**. The embedded package is live —
-edit `Packages/com.l47coder.stratum/…` and Unity will recompile.
+Open the folder with Unity Hub. Unity resolves the host project dependencies on
+first open. The main package is in `Packages/com.l47coder.stratum/`; the
+`Assets/` folder exists for development, examples and manual verification.
 
-Contribution guidelines live in [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for release and contribution notes.
 
 ## License
 
 Released under the [MIT License](./LICENSE). See
-[`Third Party Notices.md`](./Packages/com.l47coder.stratum/Third%20Party%20Notices.md)
-for upstream dependency licenses.
+[Third Party Notices.md](./Packages/com.l47coder.stratum/Third%20Party%20Notices.md)
+for upstream dependency license notes.

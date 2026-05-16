@@ -1,27 +1,29 @@
 {
   "name": "com.l47coder.stratum",
   "displayName": "Stratum",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "unity": "2022.3",
-  "description": "A Unity ScriptableObject + Addressables framework with an in-editor workbench for Managers, Components and Addressable groups.",
+  "description": "A Unity Manager and ScriptableObject workflow package with Addressables, VContainer bootstrapping and an in-editor Dev Workbench.",
   "keywords": [
     "unity",
     "framework",
     "manager",
-    "component",
     "addressable",
+    "addressables",
     "editor",
     "workbench",
-    "scriptableobject"
+    "scriptableobject",
+    "vcontainer",
+    "unitask"
   ],
   "author": {
     "name": "L47-Coder",
     "url": "https://github.com/L47-Coder"
   },
   "license": "MIT",
-  "documentationUrl": "https://github.com/L47-Coder/unity-stratum",
-  "changelogUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/Packages/com.l47coder.stratum/CHANGELOG.md",
-  "licensesUrl": "https://github.com/L47-Coder/unity-stratum/blob/main/LICENSE",
+  "documentationUrl": "https://github.com/L47-Coder/Stratum/blob/main/Packages/com.l47coder.stratum/README.md",
+  "changelogUrl": "https://github.com/L47-Coder/Stratum/blob/main/Packages/com.l47coder.stratum/CHANGELOG.md",
+  "licensesUrl": "https://github.com/L47-Coder/Stratum/blob/main/Packages/com.l47coder.stratum/LICENSE.md",
   "dependencies": {
     "com.unity.addressables": "1.22.3",
     "com.cysharp.unitask": "2.5.10",

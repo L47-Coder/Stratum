@@ -3,35 +3,36 @@ name: Bug report
 about: Report a reproducible defect in Stratum
 title: "[Bug] "
 labels: bug
-assignees: ''
+assignees: ""
 ---
 
 ## Description
 
-A clear and concise description of what the bug is.
+A clear and concise description of the bug.
 
-## Steps to reproduce
+## Steps To Reproduce
 
-1. …
-2. …
-3. …
+1. Open ...
+2. Click ...
+3. Observe ...
 
-## Expected behaviour
+## Expected Behaviour
 
 What you expected to happen.
 
-## Actual behaviour
+## Actual Behaviour
 
-What actually happens. Include relevant Unity Console output / stack traces.
+What actually happened. Include relevant Unity Console output or stack traces.
 
 ## Environment
 
 | Field | Value |
 | ----- | ----- |
-| Stratum version (`package.json`) | e.g. `0.2.0` |
+| Stratum version (`package.json`) | e.g. `0.5.0` |
 | Unity version | e.g. `2022.3.60f1` |
 | Editor platform | e.g. Windows / macOS / Linux |
 
-## Minimal reproduction project
+## Minimal Reproduction Project
 
-If possible, attach or link a minimal Unity project that demonstrates the issue.
+If possible, attach or link a minimal Unity project that demonstrates the
+issue.

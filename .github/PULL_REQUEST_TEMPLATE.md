@@ -17,7 +17,7 @@ Closes #<!-- issue number, or "N/A" -->
 
 - [ ] Editor compiles without new warnings
 - [ ] Flows touched have been exercised manually
-- [ ] `CHANGELOG.md` updated under `## [Unreleased]`
+- [ ] `CHANGELOG.md` updated when user-facing behavior changed
 - [ ] `package.json` version bumped (only for releases)
 
 ## Reproduction / test notes

@@ -3,7 +3,6 @@
     "com.l47coder.stratum": "file:../Packages/com.l47coder.stratum",
     "jp.hadashikick.vcontainer": "https://github.com/hadashiA/VContainer.git?path=VContainer/Assets/VContainer#1.17.0",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask#2.5.10",
-    "com.boxqkrtm.ide.cursor": "https://github.com/boxqkrtm/com.unity.ide.cursor.git#fd8ff1fb700caf062eb5cce364c1d0a85f99ebe6",
     "com.unity.addressables": "1.22.3",
     "com.unity.collab-proxy": "2.12.4",
     "com.unity.feature.2d": "2.0.1",
