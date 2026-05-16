@@ -38,6 +38,21 @@ namespace Stratum.Editor
             AssetDatabase.SaveAssets();
         }
 
+        public static bool HasEntry(string assetPath, string address, string groupName = null)
+        {
+            var settings = AddressableAssetSettingsDefaultObject.Settings;
+            if (settings == null) return false;
+
+            var guid = AssetDatabase.AssetPathToGUID(assetPath);
+            if (string.IsNullOrEmpty(guid)) return false;
+
+            var entry = settings.FindAssetEntry(guid);
+            if (entry == null) return false;
+            if (!string.IsNullOrEmpty(address) && entry.address != address) return false;
+            if (!string.IsNullOrEmpty(groupName) && entry.parentGroup?.Name != groupName) return false;
+            return true;
+        }
+
         public static void RemoveEntry(string assetPath)
         {
             var settings = Settings();

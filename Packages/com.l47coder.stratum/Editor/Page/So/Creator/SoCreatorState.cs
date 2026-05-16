@@ -29,7 +29,6 @@ namespace Stratum.Editor
 
         private string _parentFolderAssetPath = RootAssetPath;
         private bool _scriptExists;
-        private bool _classExists;
         private bool _folderExists;
         private bool _firstAssetExists;
 
@@ -75,11 +74,15 @@ namespace Stratum.Editor
         public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
-        public SoCreationPlan BuildPlan() => new(
-            LogicalName, SoClassName,
-            EntityFolderPath, ScriptFilePath, LeafMarkerPath,
-            FirstAssetFilePath,
-            ShouldCreateScript());
+        public SoCreationPlan BuildPlan()
+        {
+            RefreshExistingTargets();
+            return new SoCreationPlan(
+                LogicalName, SoClassName,
+                EntityFolderPath, ScriptFilePath, LeafMarkerPath,
+                FirstAssetFilePath,
+                ShouldCreateScript(), ShouldCreateFirstAsset());
+        }
 
         private void ApplyInput(string input, string parentAssetPath)
         {
@@ -153,7 +156,6 @@ namespace Stratum.Editor
             FirstAssetFilePath = string.Empty;
 
             _scriptExists = false;
-            _classExists = false;
             _folderExists = false;
             _firstAssetExists = false;
 
@@ -161,7 +163,8 @@ namespace Stratum.Editor
             _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
-        private bool ShouldCreateScript() => !_scriptExists && !_classExists;
+        private bool ShouldCreateScript() => !_scriptExists;
+        private bool ShouldCreateFirstAsset() => !_firstAssetExists;
 
         private PreviewStatus GetScriptStatus() =>
             string.IsNullOrEmpty(SoClassName) ? PreviewStatus.Neutral : ShouldCreateScript() ? PreviewStatus.Create : PreviewStatus.Skip;
@@ -174,10 +177,7 @@ namespace Stratum.Editor
 
         private void RefreshPreviewCache()
         {
-            _scriptExists = FileExists(ScriptFilePath);
-            _classExists = SoTypeIndex.TryFindClass(SoClassName, out _);
-            _folderExists = FolderExists(EntityFolderPath);
-            _firstAssetExists = FileExists(FirstAssetFilePath);
+            RefreshExistingTargets();
 
             var scriptStatus = GetScriptStatus();
             var folderStatus = GetFolderStatus();
@@ -194,6 +194,13 @@ namespace Stratum.Editor
                 new PreviewItem("Script file", ScriptFilePath,     scriptStatus),
                 new PreviewItem("First asset", FirstAssetFilePath, assetStatus),
             };
+        }
+
+        private void RefreshExistingTargets()
+        {
+            _scriptExists = FileExists(ScriptFilePath);
+            _folderExists = FolderExists(EntityFolderPath);
+            _firstAssetExists = FileExists(FirstAssetFilePath);
         }
 
         private static bool FileExists(string assetPath) =>
@@ -230,12 +237,13 @@ namespace Stratum.Editor
         public readonly string LeafMarkerPath;
         public readonly string FirstAssetFilePath;
         public readonly bool ShouldCreateScript;
+        public readonly bool ShouldCreateFirstAsset;
 
         public SoCreationPlan(
             string logicalName, string soClassName,
             string entityFolderPath, string scriptFilePath, string leafMarkerPath,
             string firstAssetFilePath,
-            bool shouldCreateScript)
+            bool shouldCreateScript, bool shouldCreateFirstAsset)
         {
             LogicalName = logicalName;
             SoClassName = soClassName;
@@ -244,6 +252,7 @@ namespace Stratum.Editor
             LeafMarkerPath = leafMarkerPath;
             FirstAssetFilePath = firstAssetFilePath;
             ShouldCreateScript = shouldCreateScript;
+            ShouldCreateFirstAsset = shouldCreateFirstAsset;
         }
     }
 }

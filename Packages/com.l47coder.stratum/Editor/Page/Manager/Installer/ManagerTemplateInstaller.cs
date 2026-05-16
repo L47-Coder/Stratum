@@ -94,7 +94,7 @@ namespace Stratum.Editor
 
                 var destPath = $"{WorkbenchPaths.ManagerRoot}/{relativeTemplatePath}";
 
-                AssetTransporter.Transfer(sourcePath, destPath);
+                AssetTransporter.Transfer(sourcePath, destPath, ShouldSkipTemplateFile);
                 ManagerPostCompileAssetService.ScheduleTemplateInstall(
                     managerName,
                     $"{destPath}/{managerName}ManagerConfig.asset",
@@ -188,6 +188,9 @@ namespace Stratum.Editor
 
         private static string NormalizeAssetPath(string path) =>
             string.IsNullOrEmpty(path) ? string.Empty : path.Replace('\\', '/').Trim('/');
+
+        private static bool ShouldSkipTemplateFile(string relativePath) =>
+            Path.GetFileName(relativePath).EndsWith("ManagerConfig.asset", StringComparison.Ordinal);
 
         private static string Rel(string rootAbs, string fullPath)
         {

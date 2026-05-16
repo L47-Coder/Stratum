@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal enum PreviewStatus { Neutral, Create, Write, Skip }
+    internal enum PreviewStatus { Neutral, Create, Skip }
 
     internal readonly struct PreviewItem
     {
@@ -39,14 +39,12 @@ namespace Stratum.Editor
         public static readonly Color ValueBg = new(0.15f, 0.15f, 0.15f);
         public static readonly Color ValueBorder = new(0.11f, 0.11f, 0.11f);
         public static readonly Color CreateColor = new(0.29f, 0.78f, 0.40f);
-        public static readonly Color WriteColor = new(0.95f, 0.75f, 0.22f);
         public static readonly Color SkipColor = new(0.85f, 0.35f, 0.35f);
         public static readonly Color NeutralColor = new(0.50f, 0.50f, 0.50f);
 
         private static readonly (Color color, string label)[] LegendItems =
         {
             (CreateColor, "Create"),
-            (WriteColor,  "Write"),
             (SkipColor,   "Skip"),
         };
 
@@ -163,7 +161,6 @@ namespace Stratum.Editor
         public static Color StatusColor(PreviewStatus s) => s switch
         {
             PreviewStatus.Create => CreateColor,
-            PreviewStatus.Write => WriteColor,
             PreviewStatus.Skip => SkipColor,
             _ => NeutralColor,
         };

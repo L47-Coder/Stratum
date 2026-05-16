@@ -32,7 +32,7 @@ namespace Stratum.Editor
 
         public void OnFirstEnter(Action<string> onSelected)
         {
-            _treeView.ExcludePatterns = new() { "**/Generated", "**/Editor", "**/*.asmdef", "**/*.asmref", "**/*.InternalsVisibleTo", "**/*.asset" };
+            _treeView.ExcludePatterns = new() { "**/Generated", "**/Editor", "**/*.asmdef", "**/*.asmref", "**/*.InternalsVisibleTo.cs", "**/*.asset" };
             _treeView.OnNodeSelect(onSelected);
         }
 

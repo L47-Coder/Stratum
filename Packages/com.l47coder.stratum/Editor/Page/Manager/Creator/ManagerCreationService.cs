@@ -29,19 +29,21 @@ namespace Stratum.Editor
 
         private static void CreateManager(ManagerCreationPlan plan)
         {
-            var configTypeAvailable = FindType(plan.ConfigClassName) != null;
-
             if (plan.ShouldCreateManagerFile) WriteManagerCode(plan);
-            if (plan.ShouldCreateManagerFile) WriteDataCode(plan);
+            if (plan.ShouldCreateDataFile) WriteDataCode(plan);
 
-            EnsureFolder(plan.GeneratedFolderPath);
-            WriteDataGeneratedCode(plan);
-            WriteConfigGeneratedCode(plan);
-            WriteManagerPartialGeneratedCode(plan);
+            if (plan.ShouldCreateGeneratedDataFile || plan.ShouldCreateGeneratedConfigFile || plan.ShouldCreateGeneratedManagerPartialFile)
+                EnsureFolder(plan.GeneratedFolderPath);
 
-            EnsureFolder(plan.EditorFolderPath);
-            WriteEditorRefresherCode(plan);
-            WriteEditorAsmRef(plan);
+            if (plan.ShouldCreateGeneratedDataFile) WriteDataGeneratedCode(plan);
+            if (plan.ShouldCreateGeneratedConfigFile) WriteConfigGeneratedCode(plan);
+            if (plan.ShouldCreateGeneratedManagerPartialFile) WriteManagerPartialGeneratedCode(plan);
+
+            if (plan.ShouldCreateEditorRefresherFile || plan.ShouldCreateEditorAsmRefFile)
+                EnsureFolder(plan.EditorFolderPath);
+
+            if (plan.ShouldCreateEditorRefresherFile) WriteEditorRefresherCode(plan);
+            if (plan.ShouldCreateEditorAsmRefFile) WriteEditorAsmRef(plan);
             EnsureGameEditorAssemblyDefinition();
             EnsureGameManagersInternalsVisibleTo();
 
@@ -50,7 +52,7 @@ namespace Stratum.Editor
 
             AssetDatabase.Refresh();
 
-            if (configTypeAvailable)
+            if (!plan.ShouldCreateAssetFile || FindType(plan.ConfigClassName) != null)
                 EnsureAssetAndAddressable(plan.ManagerName, plan.AssetFilePath, plan.AddressableAddressName);
             else
                 ManagerPostCompileAssetService.ScheduleAssetCreation(plan);
@@ -226,8 +228,11 @@ namespace Stratum.Editor
 
         internal static bool EnsureAssetAndAddressable(string managerName, string assetPath, string assetAddress)
         {
-            var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
-            if (asset == null)
+            if (AssetFileExists(assetPath))
+            {
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+            }
+            else
             {
                 EnsureFolder(Path.GetDirectoryName(assetPath));
 
@@ -238,16 +243,19 @@ namespace Stratum.Editor
                     return false;
                 }
 
-                asset = ScriptableObject.CreateInstance(configType);
+                var asset = ScriptableObject.CreateInstance(configType);
                 AssetDatabase.CreateAsset(asset, assetPath);
                 AssetDatabase.SaveAssets();
             }
 
             AddressablesHelper.EnsureEntry(assetPath, assetAddress, ManagerCreatorState.AddressableGroupName);
             ManagerAssetIndex.Invalidate();
-            Debug.Log($"[ManagerCreationService] {managerName}Manager created successfully.");
+            Debug.Log($"[ManagerCreationService] {managerName}Manager ready.");
             return true;
         }
+
+        private static bool AssetFileExists(string assetPath) =>
+            !string.IsNullOrEmpty(assetPath) && File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
 
         private static string EscapeCSharpStringLiteral(string value) =>
             string.IsNullOrEmpty(value) ? string.Empty : value.Replace("\\", "\\\\").Replace("\"", "\\\"");

@@ -16,14 +16,12 @@ namespace Stratum.Editor
 
         private static void CreateSoType(SoCreationPlan plan)
         {
-            var typeAvailable = SoTypeIndex.TryFindClass(plan.SoClassName, out _);
-
             if (plan.ShouldCreateScript) WriteSoScript(plan);
             EnsureFolder(plan.EntityFolderPath);
             WriteLeafMarker(plan.LeafMarkerPath);
             AssetDatabase.Refresh();
 
-            if (typeAvailable)
+            if (!plan.ShouldCreateFirstAsset || SoTypeIndex.TryFindClass(plan.SoClassName, out _))
                 EnsureAsset(plan.SoClassName, plan.FirstAssetFilePath);
             else
                 SoPostCompileAssetService.ScheduleAssetCreation(plan);
@@ -57,25 +55,32 @@ namespace Stratum.Editor
 
         internal static bool EnsureAsset(string soClassName, string assetPath)
         {
+            if (AssetFileExists(assetPath))
+            {
+                AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceSynchronousImport);
+                SoTypeIndex.Invalidate();
+                Debug.Log($"[SoCreationService] {soClassName} ready at {assetPath}.");
+                return true;
+            }
+
             if (!SoTypeIndex.TryFindClass(soClassName, out var soType))
             {
                 Debug.LogError($"[SoCreationService] SO type not found: {soClassName}");
                 return false;
             }
 
-            var asset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(assetPath);
-            if (asset == null)
-            {
-                EnsureFolder(Path.GetDirectoryName(assetPath));
-                asset = ScriptableObject.CreateInstance(soType);
-                AssetDatabase.CreateAsset(asset, assetPath);
-                AssetDatabase.SaveAssets();
-            }
+            EnsureFolder(Path.GetDirectoryName(assetPath));
+            var asset = ScriptableObject.CreateInstance(soType);
+            AssetDatabase.CreateAsset(asset, assetPath);
+            AssetDatabase.SaveAssets();
 
             SoTypeIndex.Invalidate();
             Debug.Log($"[SoCreationService] {soClassName} ready at {assetPath}.");
             return true;
         }
+
+        private static bool AssetFileExists(string assetPath) =>
+            !string.IsNullOrEmpty(assetPath) && File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
 
         public static bool CreateNewAsset(Type soType, string folderAssetPath, out string createdAssetPath)
         {

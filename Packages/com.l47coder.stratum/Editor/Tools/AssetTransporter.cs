@@ -8,7 +8,7 @@ namespace Stratum.Editor
 {
     internal static class AssetTransporter
     {
-        public static int Transfer(string sourcePath, string destPath)
+        public static int Transfer(string sourcePath, string destPath, Func<string, bool> shouldSkipRelativePath = null)
         {
             var srcAbs = Path.GetFullPath(Abs(sourcePath));
             var dstAbs = Path.GetFullPath(Abs(destPath));
@@ -48,6 +48,7 @@ namespace Stratum.Editor
                         if (f.EndsWith(".meta", StringComparison.OrdinalIgnoreCase)) continue;
                         if (Path.GetFileName(f).Equals(".gitkeep", StringComparison.OrdinalIgnoreCase)) continue;
                         var rel = Rel(srcAbs, f).Replace('\\', '/');
+                        if (shouldSkipRelativePath != null && shouldSkipRelativePath(rel)) continue;
                         var dst = Path.Combine(dstAbs, rel.Replace('/', Path.DirectorySeparatorChar));
                         if (File.Exists(dst)) continue;
                         try { File.Copy(f, dst); transferred.Add(dstNorm + "/" + rel); }

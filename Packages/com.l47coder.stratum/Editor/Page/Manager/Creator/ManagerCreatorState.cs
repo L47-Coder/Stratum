@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
@@ -17,7 +16,6 @@ namespace Stratum.Editor
         public const string SessionAssetPathKey = "ManagerCreator.AssetPath";
         public const string SessionAssetAddressKey = "ManagerCreator.AssetAddress";
 
-        private const string ManagerAssemblyName = "Game.Managers";
         private static readonly Regex ValidManagerNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
         public string InputManagerName { get; private set; } = string.Empty;
@@ -43,12 +41,17 @@ namespace Stratum.Editor
 
         private string _parentFolderAssetPath = RootAssetPath;
         private string _existingManagerFilePath = string.Empty;
+        private string _existingDataFilePath = string.Empty;
         private string _existingAssetPath = string.Empty;
         private bool _managerFileExists;
-        private bool _managerClassExists;
-        private bool _generatedFolderExists;
-        private bool _editorFolderExists;
+        private bool _dataFileExists;
+        private bool _generatedDataFileExists;
+        private bool _generatedConfigFileExists;
+        private bool _generatedManagerPartialFileExists;
+        private bool _editorRefresherFileExists;
+        private bool _editorAsmRefFileExists;
         private bool _assetExists;
+        private bool _addressableEntryExists;
 
         private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
         private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
@@ -96,14 +99,21 @@ namespace Stratum.Editor
         public PreviewItem[] GetAddressablePreviewItems() => _addressablePreviewItems;
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
-        public ManagerCreationPlan BuildPlan() => new(
-            InputManagerName,
-            ManagerInterfaceName, ManagerClassName, ConfigClassName, ManagerDataStructName,
-            EntityFolderPath, ManagerTargetFilePath, DataTargetFilePath,
-            GeneratedFolderPath, GeneratedDataFilePath, GeneratedConfigFilePath, GeneratedManagerPartialFilePath,
-            EditorFolderPath, EditorRefresherFilePath, EditorAsmRefFilePath,
-            AssetTargetFilePath, AddressableAddressName,
-            ShouldCreateManagerFile());
+        public ManagerCreationPlan BuildPlan()
+        {
+            RefreshExistingTargets();
+            return new ManagerCreationPlan(
+                InputManagerName,
+                ManagerInterfaceName, ManagerClassName, ConfigClassName, ManagerDataStructName,
+                EntityFolderPath, ManagerTargetFilePath, DataTargetFilePath,
+                GeneratedFolderPath, GeneratedDataFilePath, GeneratedConfigFilePath, GeneratedManagerPartialFilePath,
+                EditorFolderPath, EditorRefresherFilePath, EditorAsmRefFilePath,
+                ResolvedAssetFilePath, AddressableAddressName,
+                ShouldCreateManagerFile(), ShouldCreateDataFile(),
+                ShouldCreateGeneratedDataFile(), ShouldCreateGeneratedConfigFile(), ShouldCreateGeneratedManagerPartialFile(),
+                ShouldCreateEditorRefresherFile(), ShouldCreateEditorAsmRefFile(),
+                ShouldCreateAssetFile());
+        }
 
         private void ApplyInput(string managerName, string parentAssetPath)
         {
@@ -190,61 +200,85 @@ namespace Stratum.Editor
             AssetTargetFilePath = string.Empty;
             AddressableAddressName = string.Empty;
             _existingManagerFilePath = string.Empty;
+            _existingDataFilePath = string.Empty;
             _existingAssetPath = string.Empty;
             _managerFileExists = false;
-            _managerClassExists = false;
-            _generatedFolderExists = false;
-            _editorFolderExists = false;
+            _dataFileExists = false;
+            _generatedDataFileExists = false;
+            _generatedConfigFileExists = false;
+            _generatedManagerPartialFileExists = false;
+            _editorRefresherFileExists = false;
+            _editorAsmRefFileExists = false;
             _assetExists = false;
+            _addressableEntryExists = false;
             _namePreviewItems = Array.Empty<PreviewItem>();
             _pathPreviewItems = Array.Empty<PreviewItem>();
             _addressablePreviewItems = Array.Empty<PreviewItem>();
         }
 
-        private bool ShouldCreateManagerFile() => !_managerFileExists && !_managerClassExists;
+        private bool ShouldCreateManagerFile() => !_managerFileExists;
+        private bool ShouldCreateDataFile() => !_dataFileExists;
+        private bool ShouldCreateGeneratedDataFile() => !_generatedDataFileExists;
+        private bool ShouldCreateGeneratedConfigFile() => !_generatedConfigFileExists;
+        private bool ShouldCreateGeneratedManagerPartialFile() => !_generatedManagerPartialFileExists;
+        private bool ShouldCreateEditorRefresherFile() => !_editorRefresherFileExists;
+        private bool ShouldCreateEditorAsmRefFile() => !_editorAsmRefFileExists;
+        private bool ShouldCreateAssetFile() => !_assetExists;
 
-        private PreviewStatus GetManagerCodeStatus() =>
-            string.IsNullOrEmpty(ManagerClassName) ? PreviewStatus.Neutral : ShouldCreateManagerFile() ? PreviewStatus.Create : PreviewStatus.Skip;
+        private static PreviewStatus GetFileStatus(string path, bool exists) =>
+            string.IsNullOrEmpty(path) ? PreviewStatus.Neutral : exists ? PreviewStatus.Skip : PreviewStatus.Create;
 
-        private PreviewStatus GetGeneratedCodeStatus() =>
-            string.IsNullOrEmpty(GeneratedFolderPath) ? PreviewStatus.Neutral : _generatedFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
+        private static PreviewStatus MergeStatus(params PreviewStatus[] statuses)
+        {
+            foreach (var status in statuses)
+                if (status == PreviewStatus.Create)
+                    return PreviewStatus.Create;
 
-        private PreviewStatus GetEditorCodeStatus() =>
-            string.IsNullOrEmpty(EditorFolderPath) ? PreviewStatus.Neutral : _editorFolderExists ? PreviewStatus.Write : PreviewStatus.Create;
+            foreach (var status in statuses)
+                if (status == PreviewStatus.Skip)
+                    return PreviewStatus.Skip;
 
-        private PreviewStatus GetAssetStatus() =>
-            string.IsNullOrEmpty(AssetTargetFilePath) ? PreviewStatus.Neutral : _assetExists ? PreviewStatus.Write : PreviewStatus.Create;
+            return PreviewStatus.Neutral;
+        }
 
         private void RefreshPreviewCache()
         {
             RefreshExistingTargets();
 
-            var managerStatus = GetManagerCodeStatus();
-            var generatedStatus = GetGeneratedCodeStatus();
-            var editorStatus = GetEditorCodeStatus();
-            var assetStatus = GetAssetStatus();
+            var managerStatus = GetFileStatus(ManagerTargetFilePath, _managerFileExists);
+            var dataStatus = GetFileStatus(DataTargetFilePath, _dataFileExists);
+            var generatedDataStatus = GetFileStatus(GeneratedDataFilePath, _generatedDataFileExists);
+            var generatedConfigStatus = GetFileStatus(GeneratedConfigFilePath, _generatedConfigFileExists);
+            var generatedManagerStatus = GetFileStatus(GeneratedManagerPartialFilePath, _generatedManagerPartialFileExists);
+            var refresherStatus = GetFileStatus(EditorRefresherFilePath, _editorRefresherFileExists);
+            var asmRefStatus = GetFileStatus(EditorAsmRefFilePath, _editorAsmRefFileExists);
+            var assetStatus = GetFileStatus(AssetTargetFilePath, _assetExists);
+            var addressableStatus = GetFileStatus(ResolvedAssetFilePath, _addressableEntryExists);
 
             _namePreviewItems = new[]
             {
                 new PreviewItem("Interface",     ManagerInterfaceName, managerStatus),
                 new PreviewItem("Manager class", ManagerClassName,     managerStatus),
-                new PreviewItem("Config class",  ConfigClassName,      generatedStatus),
-                new PreviewItem("Data class",    ManagerDataStructName,generatedStatus),
+                new PreviewItem("Config class",  ConfigClassName,      generatedConfigStatus),
+                new PreviewItem("Data class",    ManagerDataStructName,MergeStatus(dataStatus, generatedDataStatus)),
             };
 
             _pathPreviewItems = new[]
             {
                 new PreviewItem("Manager script",   _managerFileExists ? _existingManagerFilePath : ManagerTargetFilePath, managerStatus),
-                new PreviewItem("Data script",      DataTargetFilePath, managerStatus),
-                new PreviewItem("Generated folder", GeneratedFolderPath, generatedStatus),
-                new PreviewItem("Editor folder",    EditorFolderPath,    editorStatus),
+                new PreviewItem("Data script",      _dataFileExists ? _existingDataFilePath : DataTargetFilePath, dataStatus),
+                new PreviewItem("Generated manager", GeneratedManagerPartialFilePath, generatedManagerStatus),
+                new PreviewItem("Generated data",   GeneratedDataFilePath, generatedDataStatus),
+                new PreviewItem("Generated config", GeneratedConfigFilePath, generatedConfigStatus),
+                new PreviewItem("Refresher script", EditorRefresherFilePath, refresherStatus),
+                new PreviewItem("Editor asmref",    EditorAsmRefFilePath, asmRefStatus),
                 new PreviewItem("Asset file",       _assetExists ? _existingAssetPath : AssetTargetFilePath,               assetStatus),
             };
 
             _addressablePreviewItems = new[]
             {
-                new PreviewItem("Addressable group",   AddressableGroupName,  assetStatus),
-                new PreviewItem("Addressable address", AddressableAddressName,assetStatus),
+                new PreviewItem("Addressable group",   AddressableGroupName,  addressableStatus),
+                new PreviewItem("Addressable address", AddressableAddressName,addressableStatus),
             };
         }
 
@@ -253,15 +287,23 @@ namespace Stratum.Editor
             _existingManagerFilePath = ResolveExisting(ManagerTargetFilePath,
                 ManagerAssetIndex.FindManagerScript(Path.GetFileName(ManagerTargetFilePath)));
 
-            _generatedFolderExists = !string.IsNullOrEmpty(GeneratedFolderPath) && FolderExists(GeneratedFolderPath);
-            _editorFolderExists = !string.IsNullOrEmpty(EditorFolderPath) && FolderExists(EditorFolderPath);
+            _existingDataFilePath = ResolveExisting(DataTargetFilePath,
+                ManagerAssetIndex.FindManagerScript(Path.GetFileName(DataTargetFilePath)));
+
+            _generatedDataFileExists = FileExists(GeneratedDataFilePath);
+            _generatedConfigFileExists = FileExists(GeneratedConfigFilePath);
+            _generatedManagerPartialFileExists = FileExists(GeneratedManagerPartialFilePath);
+            _editorRefresherFileExists = FileExists(EditorRefresherFilePath);
+            _editorAsmRefFileExists = FileExists(EditorAsmRefFilePath);
 
             _existingAssetPath = ResolveExisting(AssetTargetFilePath,
                 ManagerAssetIndex.FindManagerAsset(Path.GetFileName(AssetTargetFilePath)));
 
             _managerFileExists = !string.IsNullOrEmpty(_existingManagerFilePath);
+            _dataFileExists = !string.IsNullOrEmpty(_existingDataFilePath);
             _assetExists = !string.IsNullOrEmpty(_existingAssetPath);
-            _managerClassExists = TypeExists(ManagerClassName);
+            _addressableEntryExists = _assetExists &&
+                AddressablesHelper.HasEntry(_existingAssetPath, AddressableAddressName, AddressableGroupName);
         }
 
         private static string ResolveExisting(string preferredPath, string indexedPath)
@@ -272,9 +314,6 @@ namespace Stratum.Editor
 
         private static bool FileExists(string assetPath) =>
             !string.IsNullOrEmpty(assetPath) && File.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
-
-        private static bool FolderExists(string assetPath) =>
-            !string.IsNullOrEmpty(assetPath) && Directory.Exists(Path.GetFullPath(Path.Combine(Application.dataPath, "..", assetPath)));
 
         private static void EnsureFolder(string assetPath)
         {
@@ -292,25 +331,8 @@ namespace Stratum.Editor
             }
         }
 
-        private static bool TypeExists(string typeName)
-        {
-            if (string.IsNullOrEmpty(typeName)) return false;
-
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                if (!string.Equals(assembly.GetName().Name, ManagerAssemblyName, StringComparison.Ordinal))
-                    continue;
-
-                try { foreach (var t in assembly.GetTypes()) if (t.Name == typeName) return true; }
-                catch (ReflectionTypeLoadException e)
-                { foreach (var t in e.Types) if (t != null && t.Name == typeName) return true; }
-                catch { }
-            }
-
-            return false;
-        }
-
         private string EntityFolderPath => Path.GetDirectoryName(ManagerTargetFilePath)?.Replace('\\', '/');
+        private string ResolvedAssetFilePath => _assetExists ? _existingAssetPath : AssetTargetFilePath;
     }
 
     internal readonly struct ManagerCreationPlan
@@ -333,6 +355,13 @@ namespace Stratum.Editor
         public readonly string AssetFilePath;
         public readonly string AddressableAddressName;
         public readonly bool ShouldCreateManagerFile;
+        public readonly bool ShouldCreateDataFile;
+        public readonly bool ShouldCreateGeneratedDataFile;
+        public readonly bool ShouldCreateGeneratedConfigFile;
+        public readonly bool ShouldCreateGeneratedManagerPartialFile;
+        public readonly bool ShouldCreateEditorRefresherFile;
+        public readonly bool ShouldCreateEditorAsmRefFile;
+        public readonly bool ShouldCreateAssetFile;
 
         public ManagerCreationPlan(
             string managerName,
@@ -341,7 +370,10 @@ namespace Stratum.Editor
             string generatedFolderPath, string generatedDataFilePath, string generatedConfigFilePath, string generatedManagerPartialFilePath,
             string editorFolderPath, string editorRefresherFilePath, string editorAsmRefFilePath,
             string assetFilePath, string addressableAddressName,
-            bool shouldCreateManagerFile)
+            bool shouldCreateManagerFile, bool shouldCreateDataFile,
+            bool shouldCreateGeneratedDataFile, bool shouldCreateGeneratedConfigFile, bool shouldCreateGeneratedManagerPartialFile,
+            bool shouldCreateEditorRefresherFile, bool shouldCreateEditorAsmRefFile,
+            bool shouldCreateAssetFile)
         {
             ManagerName = managerName;
             ManagerInterfaceName = managerInterfaceName;
@@ -361,6 +393,13 @@ namespace Stratum.Editor
             AssetFilePath = assetFilePath;
             AddressableAddressName = addressableAddressName;
             ShouldCreateManagerFile = shouldCreateManagerFile;
+            ShouldCreateDataFile = shouldCreateDataFile;
+            ShouldCreateGeneratedDataFile = shouldCreateGeneratedDataFile;
+            ShouldCreateGeneratedConfigFile = shouldCreateGeneratedConfigFile;
+            ShouldCreateGeneratedManagerPartialFile = shouldCreateGeneratedManagerPartialFile;
+            ShouldCreateEditorRefresherFile = shouldCreateEditorRefresherFile;
+            ShouldCreateEditorAsmRefFile = shouldCreateEditorAsmRefFile;
+            ShouldCreateAssetFile = shouldCreateAssetFile;
         }
     }
 }
