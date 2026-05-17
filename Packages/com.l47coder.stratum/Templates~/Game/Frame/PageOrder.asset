@@ -17,10 +17,12 @@ MonoBehaviour:
     Tabs:
     - Viewer
     - Order
-    - Installer
-  - Title: ScriptableObject
+  - Title: Container
     Tabs:
     - Viewer
-  - Title: Manobehaviour
+  - Title: MonoBehaviour
+    Tabs:
+    - Viewer
+  - Title: ScriptableObject
     Tabs:
     - Viewer

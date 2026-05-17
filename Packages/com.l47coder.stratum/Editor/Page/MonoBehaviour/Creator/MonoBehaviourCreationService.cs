@@ -7,25 +7,25 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal static class ManobehaviourCreationService
+    internal static class MonoBehaviourCreationService
     {
-        public static void CreateScript(ManobehaviourCreatorState state)
+        public static void CreateScript(MonoBehaviourCreatorState state)
         {
             if (state == null || !state.IsValid) return;
             CreateScript(state.BuildPlan());
         }
 
-        private static void CreateScript(ManobehaviourCreationPlan plan)
+        private static void CreateScript(MonoBehaviourCreationPlan plan)
         {
             if (plan.ShouldCreateScript)
                 WriteScript(plan);
 
             AssetDatabase.Refresh();
-            ManobehaviourAssetIndex.Invalidate();
-            Debug.Log($"[ManobehaviourCreationService] {plan.ClassName} ready.");
+            MonoBehaviourAssetIndex.Invalidate();
+            Debug.Log($"[MonoBehaviourCreationService] {plan.ClassName} ready.");
         }
 
-        private static void WriteScript(ManobehaviourCreationPlan plan)
+        private static void WriteScript(MonoBehaviourCreationPlan plan)
         {
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
 
@@ -57,18 +57,18 @@ namespace Stratum.Editor
         }
     }
 
-    internal static class ManobehaviourAssetIndex
+    internal static class MonoBehaviourAssetIndex
     {
         private static Dictionary<string, string> _scripts;
 
-        static ManobehaviourAssetIndex()
+        static MonoBehaviourAssetIndex()
         {
             EditorApplication.projectChanged -= Invalidate;
             EditorApplication.projectChanged += Invalidate;
         }
 
         public static string FindScript(string fileName) =>
-            Find(ref _scripts, ManobehaviourCreatorState.RootAssetPath, fileName, ".cs");
+            Find(ref _scripts, MonoBehaviourCreatorState.RootAssetPath, fileName, ".cs");
 
         public static void Invalidate() => _scripts = null;
 

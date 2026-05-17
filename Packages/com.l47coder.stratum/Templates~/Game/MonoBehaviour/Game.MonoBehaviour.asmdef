@@ -1,5 +1,5 @@
 {
-    "name": "Game.Manobehaviour",
+    "name": "Game.MonoBehaviour",
     "rootNamespace": "",
     "references": [
         "Stratum",

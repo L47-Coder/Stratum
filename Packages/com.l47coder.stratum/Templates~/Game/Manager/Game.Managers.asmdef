@@ -4,7 +4,8 @@
     "references": [
         "Stratum",
         "UniTask",
-        "VContainer"
+        "VContainer",
+        "Game.Container"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

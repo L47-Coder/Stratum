@@ -1,11 +1,10 @@
-﻿{
-    "name": "Game.Managers",
+{
+    "name": "Game.Container",
     "rootNamespace": "",
     "references": [
         "Stratum",
         "UniTask",
-        "VContainer",
-        "Game.Container"
+        "VContainer"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

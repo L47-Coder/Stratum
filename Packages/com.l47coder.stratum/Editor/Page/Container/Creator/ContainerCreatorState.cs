@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class ManobehaviourCreatorState
+    internal sealed class ContainerCreatorState
     {
-        public const string RootAssetPath = WorkbenchPaths.ManobehaviourRoot;
+        public const string RootAssetPath = WorkbenchPaths.ContainerRoot;
 
         private static readonly Regex ValidClassNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
@@ -68,10 +68,10 @@ namespace Stratum.Editor
         public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
-        public ManobehaviourCreationPlan BuildPlan()
+        public ContainerCreationPlan BuildPlan()
         {
             RefreshExistingTargets();
-            return new ManobehaviourCreationPlan(
+            return new ContainerCreationPlan(
                 ClassName,
                 _scriptExists ? _existingScriptFilePath : ScriptFilePath,
                 ShouldCreateScript());
@@ -121,7 +121,7 @@ namespace Stratum.Editor
             var normalizedRoot = RootAssetPath.Replace('\\', '/').TrimEnd('/');
             if (!string.Equals(normalizedParentPath, normalizedRoot, StringComparison.OrdinalIgnoreCase) &&
                 !normalizedParentPath.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase))
-            { errorMessage = "Parent folder must be inside the Manobehaviour root."; return false; }
+            { errorMessage = "Parent folder must be inside the Container root."; return false; }
 
             EnsureFolder(normalizedParentPath);
             if (!AssetDatabase.IsValidFolder(normalizedParentPath))
@@ -165,7 +165,7 @@ namespace Stratum.Editor
         private void RefreshExistingTargets()
         {
             _existingScriptFilePath = ResolveExisting(ScriptFilePath,
-                ManobehaviourAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
+                ContainerAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
 
             _scriptExists = !string.IsNullOrEmpty(_existingScriptFilePath);
         }
@@ -196,13 +196,13 @@ namespace Stratum.Editor
         }
     }
 
-    internal readonly struct ManobehaviourCreationPlan
+    internal readonly struct ContainerCreationPlan
     {
         public readonly string ClassName;
         public readonly string ScriptFilePath;
         public readonly bool ShouldCreateScript;
 
-        public ManobehaviourCreationPlan(
+        public ContainerCreationPlan(
             string className,
             string scriptFilePath,
             bool shouldCreateScript)

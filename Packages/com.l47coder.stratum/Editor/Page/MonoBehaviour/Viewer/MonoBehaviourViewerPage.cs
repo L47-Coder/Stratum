@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class ManobehaviourViewerPage : IPage
+    internal sealed class MonoBehaviourViewerPage : IPage
     {
-        public string GroupTitle => "Manobehaviour";
+        public string GroupTitle => "MonoBehaviour";
         public string TabTitle => "Viewer";
 
-        private readonly ManobehaviourLeftPanel _leftPanel = new();
-        private readonly ManobehaviourRightPanel _rightPanel = new();
+        private readonly MonoBehaviourLeftPanel _leftPanel = new();
+        private readonly MonoBehaviourRightPanel _rightPanel = new();
         private SplitterHandle _splitter = new(220f);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
@@ -24,7 +24,7 @@ namespace Stratum.Editor
         }
     }
 
-    internal sealed class ManobehaviourLeftPanel
+    internal sealed class MonoBehaviourLeftPanel
     {
         private readonly TreeControl _treeView = new();
 
@@ -37,22 +37,22 @@ namespace Stratum.Editor
         public void OnGUI(Rect rect)
         {
             EnsureRootFolder();
-            _treeView.Draw(rect, WorkbenchPaths.ManobehaviourRoot);
+            _treeView.Draw(rect, WorkbenchPaths.MonoBehaviourRoot);
         }
 
         private static void EnsureRootFolder()
         {
-            if (AssetDatabase.IsValidFolder(WorkbenchPaths.ManobehaviourRoot)) return;
-            ManobehaviourCreationService.EnsureFolder(WorkbenchPaths.ManobehaviourRoot);
+            if (AssetDatabase.IsValidFolder(WorkbenchPaths.MonoBehaviourRoot)) return;
+            MonoBehaviourCreationService.EnsureFolder(WorkbenchPaths.MonoBehaviourRoot);
         }
     }
 
-    internal sealed class ManobehaviourCreatorPanel
+    internal sealed class MonoBehaviourCreatorPanel
     {
         private const float HPad = 6f;
         private const float VPad = 8f;
 
-        private readonly ManobehaviourCreatorState _state = new();
+        private readonly MonoBehaviourCreatorState _state = new();
         private Vector2 _scroll;
 
         public void Retarget(string parentFolderAssetPath) =>
@@ -123,7 +123,7 @@ namespace Stratum.Editor
             {
                 if (GUILayout.Button("Create MonoBehaviour", GUILayout.Height(CreatorPageDraw.CreateButtonHeight)))
                 {
-                    ManobehaviourCreationService.CreateScript(_state);
+                    MonoBehaviourCreationService.CreateScript(_state);
                     _state.Reset();
                     _scroll = Vector2.zero;
                     GUI.FocusControl(null);
@@ -134,10 +134,10 @@ namespace Stratum.Editor
         }
     }
 
-    internal sealed class ManobehaviourRightPanel
+    internal sealed class MonoBehaviourRightPanel
     {
         private readonly TextControl _csTextView = new();
-        private readonly ManobehaviourCreatorPanel _creatorPanel = new();
+        private readonly MonoBehaviourCreatorPanel _creatorPanel = new();
         private string _currentPath;
 
         private string _cachedCsPath;
