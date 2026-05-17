@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditorInternal;
@@ -15,8 +13,6 @@ namespace Stratum.Editor
             public bool DelayedNumeric;
             public bool UnfocusOnMouseDown;
             public GUIStyle UnsupportedLabelStyle;
-            public DropdownAttribute Dropdown;
-            public Action<object> OnAsyncWrite;
         }
 
         internal static bool TryDraw(Rect rect, FieldInfo field, object value, in Options opts, out object newValue)
@@ -37,26 +33,6 @@ namespace Stratum.Editor
                 return false;
             }
 
-            if (type == typeof(string) && opts.Dropdown != null)
-            {
-                DrawStringDropdown(rect, field, value, opts);
-                return false;
-            }
-
-            if (type.IsEnum && type.IsDefined(typeof(FlagsAttribute), false))
-            {
-                var en = value is Enum ev ? ev : (Enum)Enum.ToObject(type, 0);
-                DrawFlagsEnumDropdown(rect, type, en, opts);
-                return false;
-            }
-
-            if (type.IsEnum)
-            {
-                var en = value is Enum ev ? ev : (Enum)Enum.ToObject(type, 0);
-                DrawEnumDropdown(rect, type, en, opts);
-                return false;
-            }
-
             EditorGUI.BeginChangeCheck();
 
             if (type == typeof(string))
@@ -73,6 +49,13 @@ namespace Stratum.Editor
                     : EditorGUI.FloatField(rect, value is float fv2 ? fv2 : 0f);
             else if (type == typeof(bool))
                 newValue = DrawToggle(rect, value is bool bv && bv);
+            else if (type.IsEnum)
+            {
+                var current = value is Enum ev ? ev : (Enum)Enum.ToObject(type, 0);
+                newValue = type.IsDefined(typeof(FlagsAttribute), false)
+                    ? EditorGUI.EnumFlagsField(rect, current)
+                    : EditorGUI.EnumPopup(rect, current);
+            }
             else if (type == typeof(AnimationCurve))
                 newValue = EditorGUI.CurveField(rect, value as AnimationCurve ?? new AnimationCurve());
             else if (type == typeof(Gradient))
@@ -117,119 +100,6 @@ namespace Stratum.Editor
             type == typeof(Vector2Int) || type == typeof(Vector3Int) || type == typeof(Quaternion) ||
             type == typeof(LayerMask);
 
-        private static IEnumerable<(string Name, long Value)> GetAtomicFlagParts(Type enumType)
-        {
-            var names = Enum.GetNames(enumType);
-            var values = Enum.GetValues(enumType);
-            for (var i = 0; i < names.Length; i++)
-            {
-                var val = Convert.ToInt64(values.GetValue(i));
-                if (val == 0) continue;
-                if ((val & (val - 1)) != 0) continue;
-                yield return (names[i], val);
-            }
-        }
-
-        private static void DrawFlagsEnumDropdown(Rect rect, Type enumType, Enum current, in Options opts)
-        {
-            var parts = GetAtomicFlagParts(enumType).OrderBy(p => p.Value).ToArray();
-            if (parts.Length == 0)
-            {
-                EditorGUI.LabelField(rect, current.ToString(), opts.UnsupportedLabelStyle ?? EditorStyles.miniLabel);
-                return;
-            }
-
-            var labels = parts.Select(p => ObjectNames.NicifyVariableName(p.Name)).ToArray();
-            var longCurrent = Convert.ToInt64(current);
-            var selectedLabels = new List<string>();
-            foreach (var p in parts)
-            {
-                if ((longCurrent & p.Value) == p.Value)
-                    selectedLabels.Add(ObjectNames.NicifyVariableName(p.Name));
-            }
-
-            const string sep = ", ";
-            var curJoined = string.Join(sep, selectedLabels);
-            var buttonText = selectedLabels.Count == 0 ? "(未选择)" : curJoined;
-
-            if (!GUI.Button(rect, buttonText, DropdownButtonStyle)) return;
-
-            GUI.FocusControl(null);
-            var onAsync = opts.OnAsyncWrite;
-            var popup = new DropdownPopup
-            {
-                Multi = true,
-                Separator = sep,
-                Search = true,
-            };
-            popup.OnConfirmed(finalString =>
-            {
-                var selected = new HashSet<string>(
-                    string.IsNullOrEmpty(finalString)
-                        ? Array.Empty<string>()
-                        : finalString.Split(new[] { sep }, StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => s.Trim()).Where(s => s.Length > 0),
-                    StringComparer.Ordinal);
-
-                long result = 0;
-                for (var i = 0; i < labels.Length; i++)
-                {
-                    if (selected.Contains(labels[i]))
-                        result |= parts[i].Value;
-                }
-
-                onAsync?.Invoke(Enum.ToObject(enumType, result));
-            });
-            popup.Show(rect, labels, curJoined);
-        }
-
-        private static void DrawStringDropdown(Rect rect, FieldInfo field, object value, in Options opts)
-        {
-            var cur = value as string ?? string.Empty;
-            var label = string.IsNullOrEmpty(cur) ? "(未选择)" : cur;
-            if (!GUI.Button(rect, label, DropdownButtonStyle)) return;
-
-            GUI.FocusControl(null);
-            var items = DropdownAttributeResolver.ResolveItems(field, opts.Dropdown.Method);
-            if (items.Length == 0) return;
-
-            var onAsync = opts.OnAsyncWrite;
-            var popup = new DropdownPopup
-            {
-                Multi = opts.Dropdown.Multi,
-                Separator = opts.Dropdown.Separator,
-            };
-            if (!opts.Dropdown.Search)
-                popup.Search = false;
-            popup.OnConfirmed(finalValue => onAsync?.Invoke(finalValue));
-            popup.Show(rect, items, cur);
-        }
-
-        private static void DrawEnumDropdown(Rect rect, Type enumType, Enum current, in Options opts)
-        {
-            var names = Enum.GetNames(enumType);
-            if (names.Length == 0) return;
-
-            var labels = names.Select(ObjectNames.NicifyVariableName).ToArray();
-            var currentName = Enum.GetName(enumType, current);
-            var curLabel = currentName != null
-                ? ObjectNames.NicifyVariableName(currentName)
-                : current.ToString();
-            var currentForPopup = currentName != null ? curLabel : labels[0];
-
-            if (!GUI.Button(rect, curLabel, DropdownButtonStyle)) return;
-
-            var onAsync = opts.OnAsyncWrite;
-            var popup = new DropdownPopup();
-            popup.OnConfirmed(selected =>
-            {
-                var idx = Array.IndexOf(labels, selected);
-                if (idx < 0) return;
-                onAsync?.Invoke(Enum.Parse(enumType, names[idx]));
-            });
-            popup.Show(rect, labels, currentForPopup);
-        }
-
         private static readonly Color ToggleOnColor = new(0.22f, 0.62f, 0.35f, 0.88f);
         private static readonly Color ToggleOffColor = new(0.72f, 0.22f, 0.22f, 0.88f);
 
@@ -238,7 +108,7 @@ namespace Stratum.Editor
             if (Event.current.type == EventType.Repaint)
             {
                 EditorGUI.DrawRect(rect, current ? ToggleOnColor : ToggleOffColor);
-                GUI.Label(rect, current ? "✓" : "✕", ToggleStyle);
+                GUI.Label(rect, current ? "\u2713" : "\u2715", ToggleStyle);
             }
             if (Event.current.type == EventType.MouseDown &&
                 Event.current.button == 0 &&
@@ -257,13 +127,6 @@ namespace Stratum.Editor
             alignment = TextAnchor.MiddleCenter,
             normal = { textColor = Color.white },
             fontStyle = FontStyle.Bold,
-        };
-
-        private static GUIStyle _dropdownButtonStyle;
-        internal static GUIStyle DropdownButtonStyle => _dropdownButtonStyle ??= new GUIStyle(EditorStyles.popup)
-        {
-            alignment = TextAnchor.MiddleLeft,
-            clipping = TextClipping.Clip,
         };
     }
 }

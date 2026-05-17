@@ -30,7 +30,6 @@ namespace Stratum.Editor
         public void OnRowReceiveDrop(Action<int> callback) => _onRowReceiveDrop = callback;
         public void OnButtonClick(Action<int> callback) => _onButtonClick = callback;
         public void OnRowButtonClick(Action<int, int> callback) => _onRowButtonClick = callback;
-        public void OnRowExpandField(Action<int, string, Rect> callback) => _onRowExpandField = callback;
 
         public bool SelectRow(int index) => SelectRowCore(index);
 

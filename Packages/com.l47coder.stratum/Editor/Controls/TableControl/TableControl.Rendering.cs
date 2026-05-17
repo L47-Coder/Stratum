@@ -382,7 +382,7 @@ namespace Stratum.Editor
                 else
                 {
                     using (new EditorGUI.DisabledScope(_columns[i].Readonly || !CanEdit || isDragFloating))
-                        DrawCellField(PaddedRect(cell), list, dataIndex, field, _columns[i].Dropdown);
+                        DrawCellField(PaddedRect(cell), list, dataIndex, field);
                 }
                 cursorX = cell.xMax;
             }
@@ -446,50 +446,16 @@ namespace Stratum.Editor
             RequestGuiVisualRefresh();
         }
 
-        private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field, DropdownAttribute dropdown)
+        private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field)
         {
             var boxed = (object)list[index];
             var value = field.GetValue(boxed);
-            var type = field.FieldType;
 
-            if (IsStringList(type))
-            {
-                if (value is not List<string> stringList)
-                {
-                    stringList = new List<string>();
-                    field.SetValue(boxed, stringList);
-                    list[index] = (T)boxed;
-                    GUI.changed = true;
-                    _onRowEdit?.Invoke(index);
-                }
-                DrawStringListCell(rect, stringList, index);
-                return;
-            }
-
-            if (field.GetCustomAttribute<ExpandableAttribute>(false) != null)
-            {
-                DrawExpandableCell(rect, value, index, field.Name);
-                return;
-            }
-
-            var capturedField = field;
-            var capturedList = list;
-            var capturedIndex = index;
             var opts = new FieldDrawer.Options
             {
                 DelayedNumeric = true,
                 UnfocusOnMouseDown = true,
                 UnsupportedLabelStyle = EditorStyles.miniLabel,
-                Dropdown = dropdown,
-                OnAsyncWrite = v =>
-                {
-                    var b = (object)capturedList[capturedIndex];
-                    capturedField.SetValue(b, v);
-                    capturedList[capturedIndex] = (T)b;
-                    _pendingDirty = true;
-                    GUI.changed = true;
-                    _onRowEdit?.Invoke(capturedIndex);
-                },
             };
 
             if (!FieldDrawer.TryDraw(rect, field, value, in opts, out var newValue)) return;
@@ -497,54 +463,6 @@ namespace Stratum.Editor
             list[index] = (T)boxed;
             GUI.changed = true;
             _onRowEdit?.Invoke(index);
-        }
-
-        private static GUIStyle _expandableLabelStyle;
-        private static GUIStyle ExpandableLabelStyle =>
-            _expandableLabelStyle ??= new GUIStyle(EditorStyles.label)
-            {
-                alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(4, 4, 0, 0),
-            };
-
-        private void DrawExpandableCell(Rect rect, object value, int rowIndex, string fieldName)
-        {
-            var typeName = value == null ? "(null)" : value.GetType().Name;
-            var e = Event.current;
-            var isHover = rect.Contains(e.mousePosition);
-
-            EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
-
-            if (e.type == EventType.Repaint)
-            {
-                if (isHover)
-                {
-                    EditorGUI.DrawRect(rect, EditorGUIUtility.isProSkin
-                        ? new Color(1f, 1f, 1f, 0.05f)
-                        : new Color(0f, 0f, 0f, 0.05f));
-                }
-
-                var linkColor = EditorGUIUtility.isProSkin
-                    ? new Color(0.35f, 0.65f, 1f, 1f)
-                    : new Color(0.1f, 0.4f, 0.8f, 1f);
-
-                var oldColor = GUI.contentColor;
-                GUI.contentColor = linkColor;
-
-                GUI.Label(rect, typeName, ExpandableLabelStyle);
-
-                GUI.contentColor = oldColor;
-            }
-
-            if (e.type == EventType.MouseDown && e.button == 0 && isHover)
-            {
-                GUI.FocusControl(null);
-                e.Use();
-                _onRowExpandField?.Invoke(rowIndex, fieldName, rect);
-            }
-
-            if (isHover && e.type == EventType.MouseMove)
-                RequestGuiVisualRefresh();
         }
 
         private static void DrawDragFloatingRowShadow(Rect rowRect)

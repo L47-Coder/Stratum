@@ -11,7 +11,6 @@ namespace Stratum.Editor
         private const float RowButtonWidth = 24f;
         private const float CellPadding = 4f;
         private const float GridThickness = 1f;
-        private const float FieldExpandableMinWidth = 180f;
 
         private const float RowMoveSmoothTime = 0.1f;
         private const float GapMoveSmoothTime = 0.09f;
@@ -64,7 +63,6 @@ namespace Stratum.Editor
         private Action<int, int> _onRowButtonClick;
         private Action<int> _onRowDragOut;
         private Action<int> _onRowReceiveDrop;
-        private Action<int, string, Rect> _onRowExpandField;
 
         private Vector2 _lastGroupSize;
         private int _dropHighlightDataIndex = -1;
@@ -184,7 +182,6 @@ namespace Stratum.Editor
         private void DrawCore<T>(Rect rect, List<T> list)
         {
             _columns ??= BuildColumnsFromElementType(typeof(T));
-            ConsumePendingDirty();
 
             var evt = Event.current;
             if (evt.type == EventType.MouseDown && !rect.Contains(evt.mousePosition))

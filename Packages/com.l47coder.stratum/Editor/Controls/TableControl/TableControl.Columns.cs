@@ -18,7 +18,6 @@ namespace Stratum.Editor
             public readonly FieldInfo Field;
             public readonly float MinWidth;
             public readonly float InitialPreferredWidth;
-            public readonly DropdownAttribute Dropdown;
 
             public ColumnDefinition(string title, string relPath, bool @readonly, FieldInfo field, float minWidth, float initialPreferredWidth)
             {
@@ -28,7 +27,6 @@ namespace Stratum.Editor
                 Field = field;
                 MinWidth = minWidth;
                 InitialPreferredWidth = initialPreferredWidth;
-                Dropdown = field?.GetCustomAttribute<DropdownAttribute>(false);
             }
         }
 
@@ -49,7 +47,7 @@ namespace Stratum.Editor
 
         private static ColumnDefinition? ToColumnDefinition(FieldInfo field)
         {
-            var attr = field.GetCustomAttribute<FieldAttribute>(false);
+            var attr = field.GetCustomAttribute<TableAttribute>(false);
             if (attr != null && attr.Hide) return null;
 
             var title = string.IsNullOrWhiteSpace(attr?.Title)
@@ -61,17 +59,11 @@ namespace Stratum.Editor
                 field.Name,
                 attr?.Readonly ?? false,
                 field,
-                GetDefaultMinWidth(field),
+                FieldLayoutUtil.GetMinWidth(field),
                 initial);
         }
 
         private static bool IsSerializedField(FieldInfo field) => FieldLayoutUtil.IsSerializedField(field);
-
-        private static float GetDefaultMinWidth(FieldInfo field)
-        {
-            if (field.GetCustomAttribute<ExpandableAttribute>(false) != null) return FieldExpandableMinWidth;
-            return FieldLayoutUtil.GetMinWidth(field);
-        }
 
         private void EnsureColumnSizing()
         {

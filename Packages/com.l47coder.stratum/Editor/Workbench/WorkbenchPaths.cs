@@ -6,7 +6,6 @@ namespace Stratum.Editor
         public const string PackageRoot = "Packages/" + PackageId;
         public const string TemplatesRoot = PackageRoot + "/Templates~";
         public const string GameSkeletonTemplateFolder = TemplatesRoot + "/Game";
-        public const string ManagerTemplatesFolder = TemplatesRoot + "/Managers";
 
         public const string AssetsRoot = "Assets";
         public const string GameRoot = AssetsRoot + "/Game";

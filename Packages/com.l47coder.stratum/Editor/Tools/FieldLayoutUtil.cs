@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using Stratum;
-using UnityEditor;
 using UnityEngine;
 
 namespace Stratum.Editor
@@ -17,11 +14,6 @@ namespace Stratum.Editor
             !field.IsDefined(typeof(HideInInspector), false) &&
             (field.IsPublic || field.IsDefined(typeof(SerializeField), false));
 
-        internal static bool IsStringList(Type type) =>
-            type.IsGenericType &&
-            type.GetGenericTypeDefinition() == typeof(List<>) &&
-            type.GetGenericArguments()[0] == typeof(string);
-
         internal static float GetMinWidth(FieldInfo field)
         {
             var type = field.FieldType;
@@ -31,7 +23,6 @@ namespace Stratum.Editor
             if (type == typeof(string)) return 140f;
             if (type == typeof(LayerMask)) return 120f;
             if (type == typeof(AnimationCurve) || type == typeof(Gradient)) return 120f;
-            if (IsStringList(type)) return 120f;
             if (type == typeof(Vector2) || type == typeof(Vector2Int)) return 140f;
             if (type == typeof(Vector3) || type == typeof(Vector3Int) || type == typeof(Quaternion)) return 210f;
             if (type == typeof(Vector4)) return 280f;
