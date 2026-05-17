@@ -5,7 +5,7 @@ using UnityEditor;
 
 namespace Stratum.Editor
 {
-    internal sealed class SoCreatorState
+    internal sealed class SoCreatorState : ICreatorState
     {
         public const string RootAssetPath = WorkbenchPaths.SoRoot;
 
@@ -22,9 +22,6 @@ namespace Stratum.Editor
         private string _parentFolderAssetPath = RootAssetPath;
         private string _existingScriptFilePath = string.Empty;
         private bool _scriptExists;
-
-        private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
-        private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
@@ -61,9 +58,8 @@ namespace Stratum.Editor
             ApplyInput(InputClassName, _parentFolderAssetPath);
         }
 
-        public PreviewItem[] GetNamePreviewItems() => _namePreviewItems;
-        public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
-        public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
+        public string GetPreviewSource() =>
+            HasPreview ? SoCreationService.BuildSource(ClassName) : string.Empty;
 
         public SoCreationPlan BuildPlan()
         {
@@ -104,7 +100,7 @@ namespace Stratum.Editor
             ClassName = normalized;
             ScriptFilePath = $"{_parentFolderAssetPath}/{ClassName}.cs";
 
-            RefreshPreviewCache();
+            RefreshExistingTargets();
         }
 
         private static bool TryNormalizeParentFolder(string parentAssetPath, out string normalized, out string error)
@@ -134,32 +130,9 @@ namespace Stratum.Editor
 
             _existingScriptFilePath = string.Empty;
             _scriptExists = false;
-
-            _namePreviewItems = Array.Empty<PreviewItem>();
-            _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
         private bool ShouldCreateScript() => !_scriptExists;
-
-        private PreviewStatus GetScriptStatus() =>
-            string.IsNullOrEmpty(ClassName) ? PreviewStatus.Neutral : ShouldCreateScript() ? PreviewStatus.Create : PreviewStatus.Skip;
-
-        private void RefreshPreviewCache()
-        {
-            RefreshExistingTargets();
-
-            var scriptStatus = GetScriptStatus();
-
-            _namePreviewItems = new[]
-            {
-                new PreviewItem("Class", ClassName, scriptStatus),
-            };
-
-            _pathPreviewItems = new[]
-            {
-                new PreviewItem("Script file", _scriptExists ? _existingScriptFilePath : ScriptFilePath, scriptStatus),
-            };
-        }
 
         private void RefreshExistingTargets()
         {

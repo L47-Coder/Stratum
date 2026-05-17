@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class MonoBehaviourCreatorState
+    internal sealed class MonoBehaviourCreatorState : ICreatorState
     {
         public const string RootAssetPath = WorkbenchPaths.MonoBehaviourRoot;
 
@@ -23,9 +23,6 @@ namespace Stratum.Editor
         private string _parentFolderAssetPath = RootAssetPath;
         private string _existingScriptFilePath = string.Empty;
         private bool _scriptExists;
-
-        private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
-        private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
@@ -64,9 +61,8 @@ namespace Stratum.Editor
             ApplyInput(InputClassName, _parentFolderAssetPath);
         }
 
-        public PreviewItem[] GetNamePreviewItems() => _namePreviewItems;
-        public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
-        public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
+        public string GetPreviewSource() =>
+            HasPreview ? MonoBehaviourCreationService.BuildSource(ClassName) : string.Empty;
 
         public MonoBehaviourCreationPlan BuildPlan()
         {
@@ -107,7 +103,7 @@ namespace Stratum.Editor
             ClassName = normalizedName;
             ScriptFilePath = $"{_parentFolderAssetPath}/{ClassName}.cs";
 
-            RefreshPreviewCache();
+            RefreshExistingTargets();
         }
 
         private static bool TryNormalizeParentFolder(string parentAssetPath, out string normalizedParentPath, out string errorMessage)
@@ -136,31 +132,9 @@ namespace Stratum.Editor
             ScriptFilePath = string.Empty;
             _existingScriptFilePath = string.Empty;
             _scriptExists = false;
-            _namePreviewItems = Array.Empty<PreviewItem>();
-            _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
         private bool ShouldCreateScript() => !_scriptExists;
-
-        private static PreviewStatus GetFileStatus(string path, bool exists) =>
-            string.IsNullOrEmpty(path) ? PreviewStatus.Neutral : exists ? PreviewStatus.Skip : PreviewStatus.Create;
-
-        private void RefreshPreviewCache()
-        {
-            RefreshExistingTargets();
-
-            var scriptStatus = GetFileStatus(ScriptFilePath, _scriptExists);
-
-            _namePreviewItems = new[]
-            {
-                new PreviewItem("Class", ClassName, scriptStatus),
-            };
-
-            _pathPreviewItems = new[]
-            {
-                new PreviewItem("Script file", _scriptExists ? _existingScriptFilePath : ScriptFilePath, scriptStatus),
-            };
-        }
 
         private void RefreshExistingTargets()
         {

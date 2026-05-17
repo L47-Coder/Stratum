@@ -28,17 +28,20 @@ namespace Stratum.Editor
         private static void WriteSoScript(SoCreationPlan plan)
         {
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
+            File.WriteAllText(plan.ScriptFilePath, BuildSource(plan.ClassName), Encoding.UTF8);
+        }
 
+        public static string BuildSource(string className)
+        {
             var sb = new StringBuilder();
             sb.AppendLine("using UnityEngine;");
             sb.AppendLine();
-            sb.AppendLine($"[CreateAssetMenu(menuName = \"ScriptableObject/{plan.ClassName}\")]");
-            sb.AppendLine($"public class {plan.ClassName} : ScriptableObject");
+            sb.AppendLine($"[CreateAssetMenu(menuName = \"ScriptableObject/{className}\")]");
+            sb.AppendLine($"public class {className} : ScriptableObject");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("}");
-
-            File.WriteAllText(plan.ScriptFilePath, sb.ToString(), Encoding.UTF8);
+            return sb.ToString();
         }
 
         internal static void EnsureFolder(string assetPath)

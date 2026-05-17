@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class ManagerCreatorState
+    internal sealed class ManagerCreatorState : ICreatorState
     {
         public const string RootAssetPath = WorkbenchPaths.ManagerRoot;
 
@@ -24,9 +24,6 @@ namespace Stratum.Editor
         private string _parentFolderAssetPath = RootAssetPath;
         private string _existingManagerFilePath = string.Empty;
         private bool _managerFileExists;
-
-        private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
-        private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
@@ -65,9 +62,8 @@ namespace Stratum.Editor
             ApplyInput(InputClassName, _parentFolderAssetPath);
         }
 
-        public PreviewItem[] GetNamePreviewItems() => _namePreviewItems;
-        public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
-        public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
+        public string GetPreviewSource() =>
+            HasPreview ? ManagerCreationService.BuildSource(ClassName, InterfaceName) : string.Empty;
 
         public ManagerCreationPlan BuildPlan()
         {
@@ -110,7 +106,7 @@ namespace Stratum.Editor
             InterfaceName = $"I{ClassName}";
             ScriptFilePath = $"{_parentFolderAssetPath}/{ClassName}.cs";
 
-            RefreshPreviewCache();
+            RefreshExistingTargets();
         }
 
         private static bool TryNormalizeParentFolder(string parentAssetPath, out string normalizedParentPath, out string errorMessage)
@@ -140,32 +136,9 @@ namespace Stratum.Editor
             ScriptFilePath = string.Empty;
             _existingManagerFilePath = string.Empty;
             _managerFileExists = false;
-            _namePreviewItems = Array.Empty<PreviewItem>();
-            _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
         private bool ShouldCreateManagerFile() => !_managerFileExists;
-
-        private static PreviewStatus GetFileStatus(string path, bool exists) =>
-            string.IsNullOrEmpty(path) ? PreviewStatus.Neutral : exists ? PreviewStatus.Skip : PreviewStatus.Create;
-
-        private void RefreshPreviewCache()
-        {
-            RefreshExistingTargets();
-
-            var managerStatus = GetFileStatus(ScriptFilePath, _managerFileExists);
-
-            _namePreviewItems = new[]
-            {
-                new PreviewItem("Interface", InterfaceName, managerStatus),
-                new PreviewItem("Class",     ClassName,     managerStatus),
-            };
-
-            _pathPreviewItems = new[]
-            {
-                new PreviewItem("Script file", _managerFileExists ? _existingManagerFilePath : ScriptFilePath, managerStatus),
-            };
-        }
 
         private void RefreshExistingTargets()
         {

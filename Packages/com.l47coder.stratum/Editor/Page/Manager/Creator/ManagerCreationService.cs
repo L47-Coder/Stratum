@@ -39,21 +39,24 @@ namespace Stratum.Editor
         private static void WriteManagerCode(ManagerCreationPlan plan)
         {
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
+            File.WriteAllText(plan.ScriptFilePath, BuildSource(plan.ClassName, plan.InterfaceName), Encoding.UTF8);
+        }
 
+        public static string BuildSource(string className, string interfaceName)
+        {
             var sb = new StringBuilder();
             sb.AppendLine("using Stratum;");
             sb.AppendLine();
-            sb.AppendLine($"public interface {plan.InterfaceName} : IManager");
+            sb.AppendLine($"public interface {interfaceName} : IManager");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("}");
             sb.AppendLine();
-            sb.AppendLine($"internal sealed class {plan.ClassName} : {plan.InterfaceName}");
+            sb.AppendLine($"internal sealed class {className} : {interfaceName}");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("}");
-
-            File.WriteAllText(plan.ScriptFilePath, sb.ToString(), Encoding.UTF8);
+            return sb.ToString();
         }
 
         internal static void EnsureFolder(string assetPath)

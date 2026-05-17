@@ -49,89 +49,20 @@ namespace Stratum.Editor
 
     internal sealed class MonoBehaviourCreatorPanel
     {
-        private const float HPad = 6f;
-        private const float VPad = 8f;
-
         private readonly MonoBehaviourCreatorState _state = new();
-        private Vector2 _scroll;
+        private readonly CreatorLayout<MonoBehaviourCreatorState> _layout;
+
+        public MonoBehaviourCreatorPanel()
+        {
+            _layout = new CreatorLayout<MonoBehaviourCreatorState>(
+                _state, "Create MonoBehaviour",
+                s => MonoBehaviourCreationService.CreateScript(s));
+        }
 
         public void Retarget(string parentFolderAssetPath) =>
             _state.SetParentFolder(parentFolderAssetPath);
 
-        public void OnGUI(Rect rect)
-        {
-            EditorGUI.DrawRect(rect, CreatorPageDraw.BgColor);
-
-            var content = new Rect(
-                rect.x + HPad, rect.y + VPad,
-                rect.width - HPad * 2f, rect.height - VPad * 2f);
-
-            GUILayout.BeginArea(content);
-            var prevLW = EditorGUIUtility.labelWidth;
-            EditorGUIUtility.labelWidth = CreatorPageDraw.LabelWidth;
-            _scroll = EditorGUILayout.BeginScrollView(_scroll, GUILayout.ExpandHeight(true));
-            try
-            {
-                DrawInputSection();
-
-                if (_state.HasPreview)
-                {
-                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
-                    CreatorPageDraw.DrawPreviewCard("Type names",   _state.GetNamePreviewItems());
-                    GUILayout.Space(CreatorPageDraw.SectionSpacing);
-                    CreatorPageDraw.DrawPreviewCard("Output paths", _state.GetPathPreviewItems());
-                    GUILayout.Space(CreatorPageDraw.SectionSpacing + 2f);
-                    CreatorPageDraw.DrawLegendRow();
-                }
-
-                GUILayout.Space(CreatorPageDraw.SectionSpacing);
-                DrawCreateButton();
-            }
-            finally
-            {
-                EditorGUILayout.EndScrollView();
-                EditorGUIUtility.labelWidth = prevLW;
-                GUILayout.EndArea();
-            }
-        }
-
-        private void DrawInputSection()
-        {
-            CreatorPageDraw.BeginCard();
-            CreatorPageDraw.DrawHeader("New MonoBehaviour");
-
-            var newName = CreatorPageDraw.DrawEditableField(
-                "Class name", _state.InputClassName, _state.GetInputStatus());
-            if (newName != _state.InputClassName)
-                _state.SetInputClassName(newName);
-
-            if (!string.IsNullOrEmpty(_state.ErrorMessage))
-            {
-                GUILayout.Space(8f);
-                EditorGUILayout.HelpBox(_state.ErrorMessage, MessageType.Warning);
-            }
-
-            CreatorPageDraw.EndCard();
-        }
-
-        private void DrawCreateButton()
-        {
-            var prevBg = GUI.backgroundColor;
-            if (_state.IsValid) GUI.backgroundColor = CreatorPageDraw.AccentBlue;
-
-            using (new EditorGUI.DisabledScope(!_state.IsValid))
-            {
-                if (GUILayout.Button("Create MonoBehaviour", GUILayout.Height(CreatorPageDraw.CreateButtonHeight)))
-                {
-                    MonoBehaviourCreationService.CreateScript(_state);
-                    _state.Reset();
-                    _scroll = Vector2.zero;
-                    GUI.FocusControl(null);
-                }
-            }
-
-            GUI.backgroundColor = prevBg;
-        }
+        public void OnGUI(Rect rect) => _layout.OnGUI(rect);
     }
 
     internal sealed class MonoBehaviourRightPanel
