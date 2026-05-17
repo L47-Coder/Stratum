@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -47,7 +48,7 @@ namespace Stratum.Editor
             DrawSearchBar(new Rect(toolbarRect.x, toolbarRect.y, searchW, toolbarRect.height));
         }
 
-        private void DrawHeader<T>(Rect rowRect, List<T> list, TableLayout layout)
+        private void DrawHeader(Rect rowRect, IList list, TableLayout layout)
         {
             var contentWidth = Mathf.Max(rowRect.width, layout.TotalWidth);
             var viewRect = new Rect(0f, 0f, contentWidth, rowRect.height);
@@ -111,8 +112,8 @@ namespace Stratum.Editor
                         if (GUI.Button(PaddedRect(addRect), "＋"))
                         {
                             GUI.FocusControl(null);
-                            try { list.Add(Activator.CreateInstance<T>()); }
-                            catch { list.Add(default); }
+                            try { list.Add(Activator.CreateInstance(_elementType)); }
+                            catch { list.Add(_elementType is { IsValueType: true } ? Activator.CreateInstance(_elementType) : null); }
                             var newIndex = list.Count - 1;
                             _onRowAdd?.Invoke(newIndex);
                             _selectedIndex = -1;
@@ -199,7 +200,7 @@ namespace Stratum.Editor
             }
         }
 
-        private void DrawRows<T>(Rect bodyRect, List<T> list, List<int> filteredIndices, TableLayout layout, float viewWidth)
+        private void DrawRows(Rect bodyRect, IList list, List<int> filteredIndices, TableLayout layout, float viewWidth)
         {
             var isSearching = ShowToolbar && !string.IsNullOrWhiteSpace(_searchText);
             var rowCount = list.Count;
@@ -309,9 +310,9 @@ namespace Stratum.Editor
             return arr;
         }
 
-        private void DrawRow<T>(
+        private void DrawRow(
             Rect rowRect,
-            List<T> list,
+            IList list,
             int dataIndex,
             int stripeIndex,
             bool isSearching,
@@ -446,9 +447,9 @@ namespace Stratum.Editor
             RequestGuiVisualRefresh();
         }
 
-        private void DrawCellField<T>(Rect rect, List<T> list, int index, FieldInfo field)
+        private void DrawCellField(Rect rect, IList list, int index, FieldInfo field)
         {
-            var boxed = (object)list[index];
+            var boxed = list[index];
             var value = field.GetValue(boxed);
 
             var opts = new FieldDrawer.Options
@@ -460,7 +461,7 @@ namespace Stratum.Editor
 
             if (!FieldDrawer.TryDraw(rect, field, value, in opts, out var newValue)) return;
             field.SetValue(boxed, newValue);
-            list[index] = (T)boxed;
+            list[index] = boxed;
             GUI.changed = true;
             _onRowEdit?.Invoke(index);
         }
@@ -519,7 +520,7 @@ namespace Stratum.Editor
             }
         }
 
-        private HashSet<int> BuildDuplicateIndices<T>(List<T> list)
+        private HashSet<int> BuildDuplicateIndices(IList list)
         {
             if (!MarkDuplicates) return null;
             var col = FindKeyColumn();

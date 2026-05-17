@@ -25,19 +25,23 @@ namespace Stratum.Editor
         private static readonly Color ErrorColor = new(0.95f, 0.45f, 0.40f);
 
         private readonly TState _state;
-        private readonly string _buttonLabel;
-        private readonly Action<TState> _onCreate;
 
         private readonly InputControl _input = new();
         private readonly TextControl _preview = new();
-        private readonly ButtonControl _button;
+        private readonly ButtonControl _button = new() { AccentColor = AccentBlue };
 
         public CreatorLayout(TState state, string buttonLabel, Action<TState> onCreate)
         {
             _state = state;
-            _buttonLabel = buttonLabel;
-            _onCreate = onCreate;
-            _button = new ButtonControl { AccentColor = AccentBlue };
+            _button.Label = buttonLabel;
+
+            _input.OnChange(name => _state.SetInputClassName(name));
+            _button.OnClick(() =>
+            {
+                onCreate(_state);
+                _state.Reset();
+                GUI.FocusControl(null);
+            });
         }
 
         public void OnGUI(Rect rect)
@@ -50,29 +54,23 @@ namespace Stratum.Editor
             var midBottom = btnRect.y - Spacing;
             var midRect = new Rect(rect.x, midTop, rect.width, Mathf.Max(0f, midBottom - midTop));
 
-            var newName = _input.Draw(inputRect, _state.InputClassName);
-            if (newName != _state.InputClassName) _state.SetInputClassName(newName);
+            _input.Value = _state.InputClassName;
+            _button.Enabled = _state.IsValid;
 
-            if (midRect.height > 8f)
+            if (!string.IsNullOrEmpty(_state.ErrorMessage))
             {
-                if (!string.IsNullOrEmpty(_state.ErrorMessage))
-                {
-                    _preview.TextColor = ErrorColor;
-                    _preview.Draw(midRect, _state.ErrorMessage);
-                }
-                else
-                {
-                    _preview.TextColor = null;
-                    _preview.Draw(midRect, _state.GetPreviewSource());
-                }
+                _preview.TextColor = ErrorColor;
+                _preview.Text = _state.ErrorMessage;
+            }
+            else
+            {
+                _preview.TextColor = null;
+                _preview.Text = _state.GetPreviewSource();
             }
 
-            if (_button.Draw(btnRect, _buttonLabel, _state.IsValid))
-            {
-                _onCreate(_state);
-                _state.Reset();
-                GUI.FocusControl(null);
-            }
+            _input.Draw(inputRect);
+            if (midRect.height > 8f) _preview.Draw(midRect);
+            _button.Draw(btnRect);
         }
     }
 }

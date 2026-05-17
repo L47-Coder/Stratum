@@ -16,6 +16,7 @@ namespace Stratum.Editor
         public bool CanReceiveDrop { get; set; }
 
         public bool ShowToolbar { get; set; } = true;
+        public List<string> Items { get; set; }
         public List<string> ExcludePatterns { get; set; } = new();
         public List<GUIContent> ToolbarButtons { get; set; } = new();
 
@@ -30,6 +31,6 @@ namespace Stratum.Editor
 
         public bool SelectRow(int index) => SelectRowCore(index);
 
-        public void Draw(Rect rect, List<string> items) => DrawCore(rect, items);
+        public void Draw(Rect rect) => DrawCore(rect);
     }
 }

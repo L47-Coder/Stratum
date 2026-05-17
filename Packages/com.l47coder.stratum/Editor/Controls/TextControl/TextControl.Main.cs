@@ -48,8 +48,10 @@ namespace Stratum.Editor
             evt.Use();
         }
 
-        private void DrawCore(Rect rect, string text)
+        private void DrawCore(Rect rect)
         {
+            var text = Text ?? string.Empty;
+
             var boxRect = BoxDrawer.CalcBoxRect(rect);
             if (boxRect.width < 1f || boxRect.height < 1f) return;
 

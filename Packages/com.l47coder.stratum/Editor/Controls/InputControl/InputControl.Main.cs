@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ namespace Stratum.Editor
     {
         private GUIStyle _style;
         private int _styleBuiltFontSize = -1;
+        private Action<string> _onChange;
 
         private GUIStyle GetStyle()
         {
@@ -21,20 +23,23 @@ namespace Stratum.Editor
             return _style;
         }
 
-        private string DrawCore(Rect rect, string value)
+        private void DrawCore(Rect rect)
         {
             var boxRect = BoxDrawer.CalcBoxRect(rect);
-            if (boxRect.width < 1f || boxRect.height < 1f) return value;
+            if (boxRect.width < 1f || boxRect.height < 1f) return;
 
             BoxDrawer.DrawBox(boxRect);
             var contentRect = BoxDrawer.CalcContentRect(boxRect);
 
             GUI.BeginGroup(contentRect);
-            var result = EditorGUI.TextField(
+            var newValue = EditorGUI.TextField(
                 new Rect(0f, 0f, contentRect.width, contentRect.height),
-                value ?? string.Empty, GetStyle());
+                Value ?? string.Empty, GetStyle());
             GUI.EndGroup();
-            return result;
+
+            if (newValue == Value) return;
+            Value = newValue;
+            _onChange?.Invoke(newValue);
         }
     }
 }

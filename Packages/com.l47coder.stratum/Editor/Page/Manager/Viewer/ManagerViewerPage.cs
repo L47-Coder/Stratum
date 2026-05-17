@@ -26,7 +26,7 @@ namespace Stratum.Editor
 
     internal sealed class ManagerLeftPanel
     {
-        private readonly TreeControl _treeView = new();
+        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.ManagerRoot };
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -34,7 +34,7 @@ namespace Stratum.Editor
             _treeView.OnNodeSelect(onSelected);
         }
 
-        public void OnGUI(Rect rect) => _treeView.Draw(rect, WorkbenchPaths.ManagerRoot);
+        public void OnGUI(Rect rect) => _treeView.Draw(rect);
     }
 
     internal sealed class ManagerCreatorPanel
@@ -102,8 +102,9 @@ namespace Stratum.Editor
             {
                 _cachedCsPath = path;
                 _cachedCsText = File.Exists(path) ? File.ReadAllText(path) : "(failed to read file)";
+                _csTextView.Text = _cachedCsText;
             }
-            _csTextView.Draw(rect, _cachedCsText);
+            _csTextView.Draw(rect);
         }
     }
 }

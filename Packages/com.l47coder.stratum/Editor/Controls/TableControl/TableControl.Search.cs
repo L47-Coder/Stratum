@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
@@ -34,7 +35,7 @@ namespace Stratum.Editor
             return null;
         }
 
-        private List<int> GetFilteredIndices<T>(List<T> list)
+        private List<int> GetFilteredIndices(IList list)
         {
             _filteredCache.Clear();
             var col = FindSearchColumn();

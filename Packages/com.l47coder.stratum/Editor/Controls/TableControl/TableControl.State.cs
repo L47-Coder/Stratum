@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -47,6 +48,8 @@ namespace Stratum.Editor
         private bool _rowIndexInteractSearchingAtPress;
 
         private List<ColumnDefinition> _columns;
+        private Type _elementType;
+        private object _lastItemsRef;
         private float[] _columnPreferredWidths;
         private float[] _columnMinWidths;
         private int _resizeColumnIndex = -1;
@@ -177,11 +180,37 @@ namespace Stratum.Editor
             return true;
         }
 
+        private static Type DetectElementType(IList items)
+        {
+            if (items == null) return null;
+            var t = items.GetType();
+            if (t.IsArray) return t.GetElementType();
+            if (t.IsGenericType)
+            {
+                var args = t.GetGenericArguments();
+                if (args.Length > 0) return args[0];
+            }
+            foreach (var iface in t.GetInterfaces())
+                if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(IList<>))
+                    return iface.GetGenericArguments()[0];
+            return typeof(object);
+        }
+
         private static void RequestGuiVisualRefresh() => (EditorWindow.mouseOverWindow ?? EditorWindow.focusedWindow)?.Repaint();
 
-        private void DrawCore<T>(Rect rect, List<T> list)
+        private void DrawCore(Rect rect)
         {
-            _columns ??= BuildColumnsFromElementType(typeof(T));
+            var list = Items;
+            if (list == null) return;
+
+            if (!ReferenceEquals(list, _lastItemsRef))
+            {
+                _lastItemsRef = list;
+                _elementType = DetectElementType(list);
+                _columns = BuildColumnsFromElementType(_elementType);
+                _columnMinWidths = null;
+                _columnPreferredWidths = null;
+            }
 
             var evt = Event.current;
             if (evt.type == EventType.MouseDown && !rect.Contains(evt.mousePosition))

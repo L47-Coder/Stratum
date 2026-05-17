@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -42,7 +43,7 @@ namespace Stratum.Editor
         private void ReleaseRowIndexPendingOwner() { if (_rowIndexPendingOwner == this) _rowIndexPendingOwner = null; UnhookRowIndexPendingUpdate(); }
         private void ClearRowIndexInteractAfterReorderOrCancel() { _rowIndexInteractDown = false; ReleaseRowIndexPendingOwner(); }
 
-        private void FlushRowIndexInteractClickSelect<T>(List<T> list)
+        private void FlushRowIndexInteractClickSelect(IList list)
         {
             var e = Event.current;
             if (e.type != EventType.MouseUp || e.button != 0) return;
@@ -132,7 +133,7 @@ namespace Stratum.Editor
             HookRepaintTick();
         }
 
-        private void HandleActiveReorderLifecycle<T>(List<T> list)
+        private void HandleActiveReorderLifecycle(IList list)
         {
             if (_draggingOwner != this || _reorder == null) return;
             var e = Event.current;
@@ -172,7 +173,7 @@ namespace Stratum.Editor
             if (e.rawType == EventType.Ignore) { GUIUtility.hotControl = 0; EndReorderSession(); }
         }
 
-        private void ApplyReorder<T>(List<T> list, int from, int insertSlot)
+        private void ApplyReorder(IList list, int from, int insertSlot)
         {
             var rowCount = list.Count;
             if (from < 0 || from >= rowCount) return;

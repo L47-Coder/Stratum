@@ -66,8 +66,9 @@ namespace Stratum.Editor
             return true;
         }
 
-        private void DrawCore(Rect rect, List<string> items)
+        private void DrawCore(Rect rect)
         {
+            var items = Items;
             _lastItems = items;
             CheckRenameBlur();
             HandleKeyboard();

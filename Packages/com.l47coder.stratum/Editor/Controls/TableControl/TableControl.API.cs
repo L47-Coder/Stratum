@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,6 +7,8 @@ namespace Stratum.Editor
 {
     public sealed partial class TableControl
     {
+        public IList Items { get; set; }
+
         public bool CanAdd { get; set; } = true;
         public bool CanRemove { get; set; } = true;
         public bool CanSelect { get; set; } = true;
@@ -33,6 +36,6 @@ namespace Stratum.Editor
 
         public bool SelectRow(int index) => SelectRowCore(index);
 
-        public void Draw<T>(Rect rect, List<T> list) => DrawCore(rect, list);
+        public void Draw(Rect rect) => DrawCore(rect);
     }
 }

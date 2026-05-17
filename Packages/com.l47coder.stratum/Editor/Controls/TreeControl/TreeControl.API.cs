@@ -16,6 +16,7 @@ namespace Stratum.Editor
         public bool CanReceiveDrop { get; set; } = true;
 
         public bool ShowToolbar { get; set; } = true;
+        public string RootPath { get; set; } = string.Empty;
         public List<string> ExcludePatterns { get; set; } = new();
         public List<string> HiddenExtensions { get; set; }
         public List<GUIContent> ToolbarButtons { get; set; } = new();
@@ -32,6 +33,6 @@ namespace Stratum.Editor
         public bool SelectNode(string path) => SelectNodeCore(path);
         public void RebuildTree() => _root = null;
 
-        public void Draw(Rect rect, string path) => DrawCore(rect, path);
+        public void Draw(Rect rect) => DrawCore(rect);
     }
 }

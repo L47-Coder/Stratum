@@ -15,6 +15,7 @@ namespace Stratum.Editor
         {
             _tableView.KeyField = "Manager";
             _config = AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(WorkbenchPaths.ManagerOrder);
+            if (_config != null) _tableView.Items = _config.Entries;
             _tableView.OnRowMove((_, _) => EditorUtility.SetDirty(_config));
         }
 
@@ -30,7 +31,7 @@ namespace Stratum.Editor
                 GUI.Label(rect, "Failed to load config.", EditorStyles.centeredGreyMiniLabel);
                 return;
             }
-            _tableView.Draw(rect, _config.Entries);
+            _tableView.Draw(rect);
         }
     }
 }

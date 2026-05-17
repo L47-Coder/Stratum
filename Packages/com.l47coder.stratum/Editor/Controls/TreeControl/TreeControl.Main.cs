@@ -57,14 +57,14 @@ namespace Stratum.Editor
                 : n;
         }
 
-        private void DrawCore(Rect rect, string path)
+        private void DrawCore(Rect rect)
         {
             if (_pendingContextNode != null) { var n = _pendingContextNode; _pendingContextNode = null; ShowContextMenu(n); }
 
             CheckRenameBlur();
             HandleKeyboard();
 
-            var normalizedPath = NormalizePath(path);
+            var normalizedPath = NormalizePath(RootPath);
             if (_root == null || normalizedPath != _cachedRootPath) RebuildTree(normalizedPath);
 
             var box = BoxDrawer.CalcBoxRect(rect);

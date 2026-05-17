@@ -26,7 +26,7 @@ namespace Stratum.Editor
 
     internal sealed class SoLeftPanel
     {
-        private readonly TreeControl _treeView = new();
+        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.SoRoot };
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -37,7 +37,7 @@ namespace Stratum.Editor
         public void OnGUI(Rect rect)
         {
             EnsureRootFolder();
-            _treeView.Draw(rect, WorkbenchPaths.SoRoot);
+            _treeView.Draw(rect);
         }
 
         private static void EnsureRootFolder()
@@ -94,8 +94,9 @@ namespace Stratum.Editor
             {
                 _cachedCsPath = path;
                 _cachedCsText = File.Exists(path) ? File.ReadAllText(path) : "(failed to read file)";
+                _csTextView.Text = _cachedCsText;
             }
-            _csTextView.Draw(rect, _cachedCsText);
+            _csTextView.Draw(rect);
         }
     }
 }
