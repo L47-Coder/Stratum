@@ -8,8 +8,8 @@ namespace Stratum.Editor
 {
     internal sealed partial class DevWindow : EditorWindow
     {
-        private const float StartWidth = 900f;
-        private const float StartHeight = 600f;
+        private const float StartWidth = 720f;
+        private const float StartHeight = 480f;
         private const float MenuWidth = 130f;
         private const float HeaderHeight = 25f;
         private const float DividerWidth = 1f;

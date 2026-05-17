@@ -17,10 +17,10 @@ MonoBehaviour:
     Tabs:
     - Viewer
     - Order
-  - Title: Container
+  - Title: MonoBehaviour
     Tabs:
     - Viewer
-  - Title: MonoBehaviour
+  - Title: Container
     Tabs:
     - Viewer
   - Title: ScriptableObject

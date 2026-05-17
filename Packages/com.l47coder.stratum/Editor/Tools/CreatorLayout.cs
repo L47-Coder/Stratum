@@ -18,7 +18,6 @@ namespace Stratum.Editor
     {
         private const float InputHeight = 32f;
         private const float ButtonHeight = 40f;
-        private const float Spacing = 0f;
 
         private static readonly Color BgColor = new(0.17f, 0.17f, 0.17f);
         private static readonly Color AccentBlue = new(0.35f, 0.65f, 1f);
@@ -50,8 +49,8 @@ namespace Stratum.Editor
 
             var inputRect = new Rect(rect.x, rect.y, rect.width, InputHeight);
             var btnRect = new Rect(rect.x, rect.yMax - ButtonHeight, rect.width, ButtonHeight);
-            var midTop = inputRect.yMax + Spacing;
-            var midBottom = btnRect.y - Spacing;
+            var midTop = inputRect.yMax - BoxDrawer.Padding;
+            var midBottom = btnRect.y + BoxDrawer.Padding;
             var midRect = new Rect(rect.x, midTop, rect.width, Mathf.Max(0f, midBottom - midTop));
 
             _input.Value = _state.InputClassName;
