@@ -9,41 +9,32 @@ namespace Stratum.Editor
     {
         public const string RootAssetPath = WorkbenchPaths.SoRoot;
 
-        public const string SessionSoClassNameKey = "SoCreator.SoClassName";
-        public const string SessionAssetPathKey = "SoCreator.AssetPath";
-
         private static readonly Regex ValidNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
-        private const string ClassSuffix = "SO";
 
-        public string InputName { get; private set; } = string.Empty;
+        public string InputClassName { get; private set; } = string.Empty;
         public bool IsValid { get; private set; }
-        public bool HasPreview => !string.IsNullOrEmpty(SoClassName);
+        public bool HasPreview => !string.IsNullOrEmpty(ClassName);
         public string ErrorMessage { get; private set; } = string.Empty;
 
-        public string LogicalName { get; private set; } = string.Empty;
-        public string SoClassName { get; private set; } = string.Empty;
-        public string EntityFolderPath { get; private set; } = string.Empty;
+        public string ClassName { get; private set; } = string.Empty;
         public string ScriptFilePath { get; private set; } = string.Empty;
-        public string LeafMarkerPath { get; private set; } = string.Empty;
-        public string FirstAssetFilePath { get; private set; } = string.Empty;
 
         private string _parentFolderAssetPath = RootAssetPath;
+        private string _existingScriptFilePath = string.Empty;
         private bool _scriptExists;
-        private bool _folderExists;
-        private bool _firstAssetExists;
 
         private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
         private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
 
         public void Reset()
         {
-            InputName = string.Empty;
+            InputClassName = string.Empty;
             IsValid = false;
             ErrorMessage = string.Empty;
             ClearOutput();
         }
 
-        public void SetInputName(string input) => ApplyInput(input, _parentFolderAssetPath);
+        public void SetInputClassName(string className) => ApplyInput(className, _parentFolderAssetPath);
 
         public void SetParentFolder(string parentAssetPath)
         {
@@ -60,14 +51,14 @@ namespace Stratum.Editor
 
         public void RefreshDerivedState()
         {
-            if (string.IsNullOrWhiteSpace(InputName))
+            if (string.IsNullOrWhiteSpace(InputClassName))
             {
                 ClearOutput();
                 ErrorMessage = string.Empty;
                 IsValid = false;
                 return;
             }
-            ApplyInput(InputName, _parentFolderAssetPath);
+            ApplyInput(InputClassName, _parentFolderAssetPath);
         }
 
         public PreviewItem[] GetNamePreviewItems() => _namePreviewItems;
@@ -78,17 +69,16 @@ namespace Stratum.Editor
         {
             RefreshExistingTargets();
             return new SoCreationPlan(
-                LogicalName, SoClassName,
-                EntityFolderPath, ScriptFilePath, LeafMarkerPath,
-                FirstAssetFilePath,
-                ShouldCreateScript(), ShouldCreateFirstAsset());
+                ClassName,
+                _scriptExists ? _existingScriptFilePath : ScriptFilePath,
+                ShouldCreateScript());
         }
 
-        private void ApplyInput(string input, string parentAssetPath)
+        private void ApplyInput(string className, string parentAssetPath)
         {
-            if (string.IsNullOrWhiteSpace(input)) { Reset(); return; }
+            if (string.IsNullOrWhiteSpace(className)) { Reset(); return; }
 
-            InputName = input;
+            InputClassName = className;
             if (!TryNormalizeParentFolder(parentAssetPath, out var normalizedParent, out var parentErr))
             {
                 ErrorMessage = parentErr;
@@ -97,32 +87,22 @@ namespace Stratum.Editor
                 return;
             }
 
-            var normalized = input.Trim();
-            if (normalized.EndsWith(ClassSuffix, StringComparison.OrdinalIgnoreCase) &&
-                normalized.Length > ClassSuffix.Length)
-                normalized = normalized[..^ClassSuffix.Length];
-
+            var normalized = className.Trim();
             if (!ValidNameRegex.IsMatch(normalized))
             {
-                ErrorMessage = "Name must be PascalCase and contain only letters and digits.";
+                ErrorMessage = "Class name must be PascalCase and contain only letters and digits.";
                 IsValid = false;
                 ClearOutput();
                 return;
             }
 
             _parentFolderAssetPath = normalizedParent;
-            InputName = input;
+            InputClassName = normalized;
             ErrorMessage = string.Empty;
             IsValid = true;
 
-            LogicalName = normalized;
-            SoClassName = $"{LogicalName}{ClassSuffix}";
-
-            EntityFolderPath = $"{_parentFolderAssetPath}/{LogicalName}";
-            ScriptFilePath = $"{EntityFolderPath}/{SoClassName}.cs";
-            LeafMarkerPath = $"{EntityFolderPath}/_leaf.json";
-            var firstAssetName = $"New{LogicalName}";
-            FirstAssetFilePath = $"{EntityFolderPath}/{firstAssetName}.asset";
+            ClassName = normalized;
+            ScriptFilePath = $"{_parentFolderAssetPath}/{ClassName}.cs";
 
             RefreshPreviewCache();
         }
@@ -136,7 +116,8 @@ namespace Stratum.Editor
             { error = "Invalid parent folder."; return false; }
 
             var normalizedRoot = RootAssetPath.Replace('\\', '/').TrimEnd('/');
-            if (!normalized.StartsWith(normalizedRoot, StringComparison.OrdinalIgnoreCase))
+            if (!string.Equals(normalized, normalizedRoot, StringComparison.OrdinalIgnoreCase) &&
+                !normalized.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase))
             { error = $"Parent folder must be inside {RootAssetPath}."; return false; }
 
             EnsureFolder(normalized);
@@ -148,68 +129,55 @@ namespace Stratum.Editor
 
         private void ClearOutput()
         {
-            LogicalName = string.Empty;
-            SoClassName = string.Empty;
-            EntityFolderPath = string.Empty;
+            ClassName = string.Empty;
             ScriptFilePath = string.Empty;
-            LeafMarkerPath = string.Empty;
-            FirstAssetFilePath = string.Empty;
 
+            _existingScriptFilePath = string.Empty;
             _scriptExists = false;
-            _folderExists = false;
-            _firstAssetExists = false;
 
             _namePreviewItems = Array.Empty<PreviewItem>();
             _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
         private bool ShouldCreateScript() => !_scriptExists;
-        private bool ShouldCreateFirstAsset() => !_firstAssetExists;
 
         private PreviewStatus GetScriptStatus() =>
-            string.IsNullOrEmpty(SoClassName) ? PreviewStatus.Neutral : ShouldCreateScript() ? PreviewStatus.Create : PreviewStatus.Skip;
-
-        private PreviewStatus GetFolderStatus() =>
-            string.IsNullOrEmpty(EntityFolderPath) ? PreviewStatus.Neutral : _folderExists ? PreviewStatus.Skip : PreviewStatus.Create;
-
-        private PreviewStatus GetFirstAssetStatus() =>
-            string.IsNullOrEmpty(FirstAssetFilePath) ? PreviewStatus.Neutral : _firstAssetExists ? PreviewStatus.Skip : PreviewStatus.Create;
+            string.IsNullOrEmpty(ClassName) ? PreviewStatus.Neutral : ShouldCreateScript() ? PreviewStatus.Create : PreviewStatus.Skip;
 
         private void RefreshPreviewCache()
         {
             RefreshExistingTargets();
 
             var scriptStatus = GetScriptStatus();
-            var folderStatus = GetFolderStatus();
-            var assetStatus = GetFirstAssetStatus();
 
             _namePreviewItems = new[]
             {
-                new PreviewItem("SO class", SoClassName, scriptStatus),
+                new PreviewItem("Class", ClassName, scriptStatus),
             };
 
             _pathPreviewItems = new[]
             {
-                new PreviewItem("Folder",      EntityFolderPath,   folderStatus),
-                new PreviewItem("Script file", ScriptFilePath,     scriptStatus),
-                new PreviewItem("First asset", FirstAssetFilePath, assetStatus),
+                new PreviewItem("Script file", _scriptExists ? _existingScriptFilePath : ScriptFilePath, scriptStatus),
             };
         }
 
         private void RefreshExistingTargets()
         {
-            _scriptExists = FileExists(ScriptFilePath);
-            _folderExists = FolderExists(EntityFolderPath);
-            _firstAssetExists = FileExists(FirstAssetFilePath);
+            _existingScriptFilePath = ResolveExisting(ScriptFilePath,
+                SoAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
+
+            _scriptExists = !string.IsNullOrEmpty(_existingScriptFilePath);
+        }
+
+        private static string ResolveExisting(string preferredPath, string indexedPath)
+        {
+            if (FileExists(preferredPath)) return preferredPath;
+            return FileExists(indexedPath) ? indexedPath : string.Empty;
         }
 
         private static bool FileExists(string assetPath) =>
             !string.IsNullOrEmpty(assetPath) &&
             File.Exists(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", assetPath)));
-
-        private static bool FolderExists(string assetPath) =>
-            !string.IsNullOrEmpty(assetPath) &&
-            Directory.Exists(Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "..", assetPath)));
 
         private static void EnsureFolder(string assetPath)
         {
@@ -230,29 +198,18 @@ namespace Stratum.Editor
 
     internal readonly struct SoCreationPlan
     {
-        public readonly string LogicalName;
-        public readonly string SoClassName;
-        public readonly string EntityFolderPath;
+        public readonly string ClassName;
         public readonly string ScriptFilePath;
-        public readonly string LeafMarkerPath;
-        public readonly string FirstAssetFilePath;
         public readonly bool ShouldCreateScript;
-        public readonly bool ShouldCreateFirstAsset;
 
         public SoCreationPlan(
-            string logicalName, string soClassName,
-            string entityFolderPath, string scriptFilePath, string leafMarkerPath,
-            string firstAssetFilePath,
-            bool shouldCreateScript, bool shouldCreateFirstAsset)
+            string className,
+            string scriptFilePath,
+            bool shouldCreateScript)
         {
-            LogicalName = logicalName;
-            SoClassName = soClassName;
-            EntityFolderPath = entityFolderPath;
+            ClassName = className;
             ScriptFilePath = scriptFilePath;
-            LeafMarkerPath = leafMarkerPath;
-            FirstAssetFilePath = firstAssetFilePath;
             ShouldCreateScript = shouldCreateScript;
-            ShouldCreateFirstAsset = shouldCreateFirstAsset;
         }
     }
 }

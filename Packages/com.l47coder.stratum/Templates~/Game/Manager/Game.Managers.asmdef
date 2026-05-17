@@ -4,9 +4,6 @@
     "references": [
         "Stratum",
         "UniTask",
-        "UniTask.Addressables",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
         "VContainer"
     ],
     "includePlatforms": [],

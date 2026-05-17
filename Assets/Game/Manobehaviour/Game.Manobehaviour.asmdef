@@ -1,9 +1,10 @@
-﻿{
-    "name": "Game.Managers",
+{
+    "name": "Game.Manobehaviour",
     "rootNamespace": "",
     "references": [
         "Stratum",
-        "UniTask",
+        "Game.Managers",
+        "Game.ScriptableObject",
         "VContainer"
     ],
     "includePlatforms": [],

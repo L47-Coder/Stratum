@@ -6,9 +6,9 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class ManagerCreatorState
+    internal sealed class ManobehaviourCreatorState
     {
-        public const string RootAssetPath = WorkbenchPaths.ManagerRoot;
+        public const string RootAssetPath = WorkbenchPaths.ManobehaviourRoot;
 
         private static readonly Regex ValidClassNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
@@ -17,13 +17,12 @@ namespace Stratum.Editor
         public bool HasPreview => !string.IsNullOrEmpty(ClassName);
         public string ErrorMessage { get; private set; } = string.Empty;
 
-        public string InterfaceName { get; private set; } = string.Empty;
         public string ClassName { get; private set; } = string.Empty;
         public string ScriptFilePath { get; private set; } = string.Empty;
 
         private string _parentFolderAssetPath = RootAssetPath;
-        private string _existingManagerFilePath = string.Empty;
-        private bool _managerFileExists;
+        private string _existingScriptFilePath = string.Empty;
+        private bool _scriptExists;
 
         private PreviewItem[] _namePreviewItems = Array.Empty<PreviewItem>();
         private PreviewItem[] _pathPreviewItems = Array.Empty<PreviewItem>();
@@ -38,8 +37,6 @@ namespace Stratum.Editor
 
         public void SetInputClassName(string className) => ApplyInput(className, _parentFolderAssetPath);
 
-        public void SetInputWithParentFolder(string parentAssetPath, string className) => ApplyInput(className, parentAssetPath);
-
         public void SetParentFolder(string parentAssetPath)
         {
             if (!TryNormalizeParentFolder(parentAssetPath, out var normalizedParent, out var parentError))
@@ -49,6 +46,7 @@ namespace Stratum.Editor
                 ClearOutput();
                 return;
             }
+
             _parentFolderAssetPath = normalizedParent;
             RefreshDerivedState();
         }
@@ -62,6 +60,7 @@ namespace Stratum.Editor
                 IsValid = false;
                 return;
             }
+
             ApplyInput(InputClassName, _parentFolderAssetPath);
         }
 
@@ -69,14 +68,13 @@ namespace Stratum.Editor
         public PreviewItem[] GetPathPreviewItems() => _pathPreviewItems;
         public PreviewStatus GetInputStatus() => IsValid ? PreviewStatus.Create : PreviewStatus.Skip;
 
-        public ManagerCreationPlan BuildPlan()
+        public ManobehaviourCreationPlan BuildPlan()
         {
             RefreshExistingTargets();
-            return new ManagerCreationPlan(
+            return new ManobehaviourCreationPlan(
                 ClassName,
-                InterfaceName,
-                _managerFileExists ? _existingManagerFilePath : ScriptFilePath,
-                ShouldCreateManagerFile());
+                _scriptExists ? _existingScriptFilePath : ScriptFilePath,
+                ShouldCreateScript());
         }
 
         private void ApplyInput(string className, string parentAssetPath)
@@ -107,7 +105,6 @@ namespace Stratum.Editor
             IsValid = true;
 
             ClassName = normalizedName;
-            InterfaceName = $"I{ClassName}";
             ScriptFilePath = $"{_parentFolderAssetPath}/{ClassName}.cs";
 
             RefreshPreviewCache();
@@ -124,7 +121,7 @@ namespace Stratum.Editor
             var normalizedRoot = RootAssetPath.Replace('\\', '/').TrimEnd('/');
             if (!string.Equals(normalizedParentPath, normalizedRoot, StringComparison.OrdinalIgnoreCase) &&
                 !normalizedParentPath.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase))
-            { errorMessage = "Parent folder must be inside the manager root."; return false; }
+            { errorMessage = "Parent folder must be inside the Manobehaviour root."; return false; }
 
             EnsureFolder(normalizedParentPath);
             if (!AssetDatabase.IsValidFolder(normalizedParentPath))
@@ -135,16 +132,15 @@ namespace Stratum.Editor
 
         private void ClearOutput()
         {
-            InterfaceName = string.Empty;
             ClassName = string.Empty;
             ScriptFilePath = string.Empty;
-            _existingManagerFilePath = string.Empty;
-            _managerFileExists = false;
+            _existingScriptFilePath = string.Empty;
+            _scriptExists = false;
             _namePreviewItems = Array.Empty<PreviewItem>();
             _pathPreviewItems = Array.Empty<PreviewItem>();
         }
 
-        private bool ShouldCreateManagerFile() => !_managerFileExists;
+        private bool ShouldCreateScript() => !_scriptExists;
 
         private static PreviewStatus GetFileStatus(string path, bool exists) =>
             string.IsNullOrEmpty(path) ? PreviewStatus.Neutral : exists ? PreviewStatus.Skip : PreviewStatus.Create;
@@ -153,26 +149,25 @@ namespace Stratum.Editor
         {
             RefreshExistingTargets();
 
-            var managerStatus = GetFileStatus(ScriptFilePath, _managerFileExists);
+            var scriptStatus = GetFileStatus(ScriptFilePath, _scriptExists);
 
             _namePreviewItems = new[]
             {
-                new PreviewItem("Interface", InterfaceName, managerStatus),
-                new PreviewItem("Class",     ClassName,     managerStatus),
+                new PreviewItem("Class", ClassName, scriptStatus),
             };
 
             _pathPreviewItems = new[]
             {
-                new PreviewItem("Script file", _managerFileExists ? _existingManagerFilePath : ScriptFilePath, managerStatus),
+                new PreviewItem("Script file", _scriptExists ? _existingScriptFilePath : ScriptFilePath, scriptStatus),
             };
         }
 
         private void RefreshExistingTargets()
         {
-            _existingManagerFilePath = ResolveExisting(ScriptFilePath,
-                ManagerAssetIndex.FindManagerScript(Path.GetFileName(ScriptFilePath)));
+            _existingScriptFilePath = ResolveExisting(ScriptFilePath,
+                ManobehaviourAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
 
-            _managerFileExists = !string.IsNullOrEmpty(_existingManagerFilePath);
+            _scriptExists = !string.IsNullOrEmpty(_existingScriptFilePath);
         }
 
         private static string ResolveExisting(string preferredPath, string indexedPath)
@@ -201,23 +196,20 @@ namespace Stratum.Editor
         }
     }
 
-    internal readonly struct ManagerCreationPlan
+    internal readonly struct ManobehaviourCreationPlan
     {
         public readonly string ClassName;
-        public readonly string InterfaceName;
         public readonly string ScriptFilePath;
-        public readonly bool ShouldCreateManagerFile;
+        public readonly bool ShouldCreateScript;
 
-        public ManagerCreationPlan(
+        public ManobehaviourCreationPlan(
             string className,
-            string interfaceName,
             string scriptFilePath,
-            bool shouldCreateManagerFile)
+            bool shouldCreateScript)
         {
             ClassName = className;
-            InterfaceName = interfaceName;
             ScriptFilePath = scriptFilePath;
-            ShouldCreateManagerFile = shouldCreateManagerFile;
+            ShouldCreateScript = shouldCreateScript;
         }
     }
 }

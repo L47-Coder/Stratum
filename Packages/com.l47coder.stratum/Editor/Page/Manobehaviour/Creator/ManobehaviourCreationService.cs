@@ -7,33 +7,32 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal static class SoCreationService
+    internal static class ManobehaviourCreationService
     {
-        public static void CreateSoType(SoCreatorState state)
+        public static void CreateScript(ManobehaviourCreatorState state)
         {
             if (state == null || !state.IsValid) return;
-            CreateSoType(state.BuildPlan());
+            CreateScript(state.BuildPlan());
         }
 
-        private static void CreateSoType(SoCreationPlan plan)
+        private static void CreateScript(ManobehaviourCreationPlan plan)
         {
             if (plan.ShouldCreateScript)
-                WriteSoScript(plan);
+                WriteScript(plan);
 
             AssetDatabase.Refresh();
-            SoAssetIndex.Invalidate();
-            Debug.Log($"[SoCreationService] {plan.ClassName} ready.");
+            ManobehaviourAssetIndex.Invalidate();
+            Debug.Log($"[ManobehaviourCreationService] {plan.ClassName} ready.");
         }
 
-        private static void WriteSoScript(SoCreationPlan plan)
+        private static void WriteScript(ManobehaviourCreationPlan plan)
         {
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
 
             var sb = new StringBuilder();
             sb.AppendLine("using UnityEngine;");
             sb.AppendLine();
-            sb.AppendLine($"[CreateAssetMenu(menuName = \"ScriptableObject/{plan.ClassName}\")]");
-            sb.AppendLine($"public class {plan.ClassName} : ScriptableObject");
+            sb.AppendLine($"public class {plan.ClassName} : MonoBehaviour");
             sb.AppendLine("{");
             sb.AppendLine();
             sb.AppendLine("}");
@@ -58,18 +57,18 @@ namespace Stratum.Editor
         }
     }
 
-    internal static class SoAssetIndex
+    internal static class ManobehaviourAssetIndex
     {
         private static Dictionary<string, string> _scripts;
 
-        static SoAssetIndex()
+        static ManobehaviourAssetIndex()
         {
             EditorApplication.projectChanged -= Invalidate;
             EditorApplication.projectChanged += Invalidate;
         }
 
         public static string FindScript(string fileName) =>
-            Find(ref _scripts, SoCreatorState.RootAssetPath, fileName, ".cs");
+            Find(ref _scripts, ManobehaviourCreatorState.RootAssetPath, fileName, ".cs");
 
         public static void Invalidate() => _scripts = null;
 

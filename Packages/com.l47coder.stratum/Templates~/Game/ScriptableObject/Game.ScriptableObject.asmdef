@@ -2,11 +2,7 @@
     "name": "Game.ScriptableObject",
     "rootNamespace": "",
     "references": [
-        "Stratum",
-        "UniTask",
-        "UniTask.Addressables",
-        "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Stratum"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

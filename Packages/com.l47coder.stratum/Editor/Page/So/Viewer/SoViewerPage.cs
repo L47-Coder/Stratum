@@ -30,7 +30,7 @@ namespace Stratum.Editor
 
         public void OnFirstEnter(Action<string> onSelected)
         {
-            _treeView.ExcludePatterns = new() { "**/Generated", "**/*.asmdef", "**/*.asset", "**/_leaf.json" };
+            _treeView.ExcludePatterns = new() { "**/*.asmdef", "**/*.asset" };
             _treeView.OnNodeSelect(onSelected);
         }
 
@@ -51,7 +51,6 @@ namespace Stratum.Editor
     {
         private readonly TextControl _csTextView = new();
         private readonly SoCreatorPanel _creatorPanel = new();
-        private readonly SoTablePanel _tablePanel = new();
         private string _currentPath;
 
         private string _cachedCsPath;
@@ -62,10 +61,8 @@ namespace Stratum.Editor
             var normalized = path?.Replace('\\', '/').TrimEnd('/') ?? string.Empty;
             _currentPath = normalized;
 
-            if (IsBranchFolder(normalized))
+            if (Directory.Exists(normalized))
                 _creatorPanel.Retarget(normalized);
-            else if (IsLeafFolder(normalized))
-                _tablePanel.Retarget(normalized);
         }
 
         public void OnGUI(Rect rect)
@@ -78,7 +75,6 @@ namespace Stratum.Editor
 
             if (Directory.Exists(_currentPath))
             {
-                if (IsLeafFolder(_currentPath)) { _tablePanel.OnGUI(rect); return; }
                 _creatorPanel.OnGUI(rect);
                 return;
             }
@@ -91,15 +87,6 @@ namespace Stratum.Editor
                     break;
             }
         }
-
-        private const string LeafMarkerFileName = "_leaf.json";
-
-        private static bool IsLeafFolder(string folderPath) =>
-            Directory.Exists(folderPath) &&
-            File.Exists(Path.Combine(folderPath, LeafMarkerFileName));
-
-        private static bool IsBranchFolder(string folderPath) =>
-            Directory.Exists(folderPath) && !IsLeafFolder(folderPath);
 
         private void DrawCsFile(Rect rect, string path)
         {

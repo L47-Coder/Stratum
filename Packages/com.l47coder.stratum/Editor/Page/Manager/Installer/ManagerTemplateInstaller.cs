@@ -9,19 +9,18 @@ namespace Stratum.Editor
     internal static class ManagerTemplateInstaller
     {
         private const string ManifestFileName = "manifest.json";
-        private const string LeafMarkerFileName = "_leaf.json";
 
         [Serializable]
         public sealed class PackageInfo
         {
-            public string id;
-            public string displayName;
-            public string description;
-            public bool recommended;
+            public string id = string.Empty;
+            public string displayName = string.Empty;
+            public string description = string.Empty;
+            public bool recommended = false;
         }
 
         [Serializable]
-        private sealed class Manifest { public List<PackageInfo> packages; }
+        private sealed class Manifest { public List<PackageInfo> packages = new(); }
 
         private static List<PackageInfo> _cachedManifest;
 
@@ -64,7 +63,7 @@ namespace Stratum.Editor
 
             try
             {
-                var fileName = $"{managerName}Manager.cs";
+                var fileName = $"{managerName}.cs";
                 foreach (var _ in Directory.EnumerateFiles(rootAbs, fileName, SearchOption.AllDirectories))
                     return true;
             }
@@ -94,11 +93,7 @@ namespace Stratum.Editor
 
                 var destPath = $"{WorkbenchPaths.ManagerRoot}/{relativeTemplatePath}";
 
-                AssetTransporter.Transfer(sourcePath, destPath, ShouldSkipTemplateFile);
-                ManagerPostCompileAssetService.ScheduleTemplateInstall(
-                    managerName,
-                    $"{destPath}/{managerName}ManagerConfig.asset",
-                    ManagerAddressConvention.AddressOf(managerName));
+                AssetTransporter.Transfer(sourcePath, destPath);
                 installed++;
                 Debug.Log($"[ManagerTemplateInstaller] Installed Manager template \"{id}\" to {destPath}.");
             }
@@ -128,7 +123,7 @@ namespace Stratum.Editor
             try
             {
                 string fallbackAbs = null;
-                var expectedScriptName = $"{managerName}Manager.cs";
+                var expectedScriptName = $"{managerName}.cs";
 
                 foreach (var dir in Directory.EnumerateDirectories(rootAbs, "*", SearchOption.AllDirectories))
                 {
@@ -137,8 +132,7 @@ namespace Stratum.Editor
 
                     fallbackAbs ??= dir;
 
-                    if (File.Exists(Path.Combine(dir, LeafMarkerFileName)) ||
-                        File.Exists(Path.Combine(dir, expectedScriptName)))
+                    if (File.Exists(Path.Combine(dir, expectedScriptName)))
                         return SetTemplateResult(rootAbs, dir, out sourceAssetPath, out relativeTemplatePath);
                 }
 
@@ -188,9 +182,6 @@ namespace Stratum.Editor
 
         private static string NormalizeAssetPath(string path) =>
             string.IsNullOrEmpty(path) ? string.Empty : path.Replace('\\', '/').Trim('/');
-
-        private static bool ShouldSkipTemplateFile(string relativePath) =>
-            Path.GetFileName(relativePath).EndsWith("ManagerConfig.asset", StringComparison.Ordinal);
 
         private static string Rel(string rootAbs, string fullPath)
         {

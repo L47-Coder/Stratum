@@ -57,9 +57,9 @@ namespace Stratum.Editor
             CreatorPageDraw.DrawHeader("New ScriptableObject type");
 
             var newName = CreatorPageDraw.DrawEditableField(
-                "Type name", _state.InputName, _state.GetInputStatus());
-            if (newName != _state.InputName)
-                _state.SetInputName(newName);
+                "Class name", _state.InputClassName, _state.GetInputStatus());
+            if (newName != _state.InputClassName)
+                _state.SetInputClassName(newName);
 
             if (!string.IsNullOrEmpty(_state.ErrorMessage))
             {

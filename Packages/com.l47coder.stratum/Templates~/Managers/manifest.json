@@ -1,28 +1,3 @@
 {
-  "packages": [
-    {
-      "id": "Asset",
-      "displayName": "Asset Manager",
-      "description": "Loads assets through Addressables by address and releases cached handles in one pass.",
-      "recommended": true
-    },
-    {
-      "id": "Event",
-      "displayName": "Event Manager",
-      "description": "Publishes synchronous and asynchronous typed events with subscription handles.",
-      "recommended": true
-    },
-    {
-      "id": "Message",
-      "displayName": "Message Manager",
-      "description": "Registers message handlers and dispatches synchronous or asynchronous message calls.",
-      "recommended": true
-    },
-    {
-      "id": "Task",
-      "displayName": "Task Manager",
-      "description": "Builds and runs frame-driven task chains with actions, waits, loops and lifetimes.",
-      "recommended": true
-    }
-  ]
+  "packages": []
 }

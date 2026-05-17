@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: PageOrder
   m_EditorClassIdentifier: 
   _groups:
-  - Title: Framework
-    Tabs:
-    - Sync
   - Title: Manager
     Tabs:
     - Viewer
     - Order
     - Installer
+  - Title: Manobehaviour
+    Tabs:
+    - Viewer
   - Title: ScriptableObject
     Tabs:
     - Viewer
