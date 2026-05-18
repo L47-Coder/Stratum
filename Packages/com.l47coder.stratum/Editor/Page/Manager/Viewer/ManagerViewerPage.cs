@@ -12,7 +12,7 @@ namespace Stratum.Editor
 
         private readonly ManagerLeftPanel _leftPanel = new();
         private readonly ManagerRightPanel _rightPanel = new();
-        private SplitterHandle _splitter = new(200f);
+        private SplitterHandle _splitter = new(220f);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
         public void OnEnter() => _leftPanel.OnEnter();
