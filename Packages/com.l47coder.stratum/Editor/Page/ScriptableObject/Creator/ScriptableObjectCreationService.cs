@@ -7,25 +7,25 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal static class SoCreationService
+    internal static class ScriptableObjectCreationService
     {
-        public static void CreateSoType(SoCreatorState state)
+        public static void CreateScriptableObjectType(ScriptableObjectCreatorState state)
         {
             if (state == null || !state.IsValid) return;
-            CreateSoType(state.BuildPlan());
+            CreateScriptableObjectType(state.BuildPlan());
         }
 
-        private static void CreateSoType(SoCreationPlan plan)
+        private static void CreateScriptableObjectType(ScriptableObjectCreationPlan plan)
         {
             if (plan.ShouldCreateScript)
-                WriteSoScript(plan);
+                WriteScriptableObjectScript(plan);
 
             AssetDatabase.Refresh();
-            SoAssetIndex.Invalidate();
-            Debug.Log($"[SoCreationService] {plan.ClassName} ready.");
+            ScriptableObjectAssetIndex.Invalidate();
+            Debug.Log($"[ScriptableObjectCreationService] {plan.ClassName} ready.");
         }
 
-        private static void WriteSoScript(SoCreationPlan plan)
+        private static void WriteScriptableObjectScript(ScriptableObjectCreationPlan plan)
         {
             EnsureFolder(Path.GetDirectoryName(plan.ScriptFilePath));
             File.WriteAllText(plan.ScriptFilePath, BuildSource(plan.ClassName), Encoding.UTF8);
@@ -61,18 +61,18 @@ namespace Stratum.Editor
         }
     }
 
-    internal static class SoAssetIndex
+    internal static class ScriptableObjectAssetIndex
     {
         private static Dictionary<string, string> _scripts;
 
-        static SoAssetIndex()
+        static ScriptableObjectAssetIndex()
         {
             EditorApplication.projectChanged -= Invalidate;
             EditorApplication.projectChanged += Invalidate;
         }
 
         public static string FindScript(string fileName) =>
-            Find(ref _scripts, SoCreatorState.RootAssetPath, fileName, ".cs");
+            Find(ref _scripts, ScriptableObjectCreatorState.RootAssetPath, fileName, ".cs");
 
         public static void Invalidate() => _scripts = null;
 

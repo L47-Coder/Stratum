@@ -5,9 +5,9 @@ using UnityEditor;
 
 namespace Stratum.Editor
 {
-    internal sealed class SoCreatorState : ICreatorState
+    internal sealed class ScriptableObjectCreatorState : ICreatorState
     {
-        public const string RootAssetPath = WorkbenchPaths.SoRoot;
+        public const string RootAssetPath = WorkbenchPaths.ScriptableObjectRoot;
 
         private static readonly Regex ValidNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
@@ -59,12 +59,12 @@ namespace Stratum.Editor
         }
 
         public string GetPreviewSource() =>
-            HasPreview ? SoCreationService.BuildSource(ClassName) : string.Empty;
+            HasPreview ? ScriptableObjectCreationService.BuildSource(ClassName) : string.Empty;
 
-        public SoCreationPlan BuildPlan()
+        public ScriptableObjectCreationPlan BuildPlan()
         {
             RefreshExistingTargets();
-            return new SoCreationPlan(
+            return new ScriptableObjectCreationPlan(
                 ClassName,
                 _scriptExists ? _existingScriptFilePath : ScriptFilePath,
                 ShouldCreateScript());
@@ -137,7 +137,7 @@ namespace Stratum.Editor
         private void RefreshExistingTargets()
         {
             _existingScriptFilePath = ResolveExisting(ScriptFilePath,
-                SoAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
+                ScriptableObjectAssetIndex.FindScript(Path.GetFileName(ScriptFilePath)));
 
             _scriptExists = !string.IsNullOrEmpty(_existingScriptFilePath);
         }
@@ -169,13 +169,13 @@ namespace Stratum.Editor
         }
     }
 
-    internal readonly struct SoCreationPlan
+    internal readonly struct ScriptableObjectCreationPlan
     {
         public readonly string ClassName;
         public readonly string ScriptFilePath;
         public readonly bool ShouldCreateScript;
 
-        public SoCreationPlan(
+        public ScriptableObjectCreationPlan(
             string className,
             string scriptFilePath,
             bool shouldCreateScript)

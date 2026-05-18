@@ -5,13 +5,13 @@ using UnityEngine;
 
 namespace Stratum.Editor
 {
-    internal sealed class SoViewerPage : IPage
+    internal sealed class ScriptableObjectViewerPage : IPage
     {
         public string GroupTitle => "ScriptableObject";
         public string TabTitle => "Viewer";
 
-        private readonly SoLeftPanel _leftPanel = new();
-        private readonly SoRightPanel _rightPanel = new();
+        private readonly ScriptableObjectLeftPanel _leftPanel = new();
+        private readonly ScriptableObjectRightPanel _rightPanel = new();
         private SplitterHandle _splitter = new(220f);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
@@ -25,9 +25,9 @@ namespace Stratum.Editor
         }
     }
 
-    internal sealed class SoLeftPanel
+    internal sealed class ScriptableObjectLeftPanel
     {
-        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.SoRoot };
+        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.ScriptableObjectRoot };
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -49,15 +49,15 @@ namespace Stratum.Editor
 
         private static void EnsureRootFolder()
         {
-            if (AssetDatabase.IsValidFolder(WorkbenchPaths.SoRoot)) return;
-            SoCreationService.EnsureFolder(WorkbenchPaths.SoRoot);
+            if (AssetDatabase.IsValidFolder(WorkbenchPaths.ScriptableObjectRoot)) return;
+            ScriptableObjectCreationService.EnsureFolder(WorkbenchPaths.ScriptableObjectRoot);
         }
     }
 
-    internal sealed class SoRightPanel
+    internal sealed class ScriptableObjectRightPanel
     {
         private readonly TextControl _csTextView = new();
-        private readonly SoCreatorPanel _creatorPanel = new();
+        private readonly ScriptableObjectCreatorPanel _creatorPanel = new();
         private string _currentPath;
 
         private string _cachedCsPath;
