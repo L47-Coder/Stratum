@@ -4,7 +4,7 @@ Stratum is a lightweight Unity package that combines Addressables-backed
 VContainer bootstrapping with a focused IMGUI Dev Workbench for scaffolding
 single-file Manager, MonoBehaviour and ScriptableObject scripts.
 
-Status: **0.5.2**. The package is usable, but the public API is still
+Status: **0.5.3**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
@@ -19,7 +19,11 @@ pre-`1.0` and may change between minor versions.
   `IGameBoot.OnGameStart`.
 - **Dev Workbench.** `Tools > Stratum > Dev Workbench` opens a reorderable
   editor window with three symmetric script generators (`Manager`,
-  `MonoBehaviour`, `ScriptableObject`) plus a Manager boot-order editor.
+  `MonoBehaviour`, `ScriptableObject`), a Manager boot-order editor and a
+  Manager template import tab.
+- **Manager templates.** Optional single-file `EventManager`,
+  `MessageManager` and `TaskManager` templates can be imported from
+  `Manager > Import`.
 - **Single-file code generation.** Each creator panel writes one `.cs` file:
   - Manager: `public interface IXxxManager : IManager` and
     `internal sealed class XxxManager : IXxxManager`.
@@ -76,7 +80,7 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.2
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.3
 ```
 
 ## Quick Start
@@ -91,9 +95,11 @@ https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5
    Managers depend on.
 6. In `ScriptableObject > Viewer`, generate ScriptableObject types and
    create matching `.asset` instances directly from the Unity create menu.
-7. In `Manager > Order`, arrange the runtime Manager boot order. Newly
+7. Optionally import `EventManager`, `MessageManager` or `TaskManager` from
+   `Manager > Import`.
+8. In `Manager > Order`, arrange the runtime Manager boot order. Newly
    compiled Managers are added automatically; missing ones are pruned.
-8. In your boot scene, add a `GameLifetimeScope` component and the generated
+9. In your boot scene, add a `GameLifetimeScope` component and the generated
    `GameBoot` MonoBehaviour, then implement `IGameBoot.OnGameStart`.
 
 Example boot script:
@@ -122,6 +128,7 @@ type) via VContainer once they exist in the project.
 | --- | --- | --- |
 | `Manager` | `Viewer` | Browse `Assets/Game/Manager`, show source files and a single-file Manager creator panel on the selected folder. |
 | `Manager` | `Order` | Sync and edit `ManagerOrder.asset`, which controls runtime Manager registration order. |
+| `Manager` | `Import` | Import optional single-file Manager templates from `Templates~/Managers`. |
 | `MonoBehaviour` | `Viewer` | Browse `Assets/Game/MonoBehaviour` and generate single-file `MonoBehaviour` scripts. |
 | `ScriptableObject` | `Viewer` | Browse `Assets/Game/ScriptableObject` and generate single-file ScriptableObject scripts. |
 

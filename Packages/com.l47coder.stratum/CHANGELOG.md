@@ -9,6 +9,28 @@ This changelog was reset for the renovated `0.5.0` package. Earlier preview
 history is intentionally omitted because the runtime and Workbench architecture
 were substantially rebuilt.
 
+## [0.5.3] - 2026-05-18
+
+### Added
+
+- Added `Manager > Import`, a lightweight Workbench tab that scans
+  `Templates~/Managers/*.cs` and imports selected Manager templates directly
+  into `Assets/Game/Manager`.
+- Restored single-file built-in Manager templates for:
+  - `EventManager`
+  - `MessageManager`
+  - `TaskManager`
+
+### Changed
+
+- Manager order now syncs when opening the `Manager > Order` tab and again
+  before entering Play Mode, so newly compiled Managers are added and stale
+  entries are pruned before runtime registration.
+- Manager template import no longer uses a manifest or per-template folders;
+  each template is a bare `.cs` file named after the Manager.
+- The `Manager > Import` UI now presents a compact name-only list and uses the
+  shared `ButtonControl` for importing.
+
 ## [0.5.2] - 2026-05-18
 
 This release is a substantial simplification pass. The package drops the
