@@ -14,11 +14,14 @@ Packages/
 
 Assets/
 +-- Game/                   # Dogfooded generated host layout
-+-- StratumWorkbenchExamples/
+    +-- Frame/
+    +-- Manager/
+    +-- MonoBehaviour/
+    +-- ScriptableObject/
 ```
 
 Package code belongs under `Packages/com.l47coder.stratum/`. The `Assets/`
-folder is the development host project used for manual testing, examples and
+folder is the development host project used for manual testing and
 dogfooding generated output.
 
 ## Prerequisites
@@ -41,12 +44,11 @@ and VContainer through `Packages/manifest.json`.
 Useful manual checks:
 
 - Open `Tools > Stratum > Dev Workbench`.
-- Use `Framework > Sync` after changing generated Manager data or refreshers.
-- Exercise `Manager > Viewer`, `Manager > Creator`, `Manager > Order` and
-  `Manager > Installer` for Manager workflow changes.
-- Exercise `ScriptableObject > Viewer` for SO creation, asset rename/delete and
-  table editing changes.
-- Open `Tools > Stratum > Test` for local editor-control examples.
+- Exercise `Manager > Viewer` and `Manager > Order` for Manager workflow
+  changes.
+- Exercise `MonoBehaviour > Viewer` for MonoBehaviour script generation
+  changes.
+- Exercise `ScriptableObject > Viewer` for SO script generation changes.
 
 ## Coding Conventions
 
@@ -56,9 +58,9 @@ Useful manual checks:
   `Stratum` namespace.
 - Editor code lives in `Packages/com.l47coder.stratum/Editor/` and uses the
   `Stratum.Editor` namespace.
-- Host templates live in `Packages/com.l47coder.stratum/Templates~/`.
-- Manager templates in `Templates~/Managers/` are copied into user projects as
-  source. Treat their public interfaces as user-facing API.
+- Host templates live in `Packages/com.l47coder.stratum/Templates~/Game/` and
+  are copied into the user project's `Assets/Game/` skeleton on first
+  Workbench open.
 - Keep generated host-project files deterministic and easy to diff.
 - Avoid unrelated refactors in feature or fix branches.
 

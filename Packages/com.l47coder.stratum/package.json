@@ -1,9 +1,9 @@
 {
   "name": "com.l47coder.stratum",
   "displayName": "Stratum",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "unity": "2022.3",
-  "description": "A Unity Manager and ScriptableObject workflow package with Addressables, VContainer bootstrapping and an in-editor Dev Workbench.",
+  "description": "A lightweight Unity package with Addressables-backed VContainer bootstrapping and a Dev Workbench that scaffolds single-file Manager, MonoBehaviour and ScriptableObject scripts.",
   "keywords": [
     "unity",
     "framework",

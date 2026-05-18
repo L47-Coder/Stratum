@@ -13,22 +13,22 @@ dogfood the package.
 - Changelog: [Packages/com.l47coder.stratum/CHANGELOG.md](./Packages/com.l47coder.stratum/CHANGELOG.md)
 - License: [MIT](./LICENSE)
 
-Stratum is a Manager and ScriptableObject workflow package for Unity. It
-provides Addressables-backed Manager bootstrapping, VContainer registration,
-config tables and an IMGUI Dev Workbench at `Tools > Stratum > Dev Workbench`.
+Stratum is a lightweight Unity package combining Addressables-backed
+VContainer bootstrapping with a Dev Workbench at
+`Tools > Stratum > Dev Workbench` that scaffolds single-file Manager,
+MonoBehaviour and ScriptableObject scripts.
 
 ## Repository Layout
 
 ```text
 .
 +-- Assets/                              # Unity host project
-|   +-- Game/                            # Generated/dogfooded Stratum host layout
-|   |   +-- Editor/
+|   +-- Game/                            # Dogfooded Stratum host layout
 |   |   +-- Frame/
 |   |   +-- Manager/
+|   |   +-- MonoBehaviour/
 |   |   +-- ScriptableObject/
 |   +-- Scenes/
-|   +-- StratumWorkbenchExamples/        # Local examples for editor controls
 +-- Packages/
 |   +-- com.l47coder.stratum/            # The embedded UPM package
 |   +-- manifest.json                    # Host project dependencies
@@ -64,7 +64,7 @@ The `?path=` segment is required because this repository is a full Unity
 project and the package lives in a subfolder. To install a tagged release:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.1
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.2
 ```
 
 ## Requirements

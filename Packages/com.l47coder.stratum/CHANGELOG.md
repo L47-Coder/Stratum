@@ -9,6 +9,100 @@ This changelog was reset for the renovated `0.5.0` package. Earlier preview
 history is intentionally omitted because the runtime and Workbench architecture
 were substantially rebuilt.
 
+## [0.5.2] - 2026-05-18
+
+This release is a substantial simplification pass. The package drops the
+config/data/refresher Manager scaffolding and the popup-driven editor
+subsystem, and reorganizes the Dev Workbench around three symmetric script
+generators: `Manager`, `MonoBehaviour` and `ScriptableObject`. Each generator
+now writes a single `.cs` file with no companion assets.
+
+### Added
+
+- Added a `MonoBehaviour` Workbench page that scaffolds a single
+  `class XxxComponent : MonoBehaviour` script under
+  `Assets/Game/MonoBehaviour` and the new `Game.MonoBehaviour` host assembly.
+- Added a unified `CreatorLayout<TState>` that drives the Manager, MonoBehaviour
+  and ScriptableObject creator UI: input field on top, live source preview in
+  the middle, create button pinned at the bottom.
+- Added reusable `InputControl` and `ButtonControl` editor controls with the
+  same `BoxDrawer` styling as the other custom controls.
+- Added on-enter "default-select the root node" behavior for every Workbench
+  viewer page so the right pane immediately shows the creator panel after a
+  tab switch when nothing has been picked yet.
+- Added new state-query / state-mutation helpers across the editor controls:
+  - `TreeControl.GetSelectedPath()`
+  - `TableControl.GetSelectedIndex()` and `ListControl.GetSelectedIndex()`
+  - `InputControl.GetValue()` / `InputControl.SetValue(string)`
+
+### Changed
+
+- Switched to lightweight, single-file code generation:
+  - Manager creator writes one `.cs` with `public interface IXxxManager : IManager`
+    and `internal sealed class XxxManager : IXxxManager`. No more base-class
+    partials, data classes, refresher stubs, config `.asset` files or
+    Addressables entries.
+  - ScriptableObject creator writes one `.cs` with `[CreateAssetMenu]` and
+    `public class XxxConfig : ScriptableObject`.
+  - MonoBehaviour creator writes one `.cs` with
+    `public class XxxComponent : MonoBehaviour`.
+- Reorganized the Dev Workbench around three sections: `Manager`,
+  `MonoBehaviour` and `ScriptableObject`. The Manager section keeps a
+  `Viewer` plus an `Order` tab; the other two each expose a `Viewer` tab.
+- Renamed every editor `So*` identifier and the `Editor/Page/So` folder to
+  use the full `ScriptableObject*` name, including class names, file names
+  and the `WorkbenchPaths.ScriptableObjectRoot` constant. The on-disk asset
+  path `Assets/Game/ScriptableObject` is unchanged.
+- Renamed the `Manobehaviour` typo to `MonoBehaviour` across editor pages,
+  folders and assembly definitions.
+- Renamed `FieldAttribute` to `TableAttribute` and scoped it to table column
+  metadata (`Title`, `Hide`, `Readonly`, `Width`).
+- Unified the `Draw(Rect)` signature across every custom editor control
+  (`TextControl`, `InputControl`, `ButtonControl`, `TreeControl`,
+  `ListControl`, `TableControl`). Item data and configuration are exposed
+  through public properties or `Set*` / `Get*` functions instead of per-frame
+  arguments.
+- `TableControl` is no longer generic at the class level; rows are bound
+  through `IList Items` and the element type is detected via reflection so
+  static state can be safely shared across owners.
+- Tightened the `Game.Managers` host assembly references back to `Stratum`,
+  `UniTask` and `VContainer`.
+
+### Removed
+
+- Removed the previous Manager scaffolding artefacts: generated base-class
+  partials, manager data classes, refresher stubs, per-Manager `.asset`
+  configs and the `ManagerConfig/<ManagerName>` Addressables entries.
+- Removed `BaseManager<TConfig, TData>`, `BaseManagerConfig<TData>` and
+  `BaseManagerData`. `IManager` is now a bare marker interface; Managers
+  implement it directly (and optionally `IAsyncInitManager`).
+- Removed the `Manager > Installer` Workbench page, the
+  `Templates~/Managers/manifest.json` template manifest and the built-in
+  `AssetManager`, `EventManager`, `MessageManager` and `TaskManager`
+  templates.
+- Removed `Framework > Sync` and the `[EditorSync]` attribute, along with the
+  previously-required `ManagerOrderSync.Run()` entry point.
+- Removed `DropdownAttribute` and `ExpandableAttribute` and the entire
+  `Editor/Popup` subsystem (`DropdownPopup`, `FieldPopup`,
+  `DropdownAttributeResolver`) and `TableControl.Popups`.
+- Removed `TextControl.WordWrap`. Long preview text now scrolls horizontally
+  rather than wrapping.
+- Removed the briefly-introduced `Container` Workbench page, the
+  `Game.Container` template assembly and the `Game.Managers → Game.Container`
+  reference. Manager-bound interfaces can be defined directly inside the
+  Manager file when needed.
+- Removed `Assets/StratumWorkbenchExamples` and any editor code paths that
+  depended on the deleted popup APIs.
+
+### Fixed
+
+- Fixed stale `TextField` display when switching Workbench pages by clearing
+  keyboard focus on every page switch. Typing in one page's input no longer
+  leaks the text into a sibling page's input control.
+- Fixed `CreatorLayout` reset behavior so the input field clears after a
+  successful create by routing the assignment through
+  `InputControl.SetValue` instead of the removed `Value` property.
+
 ## [0.5.1] - 2026-05-16
 
 ### Changed

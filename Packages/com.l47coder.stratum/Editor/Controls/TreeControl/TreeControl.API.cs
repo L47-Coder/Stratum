@@ -10,7 +10,6 @@ namespace Stratum.Editor
         public bool CanRemove { get; set; } = true;
         public bool CanSelect { get; set; } = true;
         public bool CanEdit { get; set; } = true;
-
         public bool CanReorder { get; set; } = true;
         public bool CanDragOut { get; set; } = false;
         public bool CanReceiveDrop { get; set; } = true;

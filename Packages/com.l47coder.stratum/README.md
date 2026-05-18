@@ -1,33 +1,35 @@
 # Stratum
 
-Stratum is a Unity package for building small Manager-based runtime services
-and keeping their configuration assets editable from a focused IMGUI workbench.
-It combines `ScriptableObject` data, Addressables, UniTask and VContainer with
-editor tooling for Manager scaffolding, Manager order, config tables and
-ScriptableObject asset folders.
+Stratum is a lightweight Unity package that combines Addressables-backed
+VContainer bootstrapping with a focused IMGUI Dev Workbench for scaffolding
+single-file Manager, MonoBehaviour and ScriptableObject scripts.
 
-Status: **0.5.1**. The package is usable, but the public API is still
+Status: **0.5.2**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
 
-- **Runtime Manager contracts.** `BaseManager<TConfig, TData>`,
-  `BaseManagerConfig<TData>`, `BaseManagerData`, `IManager`,
-  `IAsyncInitManager` and `IGameBoot` define the runtime service model.
+- **Runtime Manager contract.** `IManager` is a bare marker interface;
+  Managers implement it directly. `IAsyncInitManager.InitAsync(token)` is the
+  optional asynchronous init hook.
 - **Addressables-backed boot.** `GameLifetimeScope` loads
-  `Frame/ManagerOrder`, registers Managers into VContainer, loads each
-  Manager config, runs optional async init, then calls the scene `IGameBoot`.
+  `Frame/ManagerOrder`, resolves Manager types by name, registers them into
+  VContainer and hands control to `GameBootstrap`, which awaits any
+  `IAsyncInitManager.InitAsync` calls and then injects and runs the scene
+  `IGameBoot.OnGameStart`.
 - **Dev Workbench.** `Tools > Stratum > Dev Workbench` opens a reorderable
-  editor window with `Framework`, `Manager` and `ScriptableObject` sections.
-- **Manager workflow.** The Workbench can view Manager source/config folders,
-  create new Managers, install built-in Manager templates and edit Manager boot
-  order.
-- **ScriptableObject workflow.** The Workbench can create SO types under
-  `Assets/Game/ScriptableObject`, create/delete/rename matching `.asset` files
-  and display them in table form.
-- **Reusable editor controls.** `ListControl`, `TableControl`, `TreeControl`,
-  `TextControl`, `DropdownPopup` and `FieldPopup` are public editor-side
-  controls in the `Stratum.Editor` assembly.
+  editor window with three symmetric script generators (`Manager`,
+  `MonoBehaviour`, `ScriptableObject`) plus a Manager boot-order editor.
+- **Single-file code generation.** Each creator panel writes one `.cs` file:
+  - Manager: `public interface IXxxManager : IManager` and
+    `internal sealed class XxxManager : IXxxManager`.
+  - MonoBehaviour: `public class XxxComponent : MonoBehaviour`.
+  - ScriptableObject: `[CreateAssetMenu(menuName = "ScriptableObject/Xxx")]`
+    plus `public class XxxConfig : ScriptableObject`.
+- **Reusable editor controls.** `InputControl`, `ButtonControl`,
+  `TextControl`, `TreeControl`, `ListControl` and `TableControl` are public
+  controls in the `Stratum.Editor` assembly, all driven by a uniform
+  `Draw(Rect)` signature.
 
 ## Requirements
 
@@ -74,23 +76,24 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.1
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.2
 ```
 
 ## Quick Start
 
 1. Install the dependencies and this package.
 2. Open `Tools > Stratum > Dev Workbench`.
-3. On first open, Stratum ensures Addressables exists, copies the host
-   skeleton under `Assets/Game/`, registers `Frame/ManagerOrder` and creates
-   the `ManagerConfig` Addressables group.
-4. In `Manager > Installer`, import the built-in Manager templates you want:
-   `Asset`, `Event`, `Message` and `Task`.
-5. In `Manager > Creator`, create project-specific Managers. The Creator
-   writes the Manager interface, Manager partial class, data class, generated
-   base-class partials, refresher stub, config asset and Addressables entry.
-6. In `Manager > Order`, arrange the runtime Manager boot order.
-7. In your boot scene, add a `GameLifetimeScope` component and the generated
+3. On first open, Stratum ensures Addressables exists and copies the host
+   skeleton under `Assets/Game/`, then registers `Frame/ManagerOrder`.
+4. In `Manager > Viewer`, select the root folder and use the creator panel
+   on the right to generate a Manager script.
+5. In `MonoBehaviour > Viewer`, generate any data-holder components your
+   Managers depend on.
+6. In `ScriptableObject > Viewer`, generate ScriptableObject types and
+   create matching `.asset` instances directly from the Unity create menu.
+7. In `Manager > Order`, arrange the runtime Manager boot order. Newly
+   compiled Managers are added automatically; missing ones are pruned.
+8. In your boot scene, add a `GameLifetimeScope` component and the generated
    `GameBoot` MonoBehaviour, then implement `IGameBoot.OnGameStart`.
 
 Example boot script:
@@ -109,31 +112,28 @@ public sealed class GameBoot : MonoBehaviour, IGameBoot
 }
 ```
 
-Managers created or installed through the Workbench are registered by their
-interfaces, so they can be injected into `GameBoot` with VContainer once their
-templates exist in the project.
+Generated Managers are registered as `IManager` and as their implemented
+interfaces, so they can be injected into `GameBoot` (or any other resolved
+type) via VContainer once they exist in the project.
 
 ## Workbench Pages
 
 | Group | Tab | Purpose |
 | --- | --- | --- |
-| `Framework` | `Sync` | Runs all `[EditorSync]` methods manually, on Workbench close or before Play Mode. |
-| `Manager` | `Viewer` | Browses `Assets/Game/Manager`, shows source files and config tables. |
-| `Manager` | `Creator` | Scaffolds a Manager under the selected Manager folder. |
-| `Manager` | `Order` | Syncs and edits `ManagerOrder.asset`, which controls runtime registration order. |
-| `Manager` | `Installer` | Imports built-in Manager templates from `Templates~/Managers`. |
-| `ScriptableObject` | `Viewer` | Creates SO types and manages matching SO assets under `Assets/Game/ScriptableObject`. |
+| `Manager` | `Viewer` | Browse `Assets/Game/Manager`, show source files and a single-file Manager creator panel on the selected folder. |
+| `Manager` | `Order` | Sync and edit `ManagerOrder.asset`, which controls runtime Manager registration order. |
+| `MonoBehaviour` | `Viewer` | Browse `Assets/Game/MonoBehaviour` and generate single-file `MonoBehaviour` scripts. |
+| `ScriptableObject` | `Viewer` | Browse `Assets/Game/ScriptableObject` and generate single-file ScriptableObject scripts. |
 
-The built-in templates are copied as source into the host project, so they are
-intended to be edited, deleted or replaced like normal project code.
+Group order, tab order and the persisted selection live in
+`Assets/Game/Frame/PageOrder.asset` and can be reordered by dragging menu
+items or tab headers.
 
 ## Generated Host Layout
 
 ```text
 Assets/
 +-- Game/
-    +-- Editor/
-    |   +-- Game.Editor.asmdef
     +-- Frame/
     |   +-- Game.Frame.asmdef
     |   +-- GameBoot.cs
@@ -141,14 +141,16 @@ Assets/
     |   +-- PageOrder.asset
     +-- Manager/
     |   +-- Game.Managers.asmdef
-    |   +-- Game.Managers.InternalsVisibleTo.cs
-    |   +-- Asset/
-    |   +-- Event/
-    |   +-- Message/
-    |   +-- Task/
+    +-- MonoBehaviour/
+    |   +-- Game.MonoBehaviour.asmdef
     +-- ScriptableObject/
         +-- Game.ScriptableObject.asmdef
 ```
+
+Each section is its own assembly. `Game.Managers` references the runtime
+`Stratum`, `UniTask` and `VContainer` only. `Game.MonoBehaviour` and
+`Game.ScriptableObject` may reference `Game.Managers` so generated
+components and SO types can interact with project Managers.
 
 ## Runtime Flow
 
@@ -156,45 +158,25 @@ When a scene contains `GameLifetimeScope`, Play Mode startup performs this
 sequence:
 
 1. Load `ManagerOrderConfig` from Addressables address `Frame/ManagerOrder`.
-2. Resolve each ordered Manager type from its assembly-qualified name.
-3. Register Managers into VContainer as `IManager` and as their implemented
-   interfaces.
-4. `GameBootstrap` calls `SetManagerDataDict()` on every Manager, loading each
-   Manager config from `ManagerConfig/<ManagerName>`.
-5. Managers implementing `IAsyncInitManager` run `InitAsync`.
-6. The single scene `MonoBehaviour` implementing `IGameBoot` receives
-   container injection and `OnGameStart()` is awaited.
-
-## Editor Sync
-
-Mark a parameterless `void` method with `[EditorSync]` to make it runnable from
-`Framework > Sync`. Static methods are invoked directly. Instance methods are
-supported on Manager config assets, where the runner finds all matching assets,
-invokes the method and marks the asset dirty.
-
-```csharp
-using Stratum;
-
-internal static class InventoryManagerRefresher
-{
-    [EditorSync]
-    public static void Run()
-    {
-        // Rebuild InventoryManagerConfig data here.
-    }
-}
-```
+2. For every entry, resolve the Manager type by assembly-qualified name
+   (with a name-based fallback that scans assemblies referencing `Stratum`).
+3. Register each Manager into VContainer as a singleton via
+   `AsImplementedInterfaces()`.
+4. `GameBootstrap` calls `InitAsync(token)` on every Manager that implements
+   `IAsyncInitManager`, in the order from `ManagerOrderConfig`.
+5. The single scene `MonoBehaviour` implementing `IGameBoot` is located,
+   injected and `OnGameStart()` is awaited.
 
 ## Assembly Layout
 
 | Assembly | Namespace | Notes |
 | --- | --- | --- |
-| `Stratum` | `Stratum` | Runtime contracts, bootstrapping, loader utilities and field attributes. |
-| `Stratum.Editor` | `Stratum.Editor` | Dev Workbench, pages, popups and reusable editor controls. |
-| `Game.Frame` | global | Host boot layer created from templates. |
-| `Game.Managers` | global | Host Manager source and generated Manager partials. |
-| `Game.ScriptableObject` | global | Host SO scripts created by the Workbench. |
-| `Game.Editor` | global | Host editor helpers and Manager refreshers. |
+| `Stratum` | `Stratum` | Runtime contracts, bootstrapping, Addressables loader. |
+| `Stratum.Editor` | `Stratum.Editor` | Dev Workbench, pages and reusable editor controls. |
+| `Game.Frame` | global | Host boot layer copied from templates. |
+| `Game.Managers` | global | Host Manager scripts generated by the Workbench. |
+| `Game.MonoBehaviour` | global | Host MonoBehaviour scripts generated by the Workbench. |
+| `Game.ScriptableObject` | global | Host ScriptableObject scripts generated by the Workbench. |
 
 ## License
 
