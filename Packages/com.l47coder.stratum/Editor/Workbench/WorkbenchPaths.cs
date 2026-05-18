@@ -13,7 +13,6 @@ namespace Stratum.Editor
         public const string ManagerRoot = GameRoot + "/Manager";
         public const string SoRoot = GameRoot + "/ScriptableObject";
         public const string MonoBehaviourRoot = GameRoot + "/MonoBehaviour";
-        public const string ContainerRoot = GameRoot + "/Container";
 
         public const string ManagerOrder = FrameRoot + "/ManagerOrder.asset";
         public const string PageOrder = FrameRoot + "/PageOrder.asset";

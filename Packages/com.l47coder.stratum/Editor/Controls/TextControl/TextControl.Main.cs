@@ -13,11 +13,9 @@ namespace Stratum.Editor
 
         private GUIStyle _style;
         private float _styleBuiltFontSize = -1f;
-        private bool _styleBuiltWordWrap;
         private Color _styleBuiltColor;
         private string _cachedText;
         private float _cachedClientWidth;
-        private bool _cachedWordWrap;
         private float _cachedFontSize = -1f;
         private GUIContent _labelContent;
         private Vector2 _scrollExtent;
@@ -26,13 +24,12 @@ namespace Stratum.Editor
         private GUIStyle GetStyle()
         {
             var color = TextColor ?? DefaultTextColor;
-            if (_style != null && Mathf.Approximately(_styleBuiltFontSize, FontSize) && _styleBuiltWordWrap == WordWrap && _styleBuiltColor == color)
+            if (_style != null && Mathf.Approximately(_styleBuiltFontSize, FontSize) && _styleBuiltColor == color)
                 return _style;
 
             _styleBuiltFontSize = FontSize;
-            _styleBuiltWordWrap = WordWrap;
             _styleBuiltColor = color;
-            _style = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = WordWrap, font = EditorStyles.standardFont, fontSize = Mathf.Max(1, (int)FontSize) };
+            _style = new GUIStyle(EditorStyles.label) { richText = true, wordWrap = false, font = EditorStyles.standardFont, fontSize = Mathf.Max(1, (int)FontSize) };
             _style.normal.textColor = _style.hover.textColor = _style.active.textColor = _style.focused.textColor = color;
             return _style;
         }
@@ -63,26 +60,15 @@ namespace Stratum.Editor
             var fullWidth = contentRect.width;
             var clientWidth = fullWidth - ControlsToolbar.VerticalScrollbarWidth;
 
-            if (_cachedText != text || !Mathf.Approximately(_cachedClientWidth, fullWidth) || _cachedWordWrap != WordWrap || !Mathf.Approximately(_cachedFontSize, FontSize))
+            if (_cachedText != text || !Mathf.Approximately(_cachedClientWidth, fullWidth) || !Mathf.Approximately(_cachedFontSize, FontSize))
             {
                 if (_cachedText != text) _scrollPos = Vector2.zero;
                 _cachedText = text;
                 _cachedClientWidth = fullWidth;
-                _cachedWordWrap = WordWrap;
                 _cachedFontSize = FontSize;
                 _labelContent = new GUIContent(text ?? string.Empty);
-                if (WordWrap)
-                {
-                    var tentativeH = style.CalcHeight(_labelContent, fullWidth);
-                    var needVScroll = tentativeH > contentRect.height;
-                    var useW = needVScroll ? clientWidth : fullWidth;
-                    _scrollExtent = new Vector2(useW, needVScroll ? style.CalcHeight(_labelContent, useW) : tentativeH);
-                }
-                else
-                {
-                    var w = Mathf.Max(clientWidth, style.CalcSize(_labelContent).x);
-                    _scrollExtent = new Vector2(w, style.CalcHeight(_labelContent, w));
-                }
+                var w = Mathf.Max(clientWidth, style.CalcSize(_labelContent).x);
+                _scrollExtent = new Vector2(w, style.CalcHeight(_labelContent, w));
             }
 
             var viewRect = new Rect(0f, 0f, _scrollExtent.x, _scrollExtent.y);

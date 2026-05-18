@@ -5,7 +5,7 @@ namespace Stratum.Editor
 {
     public sealed partial class ButtonControl
     {
-        public string Label { get; set; } = string.Empty;
+        public string Label { get; set; }
         public bool Enabled { get; set; } = true;
         public Color? AccentColor { get; set; }
         public float FontSize { get; set; } = 13f;

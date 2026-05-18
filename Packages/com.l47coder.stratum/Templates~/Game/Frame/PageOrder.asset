@@ -17,9 +17,6 @@ MonoBehaviour:
     Tabs:
     - Viewer
     - Order
-  - Title: Container
-    Tabs:
-    - Viewer
   - Title: MonoBehaviour
     Tabs:
     - Viewer

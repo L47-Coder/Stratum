@@ -154,6 +154,9 @@ namespace Stratum.Editor
             var group = _groups.FirstOrDefault(g => g.Pages.Contains(page));
             if (group == null) return;
 
+            GUI.FocusControl(null);
+            EditorGUIUtility.editingTextField = false;
+
             if (group != _currentGroup) _tabScrollX = 0f;
             _currentPage?.OnLeave();
             _currentGroup = group;

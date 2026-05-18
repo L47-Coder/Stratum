@@ -6,6 +6,7 @@ namespace Stratum.Editor
 {
     public sealed partial class InputControl
     {
+        private string _value = string.Empty;
         private GUIStyle _style;
         private int _styleBuiltFontSize = -1;
         private Action<string> _onChange;
@@ -34,11 +35,11 @@ namespace Stratum.Editor
             GUI.BeginGroup(contentRect);
             var newValue = EditorGUI.TextField(
                 new Rect(0f, 0f, contentRect.width, contentRect.height),
-                Value ?? string.Empty, GetStyle());
+                _value, GetStyle());
             GUI.EndGroup();
 
-            if (newValue == Value) return;
-            Value = newValue;
+            if (newValue == _value) return;
+            _value = newValue;
             _onChange?.Invoke(newValue);
         }
     }

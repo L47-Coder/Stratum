@@ -20,9 +20,6 @@ MonoBehaviour:
   - Title: MonoBehaviour
     Tabs:
     - Viewer
-  - Title: Container
-    Tabs:
-    - Viewer
   - Title: ScriptableObject
     Tabs:
     - Viewer

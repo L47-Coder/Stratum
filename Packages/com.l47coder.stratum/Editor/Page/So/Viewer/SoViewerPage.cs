@@ -15,6 +15,7 @@ namespace Stratum.Editor
         private SplitterHandle _splitter = new(220f);
 
         public void OnFirstEnter() => _leftPanel.OnFirstEnter(_rightPanel.SetPath);
+        public void OnEnter() => _leftPanel.OnEnter();
 
         public void OnGUI(Rect rect)
         {
@@ -32,6 +33,12 @@ namespace Stratum.Editor
         {
             _treeView.ExcludePatterns = new() { "**/*.asmdef", "**/*.asset" };
             _treeView.OnNodeSelect(onSelected);
+        }
+
+        public void OnEnter()
+        {
+            if (string.IsNullOrEmpty(_treeView.GetSelectedPath()))
+                _treeView.SelectNode(_treeView.RootPath);
         }
 
         public void OnGUI(Rect rect)

@@ -31,6 +31,7 @@ namespace Stratum.Editor
         public void OnButtonClick(Action<int> callback) => _onButtonClick = callback;
 
         public bool SelectNode(string path) => SelectNodeCore(path);
+        public string GetSelectedPath() => _selectedPathBacking;
         public void RebuildTree() => _root = null;
 
         public void Draw(Rect rect) => DrawCore(rect);

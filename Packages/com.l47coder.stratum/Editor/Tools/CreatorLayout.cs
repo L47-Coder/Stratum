@@ -53,7 +53,7 @@ namespace Stratum.Editor
             var midBottom = btnRect.y + BoxDrawer.Padding;
             var midRect = new Rect(rect.x, midTop, rect.width, Mathf.Max(0f, midBottom - midTop));
 
-            _input.Value = _state.InputClassName;
+            _input.SetValue(_state.InputClassName);
             _button.Enabled = _state.IsValid;
 
             if (!string.IsNullOrEmpty(_state.ErrorMessage))

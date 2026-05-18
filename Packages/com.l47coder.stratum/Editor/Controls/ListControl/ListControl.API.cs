@@ -30,6 +30,7 @@ namespace Stratum.Editor
         public void OnButtonClick(Action<int> callback) => _onButtonClick = callback;
 
         public bool SelectRow(int index) => SelectRowCore(index);
+        public int GetSelectedIndex() => _selectedIndex;
 
         public void Draw(Rect rect) => DrawCore(rect);
     }
