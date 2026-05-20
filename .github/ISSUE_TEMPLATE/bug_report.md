@@ -28,7 +28,7 @@ What actually happened. Include relevant Unity Console output or stack traces.
 
 | Field | Value |
 | ----- | ----- |
-| Stratum version (`package.json`) | e.g. `0.5.3` |
+| Stratum version (`package.json`) | e.g. `0.6.0` |
 | Unity version | e.g. `2022.3.60f1` |
 | Editor platform | e.g. Windows / macOS / Linux |
 

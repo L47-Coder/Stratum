@@ -8,7 +8,7 @@ change public API between minor releases.
 Earlier preview notes were removed after the package was reduced to the
 current runtime contracts, generated host layout and focused editor commands.
 
-## [Unreleased]
+## [0.6.0] - 2026-05-21
 
 ### Added
 

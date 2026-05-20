@@ -4,7 +4,7 @@ Stratum is a lightweight Unity package that combines Addressables-backed
 VContainer bootstrapping with editor menu commands for initializing a layered
 `Assets/Game` architecture and syncing runtime Manager order.
 
-Status: **0.5.3**. The package is usable, but the public API is still
+Status: **0.6.0**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
@@ -71,7 +71,7 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.3
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.6.0
 ```
 
 ## Quick Start
