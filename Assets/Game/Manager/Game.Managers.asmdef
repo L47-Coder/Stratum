@@ -1,14 +1,15 @@
-﻿{
+{
     "name": "Game.Managers",
     "rootNamespace": "",
     "references": [
         "Stratum",
-        "Game.Core",
-        "Game.ScriptableObject",
-        "UniTask",
         "VContainer",
+        "UniTask",
         "Unity.Addressables",
-        "Unity.ResourceManager"
+        "Unity.ResourceManager",
+        "Game.Core",
+        "Game.Component",
+        "Game.ScriptableObject"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

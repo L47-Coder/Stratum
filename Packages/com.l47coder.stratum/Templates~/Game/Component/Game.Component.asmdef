@@ -3,11 +3,10 @@
     "rootNamespace": "",
     "references": [
         "Stratum",
-        "Game.Core",
-        "Game.Managers",
-        "Game.ScriptableObject",
+        "VContainer",
         "UniTask",
-        "VContainer"
+        "Game.Core",
+        "Game.ScriptableObject"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

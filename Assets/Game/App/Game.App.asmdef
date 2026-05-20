@@ -3,13 +3,12 @@
     "rootNamespace": "",
     "references": [
         "Stratum",
-        "Unity.Addressables",
-        "Unity.ResourceManager",
+        "VContainer",
         "UniTask",
         "UniTask.Addressables",
-        "VContainer",
-        "Game.Core",
-        "Game.Managers"
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "Game.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
