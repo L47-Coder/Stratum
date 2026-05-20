@@ -16,7 +16,7 @@ dogfood the package.
 Stratum is a lightweight Unity package combining Addressables-backed
 VContainer bootstrapping with a Dev Workbench at
 `Tools > Stratum > Dev Workbench` that scaffolds single-file Manager,
-Component and ScriptableObject scripts.
+Core, Manager, Component and ScriptableObject scripts.
 
 ## Repository Layout
 
@@ -25,6 +25,7 @@ Component and ScriptableObject scripts.
 +-- Assets/                              # Unity host project
 |   +-- Game/                            # Dogfooded Stratum host layout
 |   |   +-- App/
+|   |   +-- Core/
 |   |   +-- Manager/
 |   |   +-- Component/
 |   |   +-- ScriptableObject/

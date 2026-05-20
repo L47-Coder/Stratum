@@ -13,6 +13,9 @@ MonoBehaviour:
   m_Name: PageOrder
   m_EditorClassIdentifier: 
   _groups:
+  - Title: Core
+    Tabs:
+    - Viewer
   - Title: Manager
     Tabs:
     - Viewer

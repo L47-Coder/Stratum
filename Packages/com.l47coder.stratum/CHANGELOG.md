@@ -11,6 +11,13 @@ were substantially rebuilt.
 
 ## [Unreleased]
 
+### Added
+
+- Added a generated host `Game.Core` assembly under `Assets/Game/Core` as the
+  lowest game layer; it references `Stratum` only.
+- Added a `Core > Viewer` Workbench page that browses `Assets/Game/Core` and
+  generates single-file plain C# classes.
+
 ### Changed
 
 - Renamed the generated host boot layout and assembly from
@@ -20,6 +27,8 @@ were substantially rebuilt.
   `Assets/Game/Component` / `Game.Component`.
 - Runtime boot now loads manager order from Addressables address
   `App/ManagerOrder`.
+- `Game.Managers` now references `Game.ScriptableObject`.
+- `Game.Component` now references `UniTask`.
 
 ## [0.5.3] - 2026-05-18
 

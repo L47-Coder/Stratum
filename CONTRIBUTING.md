@@ -15,6 +15,7 @@ Packages/
 Assets/
 +-- Game/                   # Dogfooded generated host layout
     +-- App/
+    +-- Core/
     +-- Manager/
     +-- Component/
     +-- ScriptableObject/
@@ -44,6 +45,7 @@ and VContainer through `Packages/manifest.json`.
 Useful manual checks:
 
 - Open `Tools > Stratum > Dev Workbench`.
+- Exercise `Core > Viewer` for Core script generation changes.
 - Exercise `Manager > Viewer` and `Manager > Order` for Manager workflow
   changes.
 - Exercise `Component > Viewer` for Component script generation

@@ -13,14 +13,17 @@ MonoBehaviour:
   m_Name: PageOrder
   m_EditorClassIdentifier: 
   _groups:
-  - Title: Manager
-    Tabs:
-    - Viewer
-    - Order
-    - Import
-  - Title: Component
+  - Title: Core
     Tabs:
     - Viewer
   - Title: ScriptableObject
     Tabs:
     - Viewer
+  - Title: Component
+    Tabs:
+    - Viewer
+  - Title: Manager
+    Tabs:
+    - Viewer
+    - Order
+    - Import

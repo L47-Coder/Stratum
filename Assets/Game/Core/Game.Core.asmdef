@@ -1,9 +1,8 @@
 {
-    "name": "Game.ScriptableObject",
+    "name": "Game.Core",
     "rootNamespace": "",
     "references": [
-        "Stratum",
-        "Game.Core"
+        "Stratum"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
