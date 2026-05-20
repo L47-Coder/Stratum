@@ -46,8 +46,9 @@ Useful manual checks:
 
 - Run `Tools > Stratum > Initialize Game Architecture` and verify missing
   `Assets/Game` files are restored without overwriting existing files.
-- Run `Tools > Stratum > Sync Manager Order` and verify
-  `Assets/Game/App/ManagerOrder.asset` reflects compiled Managers.
+- Run `Tools > Stratum > Manager Order` and verify
+  `Assets/Game/App/ManagerOrder.asset` reflects compiled Managers and can be
+  drag-sorted.
 
 ## Coding Conventions
 

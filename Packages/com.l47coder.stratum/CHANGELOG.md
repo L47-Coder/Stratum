@@ -17,7 +17,7 @@ were substantially rebuilt.
   lowest game layer; it references `Stratum` only.
 - Added `Tools > Stratum > Initialize Game Architecture` for copying missing
   host skeleton files and registering `App/ManagerOrder`.
-- Added `Tools > Stratum > Sync Manager Order` for manually refreshing
+- Added `Tools > Stratum > Manager Order`, a lightweight drag-sort window for
   `ManagerOrder.asset`.
 
 ### Changed
@@ -29,6 +29,8 @@ were substantially rebuilt.
   `Assets/Game/Component` / `Game.Component`.
 - Runtime boot now loads manager order from Addressables address
   `App/ManagerOrder`.
+- Opening the Manager Order window now syncs compiled Managers once, and the
+  same sync still runs before entering Play Mode.
 - `Game.Managers` now references `Game.ScriptableObject`.
 - `Game.Component` now references `UniTask`.
 

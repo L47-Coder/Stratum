@@ -18,17 +18,10 @@ namespace Stratum.Editor
             }
         }
 
-        [MenuItem("Tools/Stratum/Sync Manager Order")]
-        private static void SyncManagerOrder()
+        [MenuItem("Tools/Stratum/Manager Order")]
+        private static void OpenManagerOrder()
         {
-            var config = ManagerOrderSync.EnsureAndSyncAsset();
-            if (config == null)
-            {
-                Debug.LogWarning("[Stratum] ManagerOrder asset not found.");
-                return;
-            }
-
-            Debug.Log("[Stratum] Manager order synced.");
+            ManagerOrderWindow.Open();
         }
     }
 }

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_GroupName: App
   m_Data:
     m_SerializedData: []
-  m_GUID: 287878df5e20d1647b26bc14bfdbdea3
+  m_GUID: 7cc76b4ec28a9344b845e2aa06c28aa2
   m_SerializeEntries:
   - m_GUID: ebbc3e8e7de2bc14ab26afb08e05e57c
     m_Address: App/ManagerOrder

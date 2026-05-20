@@ -31,7 +31,7 @@ namespace Stratum
             {
                 var t = Type.GetType(entry.AssemblyQualifiedName);
                 if (t != null) return _managerTypeCache[entry.Name] = t;
-                UnityEngine.Debug.LogWarning($"[Stratum] Manager '{entry.Name}': AQN stale, run Tools > Stratum > Sync Manager Order.");
+                UnityEngine.Debug.LogWarning($"[Stratum] Manager '{entry.Name}': AQN stale, open Tools > Stratum > Manager Order.");
             }
 
             var asmName = typeof(IManager).Assembly.GetName().Name;

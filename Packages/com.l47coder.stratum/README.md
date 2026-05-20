@@ -21,8 +21,9 @@ pre-`1.0` and may change between minor versions.
   `Tools > Stratum > Initialize Game Architecture` copies missing host
   skeleton files from `Templates~/Game` into `Assets/Game` and registers
   `App/ManagerOrder` in Addressables.
-- **Manager order sync.** `Tools > Stratum > Sync Manager Order` refreshes
-  `ManagerOrder.asset`; the same sync runs automatically before entering
+- **Manager order window.** `Tools > Stratum > Manager Order` opens a
+  lightweight drag-sort window for `ManagerOrder.asset`. It syncs compiled
+  Managers once on open; the same sync runs automatically before entering
   Play Mode.
 
 ## Requirements
@@ -80,8 +81,9 @@ https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5
 3. Add shared business contracts under `Assets/Game/Core`, components under
    `Assets/Game/Component`, config types under `Assets/Game/ScriptableObject`
    and Manager implementations under `Assets/Game/Manager`.
-4. Run `Tools > Stratum > Sync Manager Order`. Newly compiled Managers are
-   added automatically; missing ones are pruned.
+4. Open `Tools > Stratum > Manager Order` and drag Managers into the desired
+   initialization order. Newly compiled Managers are added automatically;
+   missing ones are pruned.
 5. In your boot scene, add a `GameLifetimeScope` component and the generated
    `GameBoot` MonoBehaviour, then implement `IGameBoot.OnGameStart`.
 
@@ -110,7 +112,7 @@ type) via VContainer once they exist in the project.
 | Command | Purpose |
 | --- | --- |
 | `Tools > Stratum > Initialize Game Architecture` | Ensure Addressables exists, copy missing `Assets/Game` skeleton files and register `App/ManagerOrder`. |
-| `Tools > Stratum > Sync Manager Order` | Refresh `ManagerOrder.asset` from compiled `IManager` implementations. |
+| `Tools > Stratum > Manager Order` | Open the lightweight drag-sort window for `ManagerOrder.asset`; sync runs once on open. |
 
 ## Generated Host Layout
 
@@ -158,7 +160,7 @@ sequence:
 | Assembly | Namespace | Notes |
 | --- | --- | --- |
 | `Stratum` | `Stratum` | Runtime contracts, bootstrapping, Addressables loader. |
-| `Stratum.Editor` | `Stratum.Editor` | Architecture initialization and Manager order sync commands. |
+| `Stratum.Editor` | `Stratum.Editor` | Architecture initialization and Manager order window. |
 | `Game.App` | global | Host boot layer copied from templates. |
 | `Game.Core` | global | Lowest host layer for shared game types; references `Stratum` only. |
 | `Game.Managers` | global | Host Manager implementations. |
