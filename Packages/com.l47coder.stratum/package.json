@@ -3,7 +3,7 @@
   "displayName": "Stratum",
   "version": "0.5.3",
   "unity": "2022.3",
-  "description": "A lightweight Unity package with Addressables-backed VContainer bootstrapping and a Dev Workbench that scaffolds single-file Manager, MonoBehaviour and ScriptableObject scripts.",
+  "description": "A lightweight Unity package with Addressables-backed VContainer bootstrapping and a Dev Workbench that scaffolds single-file Manager, Component and ScriptableObject scripts.",
   "keywords": [
     "unity",
     "framework",

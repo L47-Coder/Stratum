@@ -7,7 +7,7 @@ namespace Stratum.Editor
 {
     internal sealed class MonoBehaviourViewerPage : IPage
     {
-        public string GroupTitle => "MonoBehaviour";
+        public string GroupTitle => "Component";
         public string TabTitle => "Viewer";
 
         private readonly MonoBehaviourLeftPanel _leftPanel = new();
@@ -27,7 +27,7 @@ namespace Stratum.Editor
 
     internal sealed class MonoBehaviourLeftPanel
     {
-        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.MonoBehaviourRoot };
+        private readonly TreeControl _treeView = new() { RootPath = WorkbenchPaths.ComponentRoot };
 
         public void OnFirstEnter(Action<string> onSelected)
         {
@@ -49,8 +49,8 @@ namespace Stratum.Editor
 
         private static void EnsureRootFolder()
         {
-            if (AssetDatabase.IsValidFolder(WorkbenchPaths.MonoBehaviourRoot)) return;
-            MonoBehaviourCreationService.EnsureFolder(WorkbenchPaths.MonoBehaviourRoot);
+            if (AssetDatabase.IsValidFolder(WorkbenchPaths.ComponentRoot)) return;
+            MonoBehaviourCreationService.EnsureFolder(WorkbenchPaths.ComponentRoot);
         }
     }
 
@@ -62,7 +62,7 @@ namespace Stratum.Editor
         public MonoBehaviourCreatorPanel()
         {
             _layout = new CreatorLayout<MonoBehaviourCreatorState>(
-                _state, "Create MonoBehaviour",
+                _state, "Create Component",
                 s => MonoBehaviourCreationService.CreateScript(s));
         }
 

@@ -1,10 +1,13 @@
-{
-    "name": "Game.MonoBehaviour",
+﻿{
+    "name": "Game.App",
     "rootNamespace": "",
     "references": [
         "Stratum",
         "Game.Managers",
-        "Game.ScriptableObject",
+        "UniTask",
+        "UniTask.Addressables",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
         "VContainer"
     ],
     "includePlatforms": [],

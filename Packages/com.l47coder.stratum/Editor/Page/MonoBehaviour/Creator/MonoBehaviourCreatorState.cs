@@ -8,7 +8,7 @@ namespace Stratum.Editor
 {
     internal sealed class MonoBehaviourCreatorState : ICreatorState
     {
-        public const string RootAssetPath = WorkbenchPaths.MonoBehaviourRoot;
+        public const string RootAssetPath = WorkbenchPaths.ComponentRoot;
 
         private static readonly Regex ValidClassNameRegex = new(@"^[A-Z][a-zA-Z0-9]*$", RegexOptions.Compiled);
 
@@ -117,7 +117,7 @@ namespace Stratum.Editor
             var normalizedRoot = RootAssetPath.Replace('\\', '/').TrimEnd('/');
             if (!string.Equals(normalizedParentPath, normalizedRoot, StringComparison.OrdinalIgnoreCase) &&
                 !normalizedParentPath.StartsWith(normalizedRoot + "/", StringComparison.OrdinalIgnoreCase))
-            { errorMessage = "Parent folder must be inside the MonoBehaviour root."; return false; }
+            { errorMessage = "Parent folder must be inside the Component root."; return false; }
 
             EnsureFolder(normalizedParentPath);
             if (!AssetDatabase.IsValidFolder(normalizedParentPath))

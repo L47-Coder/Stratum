@@ -9,6 +9,18 @@ This changelog was reset for the renovated `0.5.0` package. Earlier preview
 history is intentionally omitted because the runtime and Workbench architecture
 were substantially rebuilt.
 
+## [Unreleased]
+
+### Changed
+
+- Renamed the generated host boot layout and assembly from
+  `Assets/Game/Frame` / `Game.Frame` to `Assets/Game/App` / `Game.App`.
+- Renamed the generated host component layout and assembly from
+  `Assets/Game/MonoBehaviour` / `Game.MonoBehaviour` to
+  `Assets/Game/Component` / `Game.Component`.
+- Runtime boot now loads manager order from Addressables address
+  `App/ManagerOrder`.
+
 ## [0.5.3] - 2026-05-18
 
 ### Added

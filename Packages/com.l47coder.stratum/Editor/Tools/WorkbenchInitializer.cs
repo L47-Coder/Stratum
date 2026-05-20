@@ -8,10 +8,10 @@ namespace Stratum.Editor
 {
     internal static class WorkbenchInitializer
     {
-        private const string FrameGroupName = "Frame";
+        private const string AppGroupName = "App";
 
         private static readonly string ManagerOrderAddress =
-            $"{FrameGroupName}/{Path.GetFileNameWithoutExtension(WorkbenchPaths.ManagerOrder)}";
+            $"{AppGroupName}/{Path.GetFileNameWithoutExtension(WorkbenchPaths.ManagerOrder)}";
 
         public static void Ensure()
         {
@@ -19,7 +19,7 @@ namespace Stratum.Editor
             {
                 EnsureAddressablesInitialized();
                 AssetTransporter.Transfer(WorkbenchPaths.GameSkeletonTemplateFolder, WorkbenchPaths.GameRoot);
-                AddressablesHelper.EnsureEntry(WorkbenchPaths.ManagerOrder, ManagerOrderAddress, FrameGroupName);
+                AddressablesHelper.EnsureEntry(WorkbenchPaths.ManagerOrder, ManagerOrderAddress, AppGroupName);
             }
             catch (Exception ex)
             {

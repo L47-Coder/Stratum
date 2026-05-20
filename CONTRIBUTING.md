@@ -14,9 +14,9 @@ Packages/
 
 Assets/
 +-- Game/                   # Dogfooded generated host layout
-    +-- Frame/
+    +-- App/
     +-- Manager/
-    +-- MonoBehaviour/
+    +-- Component/
     +-- ScriptableObject/
 ```
 
@@ -46,7 +46,7 @@ Useful manual checks:
 - Open `Tools > Stratum > Dev Workbench`.
 - Exercise `Manager > Viewer` and `Manager > Order` for Manager workflow
   changes.
-- Exercise `MonoBehaviour > Viewer` for MonoBehaviour script generation
+- Exercise `Component > Viewer` for Component script generation
   changes.
 - Exercise `ScriptableObject > Viewer` for SO script generation changes.
 

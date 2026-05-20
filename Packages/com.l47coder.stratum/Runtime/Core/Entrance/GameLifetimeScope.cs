@@ -12,7 +12,7 @@ namespace Stratum
 
         protected override void Configure(IContainerBuilder builder)
         {
-            var config = FrameworkLoader.LoadSync<ManagerOrderConfig>("Frame/ManagerOrder");
+            var config = FrameworkLoader.LoadSync<ManagerOrderConfig>("App/ManagerOrder");
             foreach (var entry in config.Entries)
             {
                 var type = ResolveManagerType(entry);

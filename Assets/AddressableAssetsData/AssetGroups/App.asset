@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
-  m_Name: Frame
+  m_Name: App
   m_EditorClassIdentifier: 
-  m_GroupName: Frame
+  m_GroupName: App
   m_Data:
     m_SerializedData: []
-  m_GUID: ffd9497c1bb9c814baf423225b5091bd
+  m_GUID: 287878df5e20d1647b26bc14bfdbdea3
   m_SerializeEntries:
   - m_GUID: ebbc3e8e7de2bc14ab26afb08e05e57c
-    m_Address: Frame/ManagerOrder
+    m_Address: App/ManagerOrder
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

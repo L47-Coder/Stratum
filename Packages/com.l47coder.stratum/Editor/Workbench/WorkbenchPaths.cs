@@ -9,12 +9,12 @@ namespace Stratum.Editor
 
         public const string AssetsRoot = "Assets";
         public const string GameRoot = AssetsRoot + "/Game";
-        public const string FrameRoot = GameRoot + "/Frame";
+        public const string AppRoot = GameRoot + "/App";
         public const string ManagerRoot = GameRoot + "/Manager";
         public const string ScriptableObjectRoot = GameRoot + "/ScriptableObject";
-        public const string MonoBehaviourRoot = GameRoot + "/MonoBehaviour";
+        public const string ComponentRoot = GameRoot + "/Component";
 
-        public const string ManagerOrder = FrameRoot + "/ManagerOrder.asset";
-        public const string PageOrder = FrameRoot + "/PageOrder.asset";
+        public const string ManagerOrder = AppRoot + "/ManagerOrder.asset";
+        public const string PageOrder = AppRoot + "/PageOrder.asset";
     }
 }

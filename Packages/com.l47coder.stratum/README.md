@@ -2,7 +2,7 @@
 
 Stratum is a lightweight Unity package that combines Addressables-backed
 VContainer bootstrapping with a focused IMGUI Dev Workbench for scaffolding
-single-file Manager, MonoBehaviour and ScriptableObject scripts.
+single-file Manager, Component and ScriptableObject scripts.
 
 Status: **0.5.3**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
@@ -13,13 +13,13 @@ pre-`1.0` and may change between minor versions.
   Managers implement it directly. `IAsyncInitManager.InitAsync(token)` is the
   optional asynchronous init hook.
 - **Addressables-backed boot.** `GameLifetimeScope` loads
-  `Frame/ManagerOrder`, resolves Manager types by name, registers them into
+  `App/ManagerOrder`, resolves Manager types by name, registers them into
   VContainer and hands control to `GameBootstrap`, which awaits any
   `IAsyncInitManager.InitAsync` calls and then injects and runs the scene
   `IGameBoot.OnGameStart`.
 - **Dev Workbench.** `Tools > Stratum > Dev Workbench` opens a reorderable
   editor window with three symmetric script generators (`Manager`,
-  `MonoBehaviour`, `ScriptableObject`), a Manager boot-order editor and a
+  `Component`, `ScriptableObject`), a Manager boot-order editor and a
   Manager template import tab.
 - **Manager templates.** Optional single-file `EventManager`,
   `MessageManager` and `TaskManager` templates can be imported from
@@ -27,7 +27,7 @@ pre-`1.0` and may change between minor versions.
 - **Single-file code generation.** Each creator panel writes one `.cs` file:
   - Manager: `public interface IXxxManager : IManager` and
     `internal sealed class XxxManager : IXxxManager`.
-  - MonoBehaviour: `public class XxxComponent : MonoBehaviour`.
+  - Component: `public class XxxComponent : MonoBehaviour`.
   - ScriptableObject: `[CreateAssetMenu(menuName = "ScriptableObject/Xxx")]`
     plus `public class XxxConfig : ScriptableObject`.
 - **Reusable editor controls.** `InputControl`, `ButtonControl`,
@@ -88,10 +88,10 @@ https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5
 1. Install the dependencies and this package.
 2. Open `Tools > Stratum > Dev Workbench`.
 3. On first open, Stratum ensures Addressables exists and copies the host
-   skeleton under `Assets/Game/`, then registers `Frame/ManagerOrder`.
+   skeleton under `Assets/Game/`, then registers `App/ManagerOrder`.
 4. In `Manager > Viewer`, select the root folder and use the creator panel
    on the right to generate a Manager script.
-5. In `MonoBehaviour > Viewer`, generate any data-holder components your
+5. In `Component > Viewer`, generate any data-holder components your
    Managers depend on.
 6. In `ScriptableObject > Viewer`, generate ScriptableObject types and
    create matching `.asset` instances directly from the Unity create menu.
@@ -129,11 +129,11 @@ type) via VContainer once they exist in the project.
 | `Manager` | `Viewer` | Browse `Assets/Game/Manager`, show source files and a single-file Manager creator panel on the selected folder. |
 | `Manager` | `Order` | Sync and edit `ManagerOrder.asset`, which controls runtime Manager registration order. |
 | `Manager` | `Import` | Import optional single-file Manager templates from `Templates~/Managers`. |
-| `MonoBehaviour` | `Viewer` | Browse `Assets/Game/MonoBehaviour` and generate single-file `MonoBehaviour` scripts. |
+| `Component` | `Viewer` | Browse `Assets/Game/Component` and generate single-file `MonoBehaviour` scripts. |
 | `ScriptableObject` | `Viewer` | Browse `Assets/Game/ScriptableObject` and generate single-file ScriptableObject scripts. |
 
 Group order, tab order and the persisted selection live in
-`Assets/Game/Frame/PageOrder.asset` and can be reordered by dragging menu
+`Assets/Game/App/PageOrder.asset` and can be reordered by dragging menu
 items or tab headers.
 
 ## Generated Host Layout
@@ -141,21 +141,21 @@ items or tab headers.
 ```text
 Assets/
 +-- Game/
-    +-- Frame/
-    |   +-- Game.Frame.asmdef
+    +-- App/
+    |   +-- Game.App.asmdef
     |   +-- GameBoot.cs
     |   +-- ManagerOrder.asset
     |   +-- PageOrder.asset
     +-- Manager/
     |   +-- Game.Managers.asmdef
-    +-- MonoBehaviour/
-    |   +-- Game.MonoBehaviour.asmdef
+    +-- Component/
+    |   +-- Game.Component.asmdef
     +-- ScriptableObject/
         +-- Game.ScriptableObject.asmdef
 ```
 
 Each section is its own assembly. `Game.Managers` references the runtime
-`Stratum`, `UniTask` and `VContainer` only. `Game.MonoBehaviour` and
+`Stratum`, `UniTask` and `VContainer` only. `Game.Component` and
 `Game.ScriptableObject` may reference `Game.Managers` so generated
 components and SO types can interact with project Managers.
 
@@ -164,7 +164,7 @@ components and SO types can interact with project Managers.
 When a scene contains `GameLifetimeScope`, Play Mode startup performs this
 sequence:
 
-1. Load `ManagerOrderConfig` from Addressables address `Frame/ManagerOrder`.
+1. Load `ManagerOrderConfig` from Addressables address `App/ManagerOrder`.
 2. For every entry, resolve the Manager type by assembly-qualified name
    (with a name-based fallback that scans assemblies referencing `Stratum`).
 3. Register each Manager into VContainer as a singleton via
@@ -180,9 +180,9 @@ sequence:
 | --- | --- | --- |
 | `Stratum` | `Stratum` | Runtime contracts, bootstrapping, Addressables loader. |
 | `Stratum.Editor` | `Stratum.Editor` | Dev Workbench, pages and reusable editor controls. |
-| `Game.Frame` | global | Host boot layer copied from templates. |
+| `Game.App` | global | Host boot layer copied from templates. |
 | `Game.Managers` | global | Host Manager scripts generated by the Workbench. |
-| `Game.MonoBehaviour` | global | Host MonoBehaviour scripts generated by the Workbench. |
+| `Game.Component` | global | Host Component scripts generated by the Workbench. |
 | `Game.ScriptableObject` | global | Host ScriptableObject scripts generated by the Workbench. |
 
 ## License
