@@ -3,13 +3,7 @@
     "rootNamespace": "Stratum.Editor",
     "references": [
         "Stratum",
-        "UniTask",
-        "UniTask.Addressables",
-        "Unity.Addressables",
-        "Unity.Addressables.Editor",
-        "Unity.CodeEditor",
-        "Unity.ResourceManager",
-        "VContainer"
+        "Unity.Addressables.Editor"
     ],
     "includePlatforms": [
         "Editor"

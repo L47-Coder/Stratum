@@ -1,6 +1,6 @@
 namespace Stratum.Editor
 {
-    internal static class WorkbenchPaths
+    internal static class StratumPaths
     {
         public const string PackageId = "com.l47coder.stratum";
         public const string PackageRoot = "Packages/" + PackageId;
@@ -16,6 +16,5 @@ namespace Stratum.Editor
         public const string ComponentRoot = GameRoot + "/Component";
 
         public const string ManagerOrder = AppRoot + "/ManagerOrder.asset";
-        public const string PageOrder = AppRoot + "/PageOrder.asset";
     }
 }

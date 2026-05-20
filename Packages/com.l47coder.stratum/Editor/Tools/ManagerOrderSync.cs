@@ -9,13 +9,13 @@ namespace Stratum.Editor
     {
         public static ManagerOrderConfig EnsureAndSyncAsset()
         {
-            WorkbenchInitializer.Ensure();
+            if (!GameArchitectureInitializer.Ensure()) return null;
             return SyncAsset();
         }
 
         public static ManagerOrderConfig SyncAsset()
         {
-            var config = AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(WorkbenchPaths.ManagerOrder);
+            var config = AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(StratumPaths.ManagerOrder);
             if (config == null) return null;
 
             Sync(config);

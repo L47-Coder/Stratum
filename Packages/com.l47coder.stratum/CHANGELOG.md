@@ -6,7 +6,7 @@ The project follows Semantic Versioning. Versions before `1.0.0` may still
 change public API between minor releases.
 
 This changelog was reset for the renovated `0.5.0` package. Earlier preview
-history is intentionally omitted because the runtime and Workbench architecture
+history is intentionally omitted because the runtime and editor architecture
 were substantially rebuilt.
 
 ## [Unreleased]
@@ -15,8 +15,10 @@ were substantially rebuilt.
 
 - Added a generated host `Game.Core` assembly under `Assets/Game/Core` as the
   lowest game layer; it references `Stratum` only.
-- Added a `Core > Viewer` Workbench page that browses `Assets/Game/Core` and
-  generates single-file plain C# classes.
+- Added `Tools > Stratum > Initialize Game Architecture` for copying missing
+  host skeleton files and registering `App/ManagerOrder`.
+- Added `Tools > Stratum > Sync Manager Order` for manually refreshing
+  `ManagerOrder.asset`.
 
 ### Changed
 
@@ -29,6 +31,14 @@ were substantially rebuilt.
   `App/ManagerOrder`.
 - `Game.Managers` now references `Game.ScriptableObject`.
 - `Game.Component` now references `UniTask`.
+
+### Removed
+
+- Removed the Dev Workbench window, page system, code generators and reusable
+  IMGUI control library.
+- Removed `PageOrder.asset`; the package now uses direct menu commands
+  instead of a persisted window layout.
+- Removed the orphaned built-in Manager code templates.
 
 ## [0.5.3] - 2026-05-18
 

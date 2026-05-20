@@ -14,9 +14,8 @@ dogfood the package.
 - License: [MIT](./LICENSE)
 
 Stratum is a lightweight Unity package combining Addressables-backed
-VContainer bootstrapping with a Dev Workbench at
-`Tools > Stratum > Dev Workbench` that scaffolds single-file Manager,
-Core, Manager, Component and ScriptableObject scripts.
+VContainer bootstrapping with editor menu commands for initializing the
+generated `Assets/Game` architecture and syncing runtime Manager order.
 
 ## Repository Layout
 

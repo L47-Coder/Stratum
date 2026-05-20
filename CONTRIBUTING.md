@@ -44,13 +44,10 @@ and VContainer through `Packages/manifest.json`.
 
 Useful manual checks:
 
-- Open `Tools > Stratum > Dev Workbench`.
-- Exercise `Core > Viewer` for Core script generation changes.
-- Exercise `Manager > Viewer` and `Manager > Order` for Manager workflow
-  changes.
-- Exercise `Component > Viewer` for Component script generation
-  changes.
-- Exercise `ScriptableObject > Viewer` for SO script generation changes.
+- Run `Tools > Stratum > Initialize Game Architecture` and verify missing
+  `Assets/Game` files are restored without overwriting existing files.
+- Run `Tools > Stratum > Sync Manager Order` and verify
+  `Assets/Game/App/ManagerOrder.asset` reflects compiled Managers.
 
 ## Coding Conventions
 
@@ -61,8 +58,8 @@ Useful manual checks:
 - Editor code lives in `Packages/com.l47coder.stratum/Editor/` and uses the
   `Stratum.Editor` namespace.
 - Host templates live in `Packages/com.l47coder.stratum/Templates~/Game/` and
-  are copied into the user project's `Assets/Game/` skeleton on first
-  Workbench open.
+  are copied into the user project's `Assets/Game/` skeleton by
+  `Tools > Stratum > Initialize Game Architecture`.
 - Keep generated host-project files deterministic and easy to diff.
 - Avoid unrelated refactors in feature or fix branches.
 
@@ -129,7 +126,7 @@ Example: package version `0.5.0` is tagged as `v0.5.0`.
 
 1. Keep the scope focused.
 2. Make sure the Unity editor compiles without new warnings.
-3. Manually run the Workbench flows touched by the change.
+3. Manually run the Stratum menu commands touched by the change.
 4. Update docs and changelog when user-facing behavior changes.
 5. Fill in the PR template with verification notes.
 

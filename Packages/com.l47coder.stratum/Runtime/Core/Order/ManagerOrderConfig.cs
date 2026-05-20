@@ -13,10 +13,8 @@ namespace Stratum
     [Serializable]
     public class ManagerOrderEntry
     {
-        [Table(Title = "Manager", Readonly = true)]
         public string Name;
 
-        [Table(Hide = true)]
         public string AssemblyQualifiedName;
     }
 }
