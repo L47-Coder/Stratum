@@ -79,7 +79,7 @@ For a release:
 3. Commit with `chore(release): v<version>`.
 4. Tag with an annotated tag named `v<version>`.
 
-Example: package version `0.5.0` is tagged as `v0.5.0`.
+Example: package version `X.Y.Z` is tagged as `vX.Y.Z`.
 
 ## Release Flow
 
@@ -98,29 +98,29 @@ Example: package version `0.5.0` is tagged as `v0.5.0`.
            Packages/com.l47coder.stratum/CHANGELOG.md \
            README.md \
            CONTRIBUTING.md
-   git commit -m "chore(release): v0.5.0"
+   git commit -m "chore(release): vX.Y.Z"
    ```
 
 3. Create and push the annotated tag.
 
    ```bash
-   git tag -a v0.5.0 -m "Stratum 0.5.0"
+   git tag -a vX.Y.Z -m "Stratum X.Y.Z"
    git push origin <branch>
-   git push origin v0.5.0
+   git push origin vX.Y.Z
    ```
 
 4. Publish the GitHub Release.
 
    ```bash
-   gh release create v0.5.0 \
-     --title "v0.5.0" \
+   gh release create vX.Y.Z \
+     --title "vX.Y.Z" \
      --notes-file release-notes.md
    ```
 
 5. Verify tagged UPM install.
 
    ```text
-   https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.5.0
+   https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#vX.Y.Z
    ```
 
 ## Pull Requests

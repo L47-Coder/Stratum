@@ -5,7 +5,7 @@
 ## Scope
 
 - [ ] Runtime change
-- [ ] Editor / workbench change
+- [ ] Editor command change
 - [ ] Documentation only
 - [ ] Chore / tooling
 
