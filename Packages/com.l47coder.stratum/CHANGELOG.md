@@ -8,6 +8,14 @@ change public API between minor releases.
 Earlier preview notes were removed after the package was reduced to the
 current runtime contracts, generated host layout and focused editor commands.
 
+## [0.6.1] - 2026-05-22
+
+### Changed
+
+- Renamed the generated host Manager assembly to `Game.Manager` in the
+  dogfooded host project and package templates.
+- Updated documentation and install examples for the `0.6.1` release.
+
 ## [0.6.0] - 2026-05-21
 
 ### Added
@@ -27,7 +35,7 @@ current runtime contracts, generated host layout and focused editor commands.
   `App/ManagerOrder`.
 - Opening the Manager Order window now syncs compiled Managers once, and the
   same sync still runs before entering Play Mode.
-- `Game.Managers` now references `Game.Component`, `Game.Core` and
+- `Game.Manager` now references `Game.Component`, `Game.Core` and
   `Game.ScriptableObject`.
 - `Game.Component` now references `Game.Core`, `Game.ScriptableObject` and
   `UniTask`.

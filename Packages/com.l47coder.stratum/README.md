@@ -4,7 +4,7 @@ Stratum is a lightweight Unity package that combines Addressables-backed
 VContainer bootstrapping with editor menu commands for initializing a layered
 `Assets/Game` architecture and syncing runtime Manager order.
 
-Status: **0.6.0**. The package is usable, but the public API is still
+Status: **0.6.1**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
@@ -71,7 +71,7 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.6.0
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.6.1
 ```
 
 ## Quick Start
@@ -126,7 +126,7 @@ Assets/
     +-- Core/
     |   +-- Game.Core.asmdef
     +-- Manager/
-    |   +-- Game.Managers.asmdef
+    |   +-- Game.Manager.asmdef
     +-- Component/
     |   +-- Game.Component.asmdef
     +-- ScriptableObject/
@@ -135,8 +135,8 @@ Assets/
 
 Each section is its own assembly. `Game.Core` is the lowest generated host
 assembly and references only `Stratum`. `Game.ScriptableObject`,
-`Game.Managers`, `Game.Component` and `Game.App` can reference `Game.Core` for
-shared lower-level types. `Game.Managers` also references
+`Game.Manager`, `Game.Component` and `Game.App` can reference `Game.Core` for
+shared lower-level types. `Game.Manager` also references
 `Game.ScriptableObject`; `Game.Component` references `UniTask` for async
 component code.
 
@@ -163,7 +163,7 @@ sequence:
 | `Stratum.Editor` | `Stratum.Editor` | Architecture initialization and Manager order window. |
 | `Game.App` | global | Host boot layer copied from templates. |
 | `Game.Core` | global | Lowest host layer for shared game types; references `Stratum` only. |
-| `Game.Managers` | global | Host Manager implementations. |
+| `Game.Manager` | global | Host Manager implementations. |
 | `Game.Component` | global | Host MonoBehaviour component scripts. |
 | `Game.ScriptableObject` | global | Host ScriptableObject scripts. |
 

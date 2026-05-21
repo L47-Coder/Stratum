@@ -1,5 +1,5 @@
 ﻿{
-    "name": "Game.Managers",
+    "name": "Game.Manager",
     "rootNamespace": "",
     "references": [
         "Stratum",
