@@ -8,6 +8,13 @@ change public API between minor releases.
 Earlier preview notes were removed after the package was reduced to the
 current runtime contracts, generated host layout and focused editor commands.
 
+## [0.6.3] - 2026-06-01
+
+### Fixed
+
+- `Game.Core` now references `UniTask` so Core-layer async functions can use
+  `Cysharp.Threading.Tasks`.
+
 ## [0.6.2] - 2026-05-31
 
 ### Changed

@@ -2,7 +2,8 @@
     "name": "Game.Core",
     "rootNamespace": "",
     "references": [
-        "Stratum"
+        "Stratum",
+        "UniTask"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
