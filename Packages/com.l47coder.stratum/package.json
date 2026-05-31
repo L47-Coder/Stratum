@@ -1,7 +1,7 @@
 {
   "name": "com.l47coder.stratum",
   "displayName": "Stratum",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "unity": "2022.3",
   "description": "A lightweight Unity package with Addressables-backed VContainer bootstrapping and editor commands for initializing a layered Game architecture.",
   "keywords": [

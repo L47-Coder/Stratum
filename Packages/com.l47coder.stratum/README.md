@@ -4,7 +4,7 @@ Stratum is a lightweight Unity package that combines Addressables-backed
 VContainer bootstrapping with editor menu commands for initializing a layered
 `Assets/Game` architecture and syncing runtime Manager order.
 
-Status: **0.6.1**. The package is usable, but the public API is still
+Status: **0.6.2**. The package is usable, but the public API is still
 pre-`1.0` and may change between minor versions.
 
 ## What Ships
@@ -71,7 +71,7 @@ project and the package lives in a subfolder.
 For a pinned release, append the tag:
 
 ```text
-https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.6.1
+https://github.com/L47-Coder/Stratum.git?path=Packages/com.l47coder.stratum#v0.6.2
 ```
 
 ## Quick Start
@@ -105,7 +105,11 @@ public sealed class GameBoot : MonoBehaviour, IGameBoot
 
 Managers are registered as `IManager` and as their implemented
 interfaces, so they can be injected into `GameBoot` (or any other resolved
-type) via VContainer once they exist in the project.
+type) via VContainer once they exist in the project. Manager implementations
+must live under `Assets/Game/Manager` in the generated `Game.Manager`
+assembly; other assemblies are ignored by Manager order sync and runtime
+fallback. If multiple Managers implement the same business interface,
+Stratum reports the conflict instead of silently choosing one registration.
 
 ## Editor Commands
 
@@ -147,7 +151,7 @@ sequence:
 
 1. Load `ManagerOrderConfig` from Addressables address `App/ManagerOrder`.
 2. For every entry, resolve the Manager type by assembly-qualified name
-   (with a name-based fallback that scans assemblies referencing `Stratum`).
+   (with a name-based fallback that only scans `Game.Manager`).
 3. Register each Manager into VContainer as a singleton via
    `AsImplementedInterfaces()`.
 4. `GameBootstrap` calls `InitAsync(token)` on every Manager that implements

@@ -1,4 +1,5 @@
 using UnityEditor;
+using UnityEngine;
 
 namespace Stratum.Editor
 {
@@ -15,7 +16,15 @@ namespace Stratum.Editor
         {
             if (state != PlayModeStateChange.ExitingEditMode) return;
 
-            ManagerOrderSync.EnsureAndSyncAsset();
+            try
+            {
+                ManagerOrderSync.EnsureAndSyncAsset();
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogException(ex);
+                EditorApplication.isPlaying = false;
+            }
         }
     }
 }

@@ -27,14 +27,18 @@ namespace Stratum.Editor
             if (config == null) return false;
 
             var liveTypes = TypeCache.GetTypesDerivedFrom<IManager>()
-                .Where(t => !t.IsAbstract && !t.IsInterface)
-                .ToDictionary(t => t.Name, t => t, StringComparer.Ordinal);
+                .Where(ManagerOrderRules.IsConcreteManagerType)
+                .Where(ManagerOrderRules.IsManagerAssembly)
+                .ToList();
+            ManagerOrderRules.ValidateManagerTypes(liveTypes);
 
-            var removed = config.Entries.RemoveAll(e => !liveTypes.ContainsKey(e.Name)) > 0;
+            var liveTypesByName = liveTypes.ToDictionary(t => t.Name, t => t, StringComparer.Ordinal);
+
+            var removed = config.Entries.RemoveAll(e => e == null || !liveTypesByName.ContainsKey(e.Name)) > 0;
 
             var existing = new HashSet<string>(config.Entries.Select(e => e.Name), StringComparer.Ordinal);
             var added = false;
-            foreach (var kv in liveTypes.Where(kv => !existing.Contains(kv.Key)).OrderBy(kv => kv.Key, StringComparer.Ordinal))
+            foreach (var kv in liveTypesByName.Where(kv => !existing.Contains(kv.Key)).OrderBy(kv => kv.Key, StringComparer.Ordinal))
             {
                 config.Entries.Add(new ManagerOrderEntry
                 {
@@ -47,7 +51,7 @@ namespace Stratum.Editor
             var refreshed = false;
             foreach (var entry in config.Entries)
             {
-                if (!liveTypes.TryGetValue(entry.Name, out var t)) continue;
+                if (!liveTypesByName.TryGetValue(entry.Name, out var t)) continue;
                 if (string.Equals(entry.AssemblyQualifiedName, t.AssemblyQualifiedName, StringComparison.Ordinal)) continue;
                 entry.AssemblyQualifiedName = t.AssemblyQualifiedName;
                 refreshed = true;

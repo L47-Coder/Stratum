@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using VContainer;
 using VContainer.Unity;
 
@@ -13,44 +14,88 @@ namespace Stratum
         protected override void Configure(IContainerBuilder builder)
         {
             var config = FrameworkLoader.LoadSync<ManagerOrderConfig>("App/ManagerOrder");
+            if (config == null)
+                throw new InvalidOperationException("[Stratum] ManagerOrderConfig not found at Addressables address 'App/ManagerOrder'.");
+
+            _managerTypeCache.Clear();
+            var managerTypes = GetGameManagerTypes();
+            ManagerOrderRules.ValidateManagerTypes(managerTypes);
+            var managerTypesByName = managerTypes.ToDictionary(t => t.Name, t => t, StringComparer.Ordinal);
+            var resolvedTypes = new List<Type>();
+
             foreach (var entry in config.Entries)
             {
-                var type = ResolveManagerType(entry);
-                if (type == null) continue;
-                builder.Register(type, Lifetime.Singleton).AsImplementedInterfaces();
+                resolvedTypes.Add(ResolveManagerType(entry, managerTypesByName));
             }
+
+            ManagerOrderRules.ValidateManagerTypes(resolvedTypes);
+            foreach (var type in resolvedTypes)
+                builder.Register(type, Lifetime.Singleton).AsImplementedInterfaces();
+
             builder.RegisterEntryPoint<GameBootstrap>();
         }
 
-        private static Type ResolveManagerType(ManagerOrderEntry entry)
+        private static Type ResolveManagerType(ManagerOrderEntry entry, IReadOnlyDictionary<string, Type> managerTypesByName)
         {
-            if (entry == null || string.IsNullOrWhiteSpace(entry.Name)) return null;
+            if (entry == null || string.IsNullOrWhiteSpace(entry.Name))
+                throw new InvalidOperationException("[Stratum] ManagerOrder contains an empty Manager entry.");
+
             if (_managerTypeCache.TryGetValue(entry.Name, out var cached)) return cached;
 
             if (!string.IsNullOrEmpty(entry.AssemblyQualifiedName))
             {
                 var t = Type.GetType(entry.AssemblyQualifiedName);
-                if (t != null) return _managerTypeCache[entry.Name] = t;
+                if (t != null)
+                {
+                    ValidateResolvedManagerType(entry, t);
+                    return _managerTypeCache[entry.Name] = t;
+                }
+
                 UnityEngine.Debug.LogWarning($"[Stratum] Manager '{entry.Name}': AQN stale, open Tools > Stratum > Manager Order.");
             }
 
-            var asmName = typeof(IManager).Assembly.GetName().Name;
-            var matches = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(a => Array.Exists(a.GetReferencedAssemblies(), r => string.Equals(r.Name, asmName, StringComparison.Ordinal)))
-                .SelectMany(a => { try { return a.GetTypes(); } catch { return Array.Empty<Type>(); } })
-                .Where(t => !t.IsAbstract && typeof(IManager).IsAssignableFrom(t) && string.Equals(t.Name, entry.Name, StringComparison.Ordinal))
+            if (!managerTypesByName.TryGetValue(entry.Name, out var type))
+                throw new InvalidOperationException($"[Stratum] Manager '{entry.Name}' not found in assembly '{ManagerOrderConfig.ManagerAssemblyName}'. Managers must live under Assets/Game/Manager.");
+
+            return _managerTypeCache[entry.Name] = type;
+        }
+
+        private static IReadOnlyList<Type> GetGameManagerTypes()
+        {
+            return AppDomain.CurrentDomain.GetAssemblies()
+                .Where(a => string.Equals(a.GetName().Name, ManagerOrderConfig.ManagerAssemblyName, StringComparison.Ordinal))
+                .SelectMany(SafeGetTypes)
+                .Where(ManagerOrderRules.IsConcreteManagerType)
                 .ToList();
+        }
 
-            if (matches.Count == 0)
+        private static IEnumerable<Type> SafeGetTypes(Assembly assembly)
+        {
+            try
             {
-                UnityEngine.Debug.LogError($"[Stratum] Manager '{entry.Name}' not found in any assembly.");
-                return _managerTypeCache[entry.Name] = null;
+                return assembly.GetTypes();
             }
+            catch (ReflectionTypeLoadException ex)
+            {
+                return ex.Types.Where(t => t != null);
+            }
+        }
 
-            if (matches.Count > 1)
-                throw new InvalidOperationException($"[Stratum] Ambiguous manager '{entry.Name}': {string.Join(", ", matches.Select(t => t.FullName))}");
+        private static void ValidateResolvedManagerType(ManagerOrderEntry entry, Type type)
+        {
+            if (!ManagerOrderRules.IsConcreteManagerType(type))
+                throw new InvalidOperationException($"[Stratum] Manager '{entry.Name}' resolved to '{FormatType(type)}', but it is not a concrete IManager type.");
 
-            return _managerTypeCache[entry.Name] = matches[0];
+            if (!ManagerOrderRules.IsManagerAssembly(type))
+                throw new InvalidOperationException($"[Stratum] Manager '{entry.Name}' resolved to '{FormatType(type)}' in assembly '{type.Assembly.GetName().Name}', but only '{ManagerOrderConfig.ManagerAssemblyName}' managers are allowed.");
+
+            if (!string.Equals(type.Name, entry.Name, StringComparison.Ordinal))
+                throw new InvalidOperationException($"[Stratum] ManagerOrder entry '{entry.Name}' points to '{FormatType(type)}'. Open Tools > Stratum > Manager Order to refresh the asset.");
+        }
+
+        private static string FormatType(Type type)
+        {
+            return string.IsNullOrEmpty(type.FullName) ? type.Name : type.FullName;
         }
     }
 }

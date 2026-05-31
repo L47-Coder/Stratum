@@ -8,6 +8,16 @@ change public API between minor releases.
 Earlier preview notes were removed after the package was reduced to the
 current runtime contracts, generated host layout and focused editor commands.
 
+## [0.6.2] - 2026-05-31
+
+### Changed
+
+- Manager order sync and runtime fallback now only resolve Managers from the
+  generated `Game.Manager` assembly.
+- Manager registration now reports duplicate business-interface
+  implementations instead of silently allowing one Manager to take over the
+  injected interface.
+
 ## [0.6.1] - 2026-05-22
 
 ### Changed

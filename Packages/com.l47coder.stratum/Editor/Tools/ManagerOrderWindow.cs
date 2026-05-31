@@ -1,3 +1,4 @@
+using System;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace Stratum.Editor
         private SerializedProperty _entriesProperty;
         private ReorderableList _list;
         private Vector2 _scroll;
+        private string _syncError;
 
         public static void Open()
         {
@@ -31,6 +33,9 @@ namespace Stratum.Editor
 
         private void OnGUI()
         {
+            if (!string.IsNullOrEmpty(_syncError))
+                EditorGUILayout.HelpBox(_syncError, MessageType.Error);
+
             if (_serializedConfig == null || _serializedConfig.targetObject == null || _list == null)
             {
                 EditorGUILayout.HelpBox("ManagerOrder.asset not found.", MessageType.Warning);
@@ -51,7 +56,17 @@ namespace Stratum.Editor
 
         private void SyncAndBind()
         {
-            Bind(ManagerOrderSync.EnsureAndSyncAsset());
+            try
+            {
+                _syncError = null;
+                Bind(ManagerOrderSync.EnsureAndSyncAsset());
+            }
+            catch (Exception ex)
+            {
+                _syncError = ex.Message;
+                Debug.LogException(ex);
+                Bind(AssetDatabase.LoadAssetAtPath<ManagerOrderConfig>(StratumPaths.ManagerOrder));
+            }
         }
 
         private void Bind(ManagerOrderConfig config)

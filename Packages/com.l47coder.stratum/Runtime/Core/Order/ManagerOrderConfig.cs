@@ -6,6 +6,8 @@ namespace Stratum
 {
     public class ManagerOrderConfig : ScriptableObject
     {
+        public const string ManagerAssemblyName = "Game.Manager";
+
         [SerializeField] private List<ManagerOrderEntry> _entries = new();
         public List<ManagerOrderEntry> Entries => _entries;
     }
